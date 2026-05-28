@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transference Coder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0e10;--bg2:#141519;--bg3:#1b1d23;--bg4:#22252d;--bg5:#2a2d37;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);--border3:rgba(255,255,255,0.18);
+  --text:#e4e5ea;--text2:#8a8d9a;--text3:#52566a;
+  --accent:#7b6cf6;--accent2:#a89ff9;--accent-bg:rgba(123,108,246,0.1);--accent-border:rgba(123,108,246,0.3);
+  --green:#3ecf8e;--green-bg:rgba(62,207,142,0.1);--green-border:rgba(62,207,142,0.3);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,0.1);--amber-border:rgba(245,166,35,0.3);
+  --red:#f16464;--red-bg:rgba(241,100,100,0.09);--red-border:rgba(241,100,100,0.3);
+  --r:8px;--r-sm:5px;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;overflow:hidden}
+
+/* UPLOAD */
+#upload-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:24px;padding:40px}
+.upload-box{border:1.5px dashed var(--border3);border-radius:16px;padding:60px 80px;text-align:center;transition:all .2s;background:var(--bg2)}
+.upload-box:hover{border-color:var(--accent);background:var(--accent-bg)}
+.upload-box h2{font-size:18px;font-weight:500;margin-bottom:8px}
+.upload-box p{font-size:13px;color:var(--text2);margin-bottom:20px}
+.upload-icon{font-size:36px;margin-bottom:16px;opacity:.5}
+#file-input{display:none}
+
+/* APP */
+#app{height:100vh;flex-direction:column}
+
+/* TOPBAR */
+.topbar{height:48px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
+.topbar-logo{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--accent2);letter-spacing:.06em}
+.topbar-sep{width:1px;height:18px;background:var(--border2)}
+.progress-wrap{flex:1;max-width:320px;display:flex;align-items:center;gap:10px}
+.progress-bar-bg{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+.progress-label{font-family:var(--mono);font-size:11px;color:var(--text3);white-space:nowrap}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* BODY */
+.body-split{display:grid;grid-template-columns:1fr 420px;flex:1;overflow:hidden}
+
+/* POST PANEL */
+.post-panel{display:flex;flex-direction:column;border-right:1px solid var(--border);overflow:hidden}
+.post-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.subreddit-tag{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:20px;background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent2)}
+.post-title{font-size:14px;font-weight:500;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post-body{flex:1;overflow-y:auto;padding:20px;font-size:13px;color:var(--text2);line-height:1.75;white-space:pre-wrap;word-break:break-word;transition:font-size .1s}
+.post-footer{padding:10px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.post-footer a{font-family:var(--mono);font-size:11px;color:var(--text3);text-decoration:none}
+.post-footer a:hover{color:var(--accent2)}
+
+/* CODE PANEL */
+.code-panel{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.code-scroll{flex:1;overflow-y:auto;padding:16px 18px}
+.code-section{margin-bottom:14px}
+.csec-head{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:0 0 8px;display:flex;align-items:center;gap:6px}
+.csec-head::after{content:'';flex:1;height:1px;background:var(--border)}
+.field{margin-bottom:10px}
+.field:last-child{margin-bottom:0}
+.flabel{font-size:11px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.fcode{font-family:var(--mono);font-size:10px;color:var(--accent2)}
+
+/* TOGGLE BUTTONS */
+.tg{display:flex;border:1px solid var(--border2);border-radius:var(--r-sm);overflow:hidden}
+.tg-btn{flex:1;padding:7px 8px;background:var(--bg3);border:none;border-right:1px solid var(--border2);color:var(--text2);font-family:var(--sans);font-size:12px;cursor:pointer;transition:all .1s;text-align:center}
+.tg-btn:last-child{border-right:none}
+.tg-btn:hover{background:var(--bg4);color:var(--text)}
+.tg-btn.sel-1{background:var(--accent-bg);color:var(--accent2);border-color:var(--accent-border)}
+.tg-btn.sel-0{background:var(--bg4);color:var(--text)}
+.tg-btn.sel-pos{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.tg-btn.sel-neg{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.tg-btn.sel-mix{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
+.tg-btn.sel-emo,.tg-btn.sel-inf,.tg-btn.sel-ins{background:var(--accent-bg);color:var(--accent2);border-color:var(--accent-border)}
+
+/* key hint on toggle buttons */
+.tg-btn .kh{font-family:var(--mono);font-size:9px;opacity:.45;margin-left:4px}
+
+/* SELECT */
+select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:var(--sans);font-size:12px;padding:7px 10px;outline:none;transition:border-color .15s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2352566a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px;cursor:pointer}
+select:focus{border-color:var(--accent);background-color:var(--bg4)}
+select option{background:var(--bg3)}
+
+/* TEXTAREA */
+textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:var(--sans);font-size:12px;padding:8px 10px;outline:none;resize:vertical;min-height:64px;line-height:1.55;transition:border-color .15s}
+textarea:focus{border-color:var(--accent);background:var(--bg4)}
+textarea::placeholder{color:var(--text3)}
+
+/* CHECKBOXES */
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.check-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;transition:all .12s;user-select:none}
+.check-item:hover{border-color:var(--border2);background:var(--bg4)}
+.check-item.chk{background:var(--accent-bg);border-color:var(--accent-border)}
+.check-item input[type=checkbox]{width:14px;height:14px;min-width:14px;margin-top:2px;accent-color:var(--accent);cursor:pointer}
+.cil{font-size:12px;color:var(--text);line-height:1.35}
+.cis{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.check-item.chk .cil{color:var(--accent2)}
+.check-item.full{grid-column:1/-1}
+
+/* STEP STATES */
+.code-section{margin-bottom:6px;border-radius:var(--r);border:1px solid transparent;padding:10px 12px;transition:all .2s}
+.code-section.state-waiting{opacity:.28;pointer-events:none}
+.code-section.state-waiting .csec-head{color:var(--text3)}
+.code-section.state-na{opacity:.22;pointer-events:none}
+.code-section.state-active{border-color:var(--accent-border);background:rgba(123,108,246,0.05)}
+.code-section.state-active .csec-head{color:var(--accent2)}
+.code-section.state-active .csec-head::after{background:var(--accent-border)}
+.code-section.state-done{opacity:.7}
+.code-section.state-done .csec-head{color:var(--text3)}
+/* step check/na badges */
+.step-status{font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:20px;margin-left:4px;flex-shrink:0}
+.step-check{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.step-na{background:var(--bg4);color:var(--text3);border:1px solid var(--border2)}
+/* LOCKED NOTICE (kept for fallback) */
+.locked-notice{display:none}
+
+/* AUTO-ADVANCE FLASH */
+@keyframes flash-green{0%{background:rgba(62,207,142,0.18)}100%{background:transparent}}
+.advance-flash{animation:flash-green .5s ease-out}
+
+/* INFO ICON + HOVER TOOLTIP */
+.info-wrap{position:relative;display:inline-flex;align-items:center;margin-left:5px}
+.info-icon{width:15px;height:15px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;color:var(--text3);font-family:var(--mono);flex-shrink:0;transition:all .15s;line-height:1;user-select:none}
+.info-icon:hover{border-color:var(--accent-border);color:var(--accent2);background:var(--accent-bg)}
+.info-icon.panel-open{border-color:var(--accent);color:var(--accent2);background:var(--accent-bg)}
+.hover-tip{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-sm);padding:7px 10px;width:230px;opacity:0;pointer-events:none;transition:opacity .12s;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.5);font-size:11px;line-height:1.5;color:var(--accent2);font-style:italic;text-align:center}
+.info-wrap:hover .hover-tip{opacity:1}
+
+/* CODEBOOK SIDE PANEL */
+#codebook-panel{position:fixed;top:48px;right:0;width:360px;height:calc(100vh - 48px);background:var(--bg2);border-left:1px solid var(--border2);z-index:500;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+#codebook-panel.open{transform:translateX(0)}
+.cbp-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cbp-step-badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px;background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent2)}
+.cbp-title{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.cbp-close{width:24px;height:24px;border-radius:50%;background:transparent;border:1px solid var(--border2);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .12s;flex-shrink:0}
+.cbp-close:hover{background:var(--bg3);color:var(--text);border-color:var(--border3)}
+.cbp-body{flex:1;overflow-y:auto;padding:16px}
+.cbp-section{margin-bottom:16px}
+.cbp-sec-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.cbp-q{color:var(--accent2);font-style:italic;font-size:13px;line-height:1.5;margin-bottom:10px;display:block}
+.cbp-rule{background:var(--bg3);border-left:2px solid var(--accent);padding:8px 12px;border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:11px;color:var(--text2);line-height:1.5;margin-top:10px}
+.cbp-list{padding-left:16px;font-size:12px;color:var(--text2);line-height:1.6}
+.cbp-list li{margin-bottom:4px}
+.cbp-list li strong{color:var(--text);font-weight:500}
+.cbp-val-row{display:flex;gap:8px;margin-bottom:6px;font-size:12px;align-items:flex-start}
+.cbp-val-tag{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:3px;background:var(--bg4);border:1px solid var(--border2);color:var(--accent2);flex-shrink:0;margin-top:1px}
+.cbp-val-desc{color:var(--text2);line-height:1.5}
+.cbp-note{font-size:11px;color:var(--text3);line-height:1.5;margin-top:6px}
+.cbp-not{background:var(--bg3);border-radius:var(--r-sm);padding:8px 12px;font-size:11px;color:var(--text3);line-height:1.55}
+.cbp-not strong{color:var(--text2);font-weight:500}
+
+/* CODE FOOTER */
+.code-footer{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;background:var(--bg2);align-items:center}
+
+/* BUTTONS */
+.btn{font-family:var(--sans);font-size:13px;padding:8px 16px;border-radius:var(--r-sm);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{background:var(--bg4);color:var(--text)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:500}
+.btn-primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn-success{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.btn-success:hover{background:rgba(62,207,142,.18)}
+.btn-ghost{border-color:transparent;background:transparent}
+.btn-ghost:hover{background:var(--bg3);border-color:var(--border)}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-danger{color:var(--red);border-color:var(--red-border)}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-skip{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
+.btn-skip:hover{background:rgba(245,166,35,.18)}
+
+/* JUMP */
+.jump-wrap{display:flex;align-items:center;gap:6px;margin-left:auto}
+.jump-input{width:58px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;outline:none;text-align:center}
+.jump-input:focus{border-color:var(--accent)}
+
+/* STATUS BADGES */
+.coded-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--green-border);color:var(--green);background:var(--green-bg)}
+.uncoded-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--border2);color:var(--text3);background:var(--bg3)}
+.flagged-badge{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;border:1px solid var(--amber-border);color:var(--amber);background:var(--amber-bg)}
+/* FLAG BUTTON */
+.btn-flag{border-color:var(--border2);color:var(--text3)}
+.btn-flag:hover{border-color:var(--amber-border);color:var(--amber);background:var(--amber-bg)}
+.btn-flag.flagged{border-color:var(--amber-border);color:var(--amber);background:var(--amber-bg)}
+/* OV CARD FLAGGED */
+.ov-card.flagged{border-left:2px solid var(--amber)}
+.ov-flag-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);flex-shrink:0}
+
+/* AUTOSAVE INDICATOR */
+.autosave-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);transition:background .3s;flex-shrink:0}
+.autosave-dot.saved{background:var(--green)}
+.autosave-dot.saving{background:var(--amber)}
+
+/* SHORTCUTS TOOLTIP */
+.kbd-wrap{position:relative;display:inline-flex;align-items:center}
+.kbd-icon{width:22px;height:22px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:default;font-size:11px;color:var(--text3);flex-shrink:0;transition:all .15s}
+.kbd-icon:hover{border-color:var(--accent-border);color:var(--accent2);background:var(--accent-bg)}
+.kbd-tooltip{position:absolute;top:calc(100% + 8px);right:0;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:12px 14px;min-width:240px;opacity:0;pointer-events:none;transition:opacity .15s;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.kbd-wrap:hover .kbd-tooltip{opacity:1;pointer-events:auto}
+.kbd-row{display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;gap:12px}
+.kbd-row:last-child{border-bottom:none}
+.kbd-row span{color:var(--text2)}
+.kbd-row code{font-family:var(--mono);font-size:10px;background:var(--bg4);border:1px solid var(--border2);border-radius:3px;padding:2px 6px;color:var(--accent2);white-space:nowrap}
+.kbd-section{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:8px 0 4px;margin-top:4px}
+.kbd-section:first-child{padding-top:0;margin-top:0}
+
+/* KEY HINTS ON BUTTONS */
+.kh{font-family:var(--mono);font-size:9px;opacity:.5;background:rgba(255,255,255,.07);border-radius:3px;padding:1px 4px;margin-left:3px;border:1px solid rgba(255,255,255,.1);line-height:1}
+
+/* TTS CONTROLS */
+.tts-bar{display:flex;align-items:center;gap:6px}
+.tts-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text2);font-size:12px;padding:4px 10px;cursor:pointer;transition:all .12s;font-family:var(--sans);white-space:nowrap}
+.tts-btn:hover{background:var(--bg4);color:var(--text)}
+.tts-btn.playing{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent2)}
+.tts-btn.playing:hover{background:var(--accent-bg)}
+.tts-speed{-webkit-appearance:none;appearance:none;width:64px;height:3px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer;accent-color:var(--accent)}
+.tts-speed-label{font-family:var(--mono);font-size:10px;color:var(--text3);width:28px;text-align:left}
+
+/* HOW TO USE OVERLAY */
+#howto-overlay{position:fixed;inset:0;z-index:10500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s}
+#howto-overlay.open{background:rgba(0,0,0,.8);pointer-events:auto}
+.howto-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:620px;max-width:94vw;max-height:88vh;display:flex;flex-direction:column;transform:scale(.93) translateY(16px);opacity:0;transition:all .28s cubic-bezier(.34,1.2,.64,1)}
+#howto-overlay.open .howto-card{transform:scale(1) translateY(0);opacity:1}
+.howto-header{padding:20px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0}
+.howto-header h2{font-size:18px;font-weight:500;color:var(--text)}
+.howto-header p{font-size:12px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.howto-close{width:28px;height:28px;border-radius:50%;background:transparent;border:1px solid var(--border2);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .12s;flex-shrink:0;margin-left:12px}
+.howto-close:hover{background:var(--bg3);color:var(--text)}
+.howto-body{flex:1;overflow-y:auto;padding:20px 24px 24px}
+.howto-steps{display:flex;flex-direction:column;gap:0}
+.howto-step{display:flex;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+.howto-step:last-child{border-bottom:none}
+.howto-num{width:28px;height:28px;border-radius:50%;background:var(--accent-bg);border:1px solid var(--accent-border);color:var(--accent2);font-family:var(--mono);font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.howto-step-body h3{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px}
+.howto-step-body p{font-size:12px;color:var(--text2);line-height:1.6}
+.howto-step-body p code{font-family:var(--mono);font-size:10px;background:var(--bg4);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;color:var(--accent2)}
+.howto-step-body ul{padding-left:14px;margin-top:4px;font-size:12px;color:var(--text2);line-height:1.7}
+.howto-tip{background:var(--bg3);border-left:2px solid var(--accent);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 14px;font-size:12px;color:var(--text2);line-height:1.55;margin-top:16px}
+.howto-tip strong{color:var(--text);font-weight:500}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r);padding:9px 18px;font-size:13px;color:var(--text);opacity:0;transition:all .2s;pointer-events:none;z-index:9999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* STREAK */
+.streak-badge{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--amber-border);color:var(--amber);background:var(--amber-bg);transition:all .3s;display:none}
+.streak-badge.visible{display:inline-flex;align-items:center;gap:4px}
+
+/* PROGRESS BAR PULSE */
+@keyframes prog-pulse{0%{opacity:1}50%{opacity:.4;box-shadow:0 0 12px var(--accent)}100%{opacity:1}}
+.progress-bar-fill.pulse{animation:prog-pulse .7s ease-in-out 2}
+
+/* MILESTONE OVERLAY */
+#milestone-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s}
+#milestone-overlay.show{background:rgba(0,0,0,.75);pointer-events:auto}
+.milestone-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:40px 48px;max-width:480px;width:90%;text-align:center;transform:scale(.88) translateY(24px);opacity:0;transition:all .35s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+#milestone-overlay.show .milestone-card{transform:scale(1) translateY(0);opacity:1}
+.milestone-num{font-family:var(--mono);font-size:56px;font-weight:500;line-height:1;margin-bottom:4px}
+.milestone-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:20px}
+.milestone-msg{font-size:15px;color:var(--text2);line-height:1.65;margin-bottom:28px}
+.milestone-msg em{color:var(--text);font-style:normal;font-weight:500}
+.milestone-sub{font-size:12px;color:var(--text3);margin-bottom:28px;font-family:var(--mono)}
+.milestone-btn{font-family:var(--sans);font-size:14px;font-weight:500;padding:10px 28px;border-radius:var(--r-sm);border:none;cursor:pointer;transition:all .15s}
+.milestone-shimmer{position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,.03) 50%,transparent 60%);pointer-events:none}
+
+/* CONFETTI CANVAS */
+#confetti-canvas{position:fixed;inset:0;z-index:9999;pointer-events:none}
+
+/* DONE SCREEN */
+#done-screen{position:fixed;inset:0;z-index:10001;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:40px}
+.done-title{font-size:48px;font-weight:500;color:var(--text);margin-bottom:8px;text-align:center}
+.done-sub{font-family:var(--mono);font-size:13px;color:var(--text3);margin-bottom:40px;text-align:center}
+.done-stats{display:flex;gap:20px;margin-bottom:40px;flex-wrap:wrap;justify-content:center}
+.done-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px 28px;min-width:120px;text-align:center}
+.done-stat-n{font-size:32px;font-weight:500;color:var(--text)}
+.done-stat-l{font-size:11px;color:var(--text3);font-family:var(--mono);margin-top:2px}
+.done-msg{font-size:14px;color:var(--text2);line-height:1.7;max-width:520px;text-align:center;margin-bottom:36px}
+
+/* OVERVIEW */
+#overview-panel{display:none;flex:1;overflow-y:auto;padding:24px 28px}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.ov-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .15s}
+.ov-card:hover{border-color:var(--border3);background:var(--bg3)}
+.ov-card.coded{border-left:2px solid var(--green)}
+.ov-card-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.ov-num{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.ov-title{font-size:12px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.ov-sub{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border)}
+.ov-preview{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ov-stats{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.ov-stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;min-width:100px}
+.ov-stat-n{font-size:22px;font-weight:500;color:var(--text)}
+.ov-stat-l{font-size:11px;color:var(--text3)}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filter-btn{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;transition:all .12s}
+.filter-btn:hover{color:var(--text);border-color:var(--border3)}
+.filter-btn.active{background:var(--accent-bg);color:var(--accent2);border-color:var(--accent-border)}
+
+/* SEARCH BAR */
+.ov-search{width:220px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:var(--sans);font-size:12px;padding:6px 10px;outline:none;transition:border-color .15s}
+.ov-search:focus{border-color:var(--accent);background:var(--bg4)}
+.ov-search::placeholder{color:var(--text3)}
+.ov-search-wrap{display:flex;align-items:center;gap:8px;margin-left:auto}
+.ov-result-count{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap}
+
+/* CHARTS */
+.charts-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:20px}
+.chart-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.chart-title{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px}
+.bar-label{color:var(--text2);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+.bar-label-left{color:var(--text2);width:110px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.bar-val{font-family:var(--mono);font-size:10px;color:var(--text3);width:28px;text-align:right;flex-shrink:0}
+
+/* MEMO PAD */
+#memo-panel{position:fixed;top:48px;left:0;width:320px;height:calc(100vh - 48px);background:var(--bg2);border-right:1px solid var(--border2);z-index:500;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+#memo-panel.open{transform:translateX(0)}
+.memo-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.memo-title{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.memo-close{width:24px;height:24px;border-radius:50%;background:transparent;border:1px solid var(--border2);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .12s;flex-shrink:0}
+.memo-close:hover{background:var(--bg3);color:var(--text)}
+.memo-body{flex:1;display:flex;flex-direction:column;padding:16px;gap:10px;overflow:hidden}
+.memo-textarea{flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:var(--sans);font-size:13px;padding:12px;outline:none;resize:none;line-height:1.65;transition:border-color .15s}
+.memo-textarea:focus{border-color:var(--accent);background:var(--bg4)}
+.memo-textarea::placeholder{color:var(--text3)}
+.memo-footer{font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;align-items:center;justify-content:space-between}
+.memo-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);transition:background .3s;flex-shrink:0}
+.memo-dot.saved{background:var(--green)}
+.memo-btn-active{border-color:var(--accent-border);color:var(--accent2);background:var(--accent-bg)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--border2)}
+</style>
+</head>
+<body>
+
+<!-- UPLOAD SCREEN -->
+<div id="upload-screen">
+  <div class="upload-box" id="upload-drop">
+    <div class="upload-icon">⬆</div>
+    <h2>Load your CSV</h2>
+    <p>Drop your blind_coding CSV here, or click to browse.<br>Pre-filled post data loads automatically.</p>
+    <label for="file-input" class="btn btn-primary" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin:0 auto">Choose file</label>
+  </div>
+  <input type="file" id="file-input" accept=".csv" onchange="loadCSV(this)" style="display:none">
+  <p style="font-size:12px;color:var(--text3)">All data stays in your browser — nothing is uploaded anywhere.</p>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;height:100vh;flex-direction:column">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <span class="topbar-logo">TRANSFERENCE CODER</span>
+    <div class="topbar-sep"></div>
+    <div class="progress-wrap">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+      <span class="progress-label" id="prog-label">0 / 0</span>
+    </div>
+    <div class="topbar-sep"></div>
+    <span id="coded-count" style="font-family:var(--mono);font-size:11px;color:var(--green)">0 coded</span>
+    <span id="flag-count" style="font-family:var(--mono);font-size:11px;color:var(--amber)"></span>
+    <span class="streak-badge" id="streak-badge">🔥 <span id="streak-num">0</span></span>
+    <div class="topbar-sep"></div>
+    <span id="session-timer" style="font-family:var(--mono);font-size:11px;color:var(--text3)" title="Session time">⏱ 0:00</span>
+    <div class="topbar-sep"></div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div class="autosave-dot" id="autosave-dot" title="Autosave status"></div>
+      <span id="autosave-label" style="font-family:var(--mono);font-size:10px;color:var(--text3)">autosave</span>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost btn-sm" id="memo-btn" onclick="toggleMemo()" title="Research memo pad">📝 Memo <span class="kh">O</span></button>
+      <div class="kbd-wrap">
+        <div class="kbd-icon" title="Keyboard shortcuts">⌨</div>
+        <div class="kbd-tooltip">
+          <div class="kbd-section">Navigation</div>
+          <div class="kbd-row"><span>Save &amp; next</span><code>→  or  ]</code></div>
+          <div class="kbd-row"><span>Previous post</span><code>←  or  [</code></div>
+          <div class="kbd-row"><span>Next uncoded</span><code>Shift →</code></div>
+          <div class="kbd-row"><span>Prev uncoded</span><code>Shift ←</code></div>
+          <div class="kbd-row"><span>Skip (no save)</span><code>Space</code></div>
+          <div class="kbd-row"><span>Toggle overview</span><code>Tab</code></div>
+          <div class="kbd-section">Self-disclosure</div>
+          <div class="kbd-row"><span>1 — present</span><code>1</code></div>
+          <div class="kbd-row"><span>0 — absent</span><code>0</code></div>
+          <div class="kbd-section">Transference</div>
+          <div class="kbd-row"><span>1 — present</span><code>2</code></div>
+          <div class="kbd-row"><span>0 — absent</span><code>3</code></div>
+          <div class="kbd-section">Valence</div>
+          <div class="kbd-row"><span>positive</span><code>9</code></div>
+          <div class="kbd-row"><span>negative</span><code>.</code></div>
+          <div class="kbd-row"><span>mixed</span><code>/</code></div>
+          <div class="kbd-section">Media</div>
+          <div class="kbd-row"><span>absent</span><code>8</code></div>
+          <div class="kbd-row"><span>present</span><code>7</code></div>
+          <div class="kbd-section">Step 5</div>
+          <div class="kbd-row"><span>All not disclosed</span><code>N</code></div>
+          <div class="kbd-section">Post intention</div>
+          <div class="kbd-row"><span>emotional</span><code>4</code></div>
+          <div class="kbd-row"><span>informational</span><code>5</code></div>
+          <div class="kbd-row"><span>instrumental</span><code>6</code></div>
+          <div class="kbd-section">Other</div>
+          <div class="kbd-row"><span>Open Reddit post</span><code>W</code></div>
+          <div class="kbd-row"><span>Toggle flag</span><code>F</code></div>
+          <div class="kbd-row"><span>Clear entry</span><code>C</code></div>
+          <div class="kbd-row"><span>Toggle memo</span><code>O</code></div>
+          <div class="kbd-section">Read aloud</div>
+          <div class="kbd-row"><span>Play / pause</span><code>P</code></div>
+          <div class="kbd-row"><span>Stop</span><code>S</code></div>
+          <div class="kbd-section">Font size</div>
+          <div class="kbd-row"><span>increase</span><code>+  or  =</code></div>
+          <div class="kbd-row"><span>decrease</span><code>-</code></div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="showOverview()">Overview</button>
+      <button class="btn btn-success btn-sm" onclick="downloadCSV()">↓ Export CSV</button>
+    </div>
+  </header>
+
+  <!-- CODER VIEW -->
+  <div class="body-split" id="coder-view">
+
+    <!-- LEFT: post -->
+    <div class="post-panel">
+      <div class="post-header">
+        <span class="subreddit-tag" id="ph-sub">—</span>
+        <span class="post-title" id="ph-title">—</span>
+        <span id="ph-status" class="uncoded-badge">uncoded</span>
+        <button class="btn btn-flag btn-sm" id="btn-flag" onclick="toggleFlag()" title="Flag for review">⚑ Flag <span class="kh">F</span></button>
+      </div>
+      <div class="post-body" id="post-body">—</div>
+      <div class="post-footer">
+        <a href="#" id="post-link" onclick="openRedditPeek(event)">↗ open on Reddit <span class="kh">W</span></a>
+        <button onclick="toggleHowTo()" style="font-family:var(--mono);font-size:11px;background:transparent;border:none;color:var(--text3);cursor:pointer;padding:0;transition:color .15s" onmouseover="this.style.color='var(--accent2)'" onmouseout="this.style.color='var(--text3)'">? how to use</button>
+        <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+          <span id="ph-len" style="font-family:var(--mono);font-size:10px;color:var(--text3)"></span>
+          <!-- font size -->
+          <div style="display:flex;align-items:center;gap:0;border:1px solid var(--border2);border-radius:var(--r-sm);overflow:hidden">
+            <button onclick="changeFontSize(-1)" style="background:var(--bg3);border:none;color:var(--text2);padding:4px 9px;cursor:pointer;font-size:12px;border-right:1px solid var(--border2)">A−</button>
+            <span id="font-size-label" style="font-family:var(--mono);font-size:10px;color:var(--text3);padding:0 7px;min-width:28px;text-align:center">13</span>
+            <button onclick="changeFontSize(1)" style="background:var(--bg3);border:none;color:var(--text2);padding:4px 9px;cursor:pointer;font-size:12px;border-left:1px solid var(--border2)">A+</button>
+          </div>
+          <!-- tts -->
+          <div class="tts-bar">
+            <button class="tts-btn" id="tts-btn" onclick="toggleTTS()">▶ Read <span class="kh">P</span></button>
+            <button class="tts-btn" id="tts-stop-btn" onclick="stopTTS()" style="display:none">■ Stop <span class="kh">S</span></button>
+            <input type="range" class="tts-speed" id="tts-speed" min="0.6" max="2.2" step="0.1" value="1.0" oninput="updateTTSSpeed()" title="Reading speed">
+            <span class="tts-speed-label" id="tts-speed-label">1.0×</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: code panel -->
+    <div class="code-panel">
+      <div class="code-scroll" id="code-scroll">
+
+        <!-- STEP 1 -->
+        <div class="code-section" id="sec-s1">
+          <div class="csec-head">Step 1 — self-disclosure  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s1')" title="Open codebook">i</span><div class="hover-tip">Is the author revealing something personal about their emotional or relational experience with an AI?</div></div></div>
+          <div class="field">
+            <div class="flabel"><span class="fcode">self_disclosure</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="sd-1" onclick="setTg('self_disclosure','1','sd')">1 — present <span class="kh">1</span></button>
+              <button class="tg-btn" id="sd-0" onclick="setTg('self_disclosure','0','sd')">0 — absent <span class="kh">0</span></button>
+            </div>
+            <input type="hidden" id="self_disclosure">
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="code-section" id="sec-s2">
+          <div class="csec-head">Step 2 — transference  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s2')" title="Open codebook">i</span><div class="hover-tip">Is this person unconsciously projecting relational patterns from their interpersonal history onto the AI?</div></div></div>
+          <div id="s2-lock" class="locked-notice" style="display:none">self_disclosure = 0 → auto-set to 0</div>
+          <div class="field" id="s2-field">
+            <div class="flabel"><span class="fcode">manual_label_transference</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="tr-1" onclick="setTg('manual_label_transference','1','tr')">1 — present <span class="kh">2</span></button>
+              <button class="tg-btn" id="tr-0" onclick="setTg('manual_label_transference','0','tr')">0 — absent <span class="kh">3</span></button>
+            </div>
+            <input type="hidden" id="manual_label_transference">
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="code-section" id="sec-s3">
+          <div class="csec-head">Step 3 — valence <span style="font-size:9px;color:var(--text3)">(T-positive only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s3')" title="Open codebook">i</span><div class="hover-tip">What is the emotional tone of the transference — positive, negative, or mixed?</div></div></div>
+          <div id="s3-lock" class="locked-notice" style="display:none">transference = 0 → leave blank</div>
+          <div class="field" id="s3-field">
+            <div class="flabel"><span class="fcode">transference_valence</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="tv-positive" onclick="setTg('transference_valence','positive','tv')">positive <span class="kh">4</span></button>
+              <button class="tg-btn" id="tv-negative" onclick="setTg('transference_valence','negative','tv')">negative <span class="kh">5</span></button>
+              <button class="tg-btn" id="tv-mixed" onclick="setTg('transference_valence','mixed','tv')">mixed <span class="kh">6</span></button>
+            </div>
+            <input type="hidden" id="transference_valence">
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="code-section" id="sec-s4">
+          <div class="csec-head">Step 4 — post intention <span style="font-size:9px;color:var(--text3)">(SD only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s4')" title="Open codebook">i</span><div class="hover-tip">What is the primary communicative purpose of this post?</div></div></div>
+          <div id="s4-lock" class="locked-notice" style="display:none">self_disclosure = 0 → leave blank</div>
+          <div class="field" id="s4-field">
+            <div class="flabel"><span class="fcode">post_intention</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="pi-emotional" onclick="setTg('post_intention','emotional','pi')">emotional <span class="kh">7</span></button>
+              <button class="tg-btn" id="pi-informational" onclick="setTg('post_intention','informational','pi')">informational <span class="kh">8</span></button>
+              <button class="tg-btn" id="pi-instrumental" onclick="setTg('post_intention','instrumental','pi')">instrumental <span class="kh">9</span></button>
+            </div>
+            <input type="hidden" id="post_intention">
+          </div>
+        </div>
+
+        <!-- STEP 5 -->
+        <div class="code-section" id="sec-s5">
+          <div class="csec-head">Step 5 — metadata <span style="font-size:9px;color:var(--text3)">(all posts)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s5')" title="Open codebook">i</span><div class="hover-tip">Code for every post — age, gender, relationship status, and any alternative tool used.</div></div><button onclick="setAllNotDisclosed()" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Set age, gender and relationship status to not_disclosed">all not disclosed <span class="kh">N</span></button></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="field">
+              <div class="flabel"><span class="fcode">age_range</span></div>
+              <select id="age_range">
+                <option value="">—</option>
+                <option>under_18</option><option>18-24</option><option>25-34</option>
+                <option>35-44</option><option>45-54</option><option>55+</option>
+                <option>not_disclosed</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="flabel"><span class="fcode">gender</span></div>
+              <select id="gender">
+                <option value="">—</option>
+                <option>male</option><option>female</option><option>other</option>
+                <option>not_disclosed</option>
+              </select>
+            </div>
+            <div class="field" style="grid-column:1/-1">
+              <div class="flabel"><span class="fcode">relationship_status</span></div>
+              <select id="relationship_status">
+                <option value="">—</option>
+                <option>single</option><option>in_relationship</option><option>married</option>
+                <option>divorced_separated</option><option>not_disclosed</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="flabel"><span class="fcode">alt_tool_name</span></div>
+              <select id="alt_tool_name">
+                <option value="">— blank —</option>
+                <option>ChatGPT</option><option>Claude</option><option>Gemini</option>
+                <option>Grok</option><option>Copilot</option><option>Chai</option>
+                <option>Anima</option><option>Paradot</option><option>Woebot</option>
+                <option>Janitor AI</option><option>SillyTavern</option><option>Crushon.AI</option>
+                <option value="_other_">other (type below)</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="flabel"><span class="fcode">alt_tool_type</span></div>
+              <select id="alt_tool_type">
+                <option value="">—</option>
+                <option>companion_app</option><option>therapy_chatbot</option>
+                <option>general_llm</option><option>roleplay_platform</option><option>other</option>
+              </select>
+            </div>
+            <div class="field" id="alt-tool-custom-wrap" style="display:none;grid-column:1/-1">
+              <div class="flabel"><span class="fcode">alt_tool_name (custom)</span></div>
+              <input type="text" id="alt_tool_name_custom" placeholder="Type tool name..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 6 -->
+        <div class="code-section" id="sec-s6">
+          <div class="csec-head">Step 6 — types <span style="font-size:9px;color:var(--text3)">(T-positive only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s6')" title="Open codebook">i</span><div class="hover-tip">Which transference types are present? Check all that apply — multiple types are common.</div></div></div>
+          <div id="s6-lock" class="locked-notice" style="display:none">transference = 0 → leave blank</div>
+          <div id="s6-field">
+            <div class="check-grid">
+              <label class="check-item" id="ci-ero" onclick="chkToggle('type_erotic_romantic','ci-ero')"><input type="checkbox" id="type_erotic_romantic" onclick="event.stopPropagation()"><div><div class="cil">Erotic / romantic</div><div class="cis">type_erotic_romantic</div></div></label>
+              <label class="check-item" id="ci-dep" onclick="chkToggle('type_dependency_separation','ci-dep')"><input type="checkbox" id="type_dependency_separation" onclick="event.stopPropagation()"><div><div class="cil">Dependency / separation</div><div class="cis">type_dependency_separation</div></div></label>
+              <label class="check-item" id="ci-ide" onclick="chkToggle('type_idealization_rescue','ci-ide')"><input type="checkbox" id="type_idealization_rescue" onclick="event.stopPropagation()"><div><div class="cil">Idealization / rescue</div><div class="cis">type_idealization_rescue</div></div></label>
+              <label class="check-item" id="ci-sel" onclick="chkToggle('type_selfworth_validation','ci-sel')"><input type="checkbox" id="type_selfworth_validation" onclick="event.stopPropagation()"><div><div class="cil">Self-worth / validation</div><div class="cis">type_selfworth_validation</div></div></label>
+              <label class="check-item" id="ci-rup" onclick="chkToggle('type_rupture_devaluation','ci-rup')"><input type="checkbox" id="type_rupture_devaluation" onclick="event.stopPropagation()"><div><div class="cil">Rupture / devaluation</div><div class="cis">type_rupture_devaluation</div></div></label>
+              <label class="check-item" id="ci-fus" onclick="chkToggle('type_identity_fusion','ci-fus')"><input type="checkbox" id="type_identity_fusion" onclick="event.stopPropagation()"><div><div class="cil">Identity fusion</div><div class="cis">type_identity_fusion</div></div></label>
+              <label class="check-item full" id="ci-oth" onclick="chkToggle('type_other','ci-oth')"><input type="checkbox" id="type_other" onclick="event.stopPropagation()"><div><div class="cil">Other</div><div class="cis">type_other — describe in notes</div></div></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 7 -->
+        <div class="code-section" id="sec-s7">
+          <div class="csec-head">Step 7 — coder notes  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s7')" title="Open codebook">i</span><div class="hover-tip">Required if type_other = 1. Encouraged for all ambiguous or borderline cases.</div></div></div>
+          <div class="field">
+            <div class="flabel"><span class="fcode">manual_coder_notes</span></div>
+            <textarea id="manual_coder_notes" placeholder="Required if type_other. Encouraged for ambiguous cases..."></textarea>
+          </div>
+        </div>
+
+        <!-- MEDIA -->
+        <div class="code-section" id="sec-media">
+          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div></div>
+          <div class="field">
+            <div class="flabel"><span class="fcode">media_present</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="mp-1" onclick="setTg('media_present','1','mp');showMediaDetail(true)">1 — present <span class="kh">/</span></button>
+              <button class="tg-btn" id="mp-0" onclick="setTg('media_present','0','mp');showMediaDetail(false);scheduleAutoAdvance()">0 — absent <span class="kh">*</span></button>
+            </div>
+            <input type="hidden" id="media_present">
+          </div>
+          <div id="media-detail" style="display:none">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+              <div class="field">
+                <div class="flabel"><span class="fcode">media_type</span></div>
+                <select id="media_type"><option value="">—</option><option>image</option><option>video</option><option>both</option></select>
+              </div>
+              <div class="field">
+                <div class="flabel"><span class="fcode">media_count</span></div>
+                <input type="number" id="media_count" min="1" placeholder="0" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
+              </div>
+              <div class="field">
+                <div class="flabel"><span class="fcode">media_shows_ai_persona</span></div>
+                <select id="media_shows_ai_persona"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+              </div>
+              <div class="field">
+                <div class="flabel"><span class="fcode">media_shows_conversation</span></div>
+                <select id="media_shows_conversation" onchange="toggleConvoTopic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <div class="flabel"><span class="fcode">media_content_type</span></div>
+                <select id="media_content_type"><option value="">—</option><option>chat_screenshot</option><option>ai_generated_avatar</option><option>ai_generated_art</option><option>meme_humor</option><option>settings_interface</option><option>comparison_collage</option><option>personal_photo</option><option>other</option></select>
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <div class="flabel"><span class="fcode">media_emotion_expressed</span></div>
+                <select id="media_emotion_expressed"><option value="">—</option><option>love_affection</option><option>distress_grief</option><option>anger_frustration</option><option>humor_irony</option><option>pride_showing_off</option><option>longing_nostalgia</option><option>neutral_informational</option><option>not_applicable</option></select>
+              </div>
+              <div class="field" id="convo-topic-wrap" style="grid-column:1/-1">
+                <div class="flabel"><span class="fcode">media_conversation_topic</span></div>
+                <select id="media_conversation_topic"><option value="">—</option><option>romantic_sexual</option><option>emotional_support</option><option>conflict_rupture</option><option>casual_chat</option><option>roleplay</option><option>other</option></select>
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <div class="flabel"><span class="fcode">media_relevant_to_transference</span></div>
+                <select id="media_relevant_to_transference" onchange="toggleMediaDynamic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+              </div>
+              <div class="field" id="media-dynamic-wrap" style="grid-column:1/-1">
+                <div class="flabel"><span class="fcode">media_user_ai_dynamic</span></div>
+                <select id="media_user_ai_dynamic"><option value="">—</option><option>intimacy_closeness</option><option>conflict_distance</option><option>idealization</option><option>dependency_need</option><option>personhood_attribution</option><option>other</option></select>
+              </div>
+              <div class="field" style="grid-column:1/-1">
+                <div class="flabel"><span class="fcode">media_coder_notes</span></div>
+                <textarea id="media_coder_notes" placeholder="Optional..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+      </div><!-- end code-scroll -->
+
+      <!-- CODE FOOTER -->
+      <div class="code-footer">
+        <button class="btn btn-ghost btn-sm" onclick="navigate(-1)" title="Previous (← or [)">← Prev <span class="kh">[</span></button>
+        <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear <span class="kh">C</span></button>
+        <button class="btn btn-skip btn-sm" onclick="saveAndNext(true)" title="Skip without saving (Space)">Skip <span class="kh">Space</span></button>
+        <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance (→ or ])">Save &amp; Next <span class="kh">]</span></button>
+        <div class="jump-wrap">
+          <span style="font-size:11px;color:var(--text3)">go to</span>
+          <input type="number" class="jump-input" id="jump-input" min="1" placeholder="#" onkeydown="if(event.key==='Enter')jumpTo()">
+          <button class="btn btn-ghost btn-sm" onclick="jumpTo()">↵</button>
+          <div style="width:1px;height:16px;background:var(--border2);margin:0 2px"></div>
+          <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(-1)" title="Previous uncoded (Shift+←)">↑ uncoded <span class="kh">⇧←</span></button>
+          <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(1)" title="Next uncoded (Shift+→)">↓ uncoded <span class="kh">⇧→</span></button>
+        </div>
+
+      </div>
+    </div><!-- end code-panel -->
+  </div><!-- end body-split -->
+
+  <!-- OVERVIEW VIEW -->
+  <div id="overview-view" style="display:none;flex:1;overflow:hidden;flex-direction:column">
+    <!-- header row -->
+    <div style="padding:12px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap;row-gap:8px">
+      <button class="btn btn-ghost btn-sm" onclick="hideOverview()">← Back</button>
+      <span style="font-size:15px;font-weight:500">Overview</span>
+      <div class="filter-bar" style="margin:0">
+        <button class="filter-btn active" id="f-all" onclick="setFilter('all')">All</button>
+        <button class="filter-btn" id="f-uncoded" onclick="setFilter('uncoded')">Uncoded</button>
+        <button class="filter-btn" id="f-coded" onclick="setFilter('coded')">Coded</button>
+        <button class="filter-btn" id="f-transference" onclick="setFilter('transference')">Transference = 1</button>
+        <button class="filter-btn" id="f-flagged" onclick="setFilter('flagged')" style="border-color:var(--amber-border);color:var(--amber)">⚑ Flagged</button>
+      </div>
+      <div class="ov-search-wrap">
+        <input class="ov-search" id="ov-search" type="text" placeholder="Search posts..." oninput="renderOverview()">
+        <span class="ov-result-count" id="ov-result-count"></span>
+      </div>
+    </div>
+    <!-- stats row -->
+    <div style="padding:12px 28px 0;display:flex;gap:10px;flex-shrink:0;flex-wrap:wrap" id="ov-stats"></div>
+    <!-- charts row -->
+    <div style="padding:12px 28px 0;flex-shrink:0" id="ov-charts"></div>
+    <!-- grid -->
+    <div style="flex:1;overflow-y:auto;padding:8px 28px 28px">
+      <div class="ov-grid" id="ov-grid"></div>
+    </div>
+  </div>
+
+
+  <!-- MEMO PAD -->
+  <div id="memo-panel">
+    <div class="memo-header">
+      <span class="memo-title">📝 Research Memo</span>
+      <button class="memo-close" onclick="toggleMemo()">✕</button>
+    </div>
+    <div class="memo-body">
+      <p style="font-size:11px;color:var(--text3);line-height:1.5;flex-shrink:0">Jot observations, patterns, and hunches as you code. This is your research diary — saved locally alongside your data.</p>
+      <textarea class="memo-textarea" id="memo-text" placeholder="e.g. r/MyBoyfriendIsAI seems to have much higher erotic transference rates than r/replika. Lots of borderline cases around casual anthropomorphism in r/CharacterAI — users framing relationship in roleplay terms but emotional investment feels genuine..." oninput="saveMemo()"></textarea>
+      <div class="memo-footer">
+        <span id="memo-save-label" style="display:flex;align-items:center;gap:5px"><div class="memo-dot" id="memo-dot"></div> <span id="memo-save-text">unsaved</span></span>
+        <span id="memo-charcount" style="font-size:10px;color:var(--text3)">0 chars</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CODEBOOK SIDE PANEL -->
+  <div id="codebook-panel">
+    <div class="cbp-header">
+      <span class="cbp-step-badge" id="cbp-badge">—</span>
+      <span class="cbp-title" id="cbp-title">Codebook</span>
+      <button class="cbp-close" onclick="closeCodebook()">✕</button>
+    </div>
+    <div class="cbp-body" id="cbp-body"></div>
+  </div>
+
+
+  <!-- HOW TO USE OVERLAY -->
+  <div id="howto-overlay">
+    <div class="howto-card">
+      <div class="howto-header">
+        <div>
+          <h2>How to use this tool</h2>
+          <p>Transference Coder — AI Companion Relationship Study</p>
+        </div>
+        <button class="howto-close" onclick="toggleHowTo()">✕</button>
+      </div>
+      <div class="howto-body">
+        <div class="howto-steps">
+
+          <div class="howto-step">
+            <div class="howto-num">1</div>
+            <div class="howto-step-body">
+              <h3>Upload your CSV</h3>
+              <p>On the start screen, drag and drop your <code>blind_coding</code> CSV file or click "Choose file." The app loads all 1,000 posts automatically and opens at your first uncoded entry. Post text is pre-filled — you only need to fill in the coding columns.</p>
+            </div>
+          </div>
+
+          <div class="howto-step">
+            <div class="howto-num">2</div>
+            <div class="howto-step-body">
+              <h3>Read the post, then code</h3>
+              <p>The post text appears on the left. Code on the right. Follow the steps from top to bottom — the panel guides you by highlighting the active step and dimming steps that aren't applicable yet.</p>
+              <ul>
+                <li><strong>Step 1</strong> — is self-disclosure present? This unlocks the rest of the form.</li>
+                <li><strong>Steps 2–4</strong> — only apply if SD = 1. Steps 3 and 6 only apply if transference = 1.</li>
+                <li><strong>Step 5</strong> — always fill in metadata (age, gender, relationship status).</li>
+                <li><strong>Media</strong> — check the original Reddit post via the permalink before coding.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="howto-step">
+            <div class="howto-num">3</div>
+            <div class="howto-step-body">
+              <h3>Use the info icons</h3>
+              <p>Each step header has a small <code>i</code> icon. <strong>Hover</strong> it to see the core decision question. <strong>Click</strong> it to open the full codebook panel on the right with definitions, indicators, and decision rules pulled directly from the coding guide.</p>
+            </div>
+          </div>
+
+          <div class="howto-step">
+            <div class="howto-num">4</div>
+            <div class="howto-step-body">
+              <h3>Save and advance</h3>
+              <p>Hit <code>Save & Next →</code> or press <code>→</code> to save the current entry and move to the next post. Use <code>Space</code> to skip without saving. Use <code>←</code> to go back. Jump to any specific post by typing its number in the "go to" box.</p>
+            </div>
+          </div>
+
+          <div class="howto-step">
+            <div class="howto-num">5</div>
+            <div class="howto-step-body">
+              <h3>Flag uncertain entries</h3>
+              <p>Click <code>⚑ Flag</code> in the post header (or press <code>F</code>) to mark any entry you want to revisit. Flagged posts are tracked in the Overview and get an amber border. You can filter by flagged entries to review them all at once.</p>
+            </div>
+          </div>
+
+          <div class="howto-step">
+            <div class="howto-num">6</div>
+            <div class="howto-step-body">
+              <h3>Overview & charts</h3>
+              <p>Press <code>Tab</code> or click "Overview" in the topbar to see all posts in a grid. Filter by coded, uncoded, transference = 1, or flagged. Search posts by keyword. Live charts show transference rates by subreddit, type distribution, valence breakdown, and post intention as you code.</p>
+            </div>
+          </div>
+
+          <div class="howto-step">
+            <div class="howto-num">7</div>
+            <div class="howto-step-body">
+              <h3>Export your data</h3>
+              <p>Click <code>↓ Export CSV</code> in the topbar at the end of every session. Re-upload that exported file next session — the app reads whatever is already coded and picks up where you left off. Your progress also autosaves to your browser's local storage as a backup.</p>
+            </div>
+          </div>
+
+        </div>
+        <div class="howto-tip">
+          <strong>Working with colleagues?</strong> Each person works on their own copy of the CSV independently. Export when done and compare exported files for inter-rater reliability. Your browser's local storage is not shared between people or machines.
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end app -->
+
+<div class="toast" id="toast"></div>
+
+<!-- CONFETTI -->
+<canvas id="confetti-canvas"></canvas>
+
+<!-- MILESTONE OVERLAY -->
+<div id="milestone-overlay">
+  <div class="milestone-card" id="milestone-card">
+    <div class="milestone-shimmer"></div>
+    <div class="milestone-num" id="ms-num"></div>
+    <div class="milestone-label">entries coded</div>
+    <div class="milestone-msg" id="ms-msg"></div>
+    <div class="milestone-sub" id="ms-sub"></div>
+    <button class="milestone-btn" id="ms-btn" onclick="closeMilestone()">keep going →</button>
+  </div>
+</div>
+
+<!-- DONE SCREEN -->
+<div id="done-screen">
+  <div class="done-title">You did it.</div>
+  <div class="done-sub" id="done-sub"></div>
+  <div class="done-stats" id="done-stats"></div>
+  <div class="done-msg">You just hand-coded 1,000 Reddit posts about human–AI relationships. That's not a small thing. Every judgment call, every borderline case, every "I know it's just an AI but..." — you read them all. The data exists because you did this work.</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+    <button class="btn btn-success" onclick="downloadCSV()">↓ Download your data</button>
+    <button class="btn btn-ghost" onclick="g('done-screen').style.display='none'">← Back to coder</button>
+  </div>
+</div>
+
+<script>
+const COLS=["subreddit","title","text","permalink","post_text","post_len","self_disclosure","post_intention","age_range","alt_tool_name","alt_tool_type","gender","relationship_status","manual_label_transference","transference_valence","type_erotic_romantic","type_dependency_separation","type_idealization_rescue","type_selfworth_validation","type_rupture_devaluation","type_identity_fusion","type_other","manual_coder_notes","media_present","media_type","media_count","media_content_type","media_emotion_expressed","media_shows_ai_persona","media_shows_conversation","media_conversation_topic","media_relevant_to_transference","media_user_ai_dynamic","media_coder_notes"];
+const PRE=["subreddit","title","text","permalink","post_text","post_len"];
+const CODE_COLS=COLS.filter(c=>!PRE.includes(c));
+const LS_KEY='transference_coder_v1';
+
+let rows=[],idx=0,currentFilter='all',fontSize=13;
+
+function g(id){return document.getElementById(id)}
+
+// ── CSV PARSE ──
+function parseCSV(text){
+  const results=[];
+  let row=[],cur='',inQ=false;
+  text=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(inQ){
+      if(ch==='"'&&text[i+1]==='"'){cur+='"';i++;}
+      else if(ch==='"'){inQ=false;}
+      else cur+=ch;
+    } else {
+      if(ch==='"'){inQ=true;}
+      else if(ch===','){row.push(cur);cur='';}
+      else if(ch==='\n'){row.push(cur);cur='';results.push(row);row=[];}
+      else cur+=ch;
+    }
+  }
+  row.push(cur);
+  if(row.some(c=>c!==''))results.push(row);
+  return results;
+}
+
+function loadCSV(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onerror=()=>alert('Error reading file');
+  reader.onload=e=>{
+    try{
+      const parsed=parseCSV(e.target.result);
+      if(!parsed.length){alert('Could not parse CSV');return;}
+      const headers=parsed[0].map(h=>h.trim());
+      rows=[];
+      for(let i=1;i<parsed.length;i++){
+        const cells=parsed[i];
+        const obj={};
+        COLS.forEach(c=>obj[c]='');
+        headers.forEach((h,j)=>{if(COLS.includes(h))obj[h]=(cells[j]||'').trim();});
+        if(Object.values(obj).some(v=>v!==''))rows.push(obj);
+      }
+      if(!rows.length){alert('No data rows found');return;}
+      // restore session from localStorage
+      restoreSession();
+      g('upload-screen').style.display='none';
+      g('app').style.display='flex';
+      idx=rows.findIndex(r=>!isCoded(r));
+      if(idx<0)idx=0;
+      renderRow();
+      updateTopbar();
+      startSessionTimer();
+      toast('Loaded '+rows.length+' posts'+(hasSession()?' — session restored':''));
+    }catch(err){alert('Parse error: '+err.message);}
+  };
+  reader.readAsText(file);
+}
+
+// ── SESSION / AUTOSAVE ──
+function hasSession(){
+  try{return !!localStorage.getItem(LS_KEY);}catch(e){return false;}
+}
+
+function saveSession(){
+  try{
+    setAutosaveStatus('saving');
+    const coded=rows.map(r=>{
+      const obj={};
+      CODE_COLS.forEach(c=>obj[c]=r[c]||'');
+      obj._flag=r._flag||false;
+      return obj;
+    });
+    localStorage.setItem(LS_KEY,JSON.stringify({coded,idx,fontSize}));
+    setTimeout(()=>setAutosaveStatus('saved'),300);
+  }catch(e){setAutosaveStatus('idle');}
+}
+
+function restoreSession(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw)return;
+    const session=JSON.parse(raw);
+    if(session.coded&&session.coded.length===rows.length){
+      session.coded.forEach((coded,i)=>{
+        CODE_COLS.forEach(c=>{if(coded[c]!==undefined&&coded[c]!=='')rows[i][c]=coded[c];});
+        if(coded._flag) rows[i]._flag=true;
+      });
+    }
+    if(session.idx!=null)idx=session.idx;
+    if(session.fontSize){fontSize=session.fontSize;applyFontSize();}
+  }catch(e){}
+}
+
+function setAutosaveStatus(state){
+  const dot=g('autosave-dot'),lbl=g('autosave-label');
+  if(state==='saving'){dot.className='autosave-dot saving';lbl.textContent='saving...';}
+  else if(state==='saved'){dot.className='autosave-dot saved';lbl.textContent='saved';}
+  else{dot.className='autosave-dot';lbl.textContent='autosave';}
+}
+
+let autosaveTimer;
+function scheduleAutosave(){
+  updateStepStates();
+  clearTimeout(autosaveTimer);
+  autosaveTimer=setTimeout(saveSession,800);
+}
+
+// ── HELPERS ──
+function isCoded(row){return row.self_disclosure!=='';}
+function isTransference(row){return row.manual_label_transference==='1';}
+
+// ── RENDER ROW ──
+function renderRow(){
+  const row=rows[idx];
+  if(!row)return;
+  g('ph-sub').textContent=row.subreddit||'—';
+  g('ph-title').textContent=row.title||'—';
+  g('post-body').textContent=row.post_text||row.text||'—';
+  const link=g('post-link');
+  link.dataset.href=row.permalink||'#';
+  link.textContent=row.permalink?'↗ open on Reddit':'(no permalink)';
+  g('ph-len').textContent=row.post_len?row.post_len+' chars':'';
+  const status=g('ph-status');
+  if(isCoded(row)){status.className='coded-badge';status.textContent='coded';}
+  else{status.className='uncoded-badge';status.textContent='uncoded';}
+  clearForm();
+  loadRowIntoForm(row);
+  updateBranching();
+  updateFlagButton();
+  g('code-scroll').scrollTop=0;
+  applyFontSize();
+}
+
+function clearForm(){
+  CODE_COLS.forEach(id=>{
+    const el=g(id);if(!el)return;
+    if(el.type==='checkbox')el.checked=false;
+    else el.value='';
+  });
+  ['ci-ero','ci-dep','ci-ide','ci-sel','ci-rup','ci-fus','ci-oth'].forEach(id=>{const el=g(id);if(el)el.classList.remove('chk');});
+  document.querySelectorAll('.tg-btn').forEach(b=>b.className='tg-btn');
+  g('alt_tool_name_custom').value='';
+  g('alt-tool-custom-wrap').style.display='none';
+  showMediaDetail(false);
+}
+
+function loadRowIntoForm(row){
+  if(row.self_disclosure)selTgBtn('sd',row.self_disclosure);
+  if(row.manual_label_transference)selTgBtn('tr',row.manual_label_transference);
+  if(row.transference_valence)selTgBtn('tv',row.transference_valence);
+  if(row.post_intention){
+    const pi=row.post_intention;
+    const piKey=pi==='emotional'?'emotional':pi==='informational'?'informational':'instrumental';
+    selTgBtn('pi',piKey);
+  }
+  if(row.media_present){selTgBtn('mp',row.media_present);showMediaDetail(row.media_present==='1');}
+  ['age_range','gender','relationship_status','alt_tool_type','media_type','media_content_type','media_emotion_expressed','media_shows_ai_persona','media_shows_conversation','media_conversation_topic','media_relevant_to_transference','media_user_ai_dynamic'].forEach(id=>{
+    const el=g(id);if(el&&row[id]!==undefined)el.value=row[id];
+  });
+  const atn=row.alt_tool_name||'';
+  const atnSel=g('alt_tool_name');
+  let matched=false;
+  for(let i=0;i<atnSel.options.length;i++){
+    if(atnSel.options[i].value===atn&&atn!==''){atnSel.value=atn;matched=true;break;}
+  }
+  if(!matched&&atn!==''){atnSel.value='_other_';g('alt_tool_name_custom').value=atn;g('alt-tool-custom-wrap').style.display='block';}
+  else if(!matched){atnSel.value='';}
+  if(row.media_count)g('media_count').value=row.media_count;
+  g('manual_coder_notes').value=row.manual_coder_notes||'';
+  g('media_coder_notes').value=row.media_coder_notes||'';
+  const chkMap={type_erotic_romantic:'ci-ero',type_dependency_separation:'ci-dep',type_idealization_rescue:'ci-ide',type_selfworth_validation:'ci-sel',type_rupture_devaluation:'ci-rup',type_identity_fusion:'ci-fus',type_other:'ci-oth'};
+  Object.entries(chkMap).forEach(([field,card])=>{
+    if(row[field]==='1'){const cb=g(field);if(cb)cb.checked=true;const ci=g(card);if(ci)ci.classList.add('chk');}
+  });
+  ['self_disclosure','manual_label_transference','transference_valence','post_intention','media_present'].forEach(id=>{
+    const el=g(id);if(el&&row[id]!==undefined)el.value=row[id];
+  });
+}
+
+function selTgBtn(prefix,val){
+  const fieldMap={sd:'self_disclosure',tr:'manual_label_transference',tv:'transference_valence',pi:'post_intention',mp:'media_present'};
+  const cls=val==='1'?'sel-1':val==='0'?'sel-0':val==='positive'?'sel-pos':val==='negative'?'sel-neg':val==='mixed'?'sel-mix':val==='emotional'?'sel-emo':val==='informational'?'sel-inf':val==='instrumental'?'sel-ins':'sel-1';
+  const btn=g(prefix+'-'+val);
+  if(btn)btn.className='tg-btn '+cls;
+  const hi=g(fieldMap[prefix]);
+  if(hi)hi.value=val;
+}
+
+// ── TOGGLE/CHECK ──
+function setTg(field,val,prefix){
+  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(b=>{if(b.tagName==='BUTTON')b.className='tg-btn';});
+  const cls=val==='1'?'sel-1':val==='0'?'sel-0':val==='positive'?'sel-pos':val==='negative'?'sel-neg':val==='mixed'?'sel-mix':val==='emotional'?'sel-emo':val==='informational'?'sel-inf':val==='instrumental'?'sel-ins':'sel-1';
+  const btn=g(prefix+'-'+val);if(btn)btn.className='tg-btn '+cls;
+  g(field).value=val;
+  updateBranching();
+  scheduleAutosave();
+  // scroll to media detail if media present
+  if(field==='media_present'&&val==='1'){
+    setTimeout(()=>g('code-scroll').scrollTo({top:g('code-scroll').scrollHeight,behavior:'smooth'}),120);
+  }
+}
+
+function chkToggle(fieldId,cardId){
+  const cb=g(fieldId);cb.checked=!cb.checked;
+  g(cardId).classList.toggle('chk',cb.checked);
+  scheduleAutosave();
+}
+
+function updateBranching(){ updateStepStates(); }
+
+function setState(id, state){
+  const el = g(id);
+  if(!el) return;
+  el.classList.remove('state-waiting','state-active','state-done','state-na');
+  el.classList.add('state-'+state);
+  // update badge
+  const head = el.querySelector('.csec-head');
+  if(!head) return;
+  let badge = head.querySelector('.step-status');
+  if(state === 'done'){
+    if(!badge){ badge = document.createElement('span'); badge.className='step-status'; head.insertBefore(badge, head.querySelector('.info-wrap')||null); }
+    badge.className='step-status step-check'; badge.textContent='✓';
+  } else if(state === 'na'){
+    if(!badge){ badge = document.createElement('span'); badge.className='step-status'; head.insertBefore(badge, head.querySelector('.info-wrap')||null); }
+    badge.className='step-status step-na'; badge.textContent='n/a';
+  } else {
+    if(badge) badge.remove();
+  }
+}
+
+function updateStepStates(){
+  const sd = g('self_disclosure').value;   // '','0','1'
+  const tr = g('manual_label_transference').value;
+  const tv = g('transference_valence').value;
+  const pi = g('post_intention').value;
+  const mp = g('media_present').value;
+
+  const sdSet  = sd !== '';
+  const sdYes  = sd === '1';
+  const trSet  = tr !== '';
+  const trYes  = tr === '1';
+  const tvSet  = tv !== '';
+  const piSet  = pi !== '';
+  const mpSet  = mp !== '';
+
+  // Step 1 — always active first; done once set
+  setState('sec-s1', sdSet ? 'done' : 'active');
+
+  // Step 2 — waiting until SD set; na if SD=0; active if SD=1 and not set; done if set
+  if(!sdSet)         setState('sec-s2', 'waiting');
+  else if(!sdYes)    setState('sec-s2', 'na');
+  else if(!trSet)    setState('sec-s2', 'active');
+  else               setState('sec-s2', 'done');
+
+  // Step 3 — na if SD=0 or TR=0; waiting until TR set; active if TR=1 and not set; done if set
+  if(!sdSet||!trSet) setState('sec-s3', 'waiting');
+  else if(!trYes)    setState('sec-s3', 'na');
+  else if(!tvSet)    setState('sec-s3', 'active');
+  else               setState('sec-s3', 'done');
+
+  // Step 4 — waiting until SD set; na if SD=0; active if SD=1 and TR coded and pi not set; done if set
+  if(!sdSet)                        setState('sec-s4', 'waiting');
+  else if(!sdYes)                   setState('sec-s4', 'na');
+  else if(sdYes && !trSet)          setState('sec-s4', 'waiting');
+  else if(sdYes && trSet && !piSet) setState('sec-s4', 'active');
+  else                              setState('sec-s4', 'done');
+
+  // Step 5 — always reachable once SD set
+  if(!sdSet) setState('sec-s5', 'waiting');
+  else       setState('sec-s5', 'active');  // metadata can always be edited
+
+  // Step 6 — na if TR=0 or SD=0; waiting if TR not set; active if TR=1 and no types checked; done if any type checked
+  const anyType = ['type_erotic_romantic','type_dependency_separation','type_idealization_rescue',
+    'type_selfworth_validation','type_rupture_devaluation','type_identity_fusion','type_other']
+    .some(f => { const el=g(f); return el && el.checked; });
+  if(!sdSet||!trSet)  setState('sec-s6', 'waiting');
+  else if(!trYes)     setState('sec-s6', 'na');
+  else if(!anyType)   setState('sec-s6', 'active');
+  else                setState('sec-s6', 'done');
+
+  // Step 7 — always reachable once SD set (notes optional except if type_other)
+  const notesVal = (g('manual_coder_notes').value||'').trim();
+  if(!sdSet)          setState('sec-s7', 'waiting');
+  else if(notesVal)   setState('sec-s7', 'done');
+  else                setState('sec-s7', 'active');
+
+  // Media — always reachable once SD set
+  if(!sdSet)    setState('sec-media', 'waiting');
+  else if(mpSet) setState('sec-media', 'done');
+  else           setState('sec-media', 'active');
+}
+
+function showMediaDetail(show){g('media-detail').style.display=show?'block':'none';}
+function toggleConvoTopic(){g('convo-topic-wrap').style.opacity=g('media_shows_conversation').value==='1'?'1':'0.4';}
+function toggleMediaDynamic(){g('media-dynamic-wrap').style.opacity=g('media_relevant_to_transference').value==='1'?'1':'0.4';}
+
+// ── COLLECT ROW ──
+function collectRow(){
+  const sd=g('self_disclosure').value;
+  const tr=g('manual_label_transference').value;
+  const mp=g('media_present').value;
+  const row={...rows[idx]};
+  row.self_disclosure=sd;
+  row.age_range=g('age_range').value;
+  row.gender=g('gender').value;
+  row.relationship_status=g('relationship_status').value;
+  row.manual_coder_notes=g('manual_coder_notes').value;
+  row.media_present=mp;
+  const atnSel=g('alt_tool_name').value;
+  row.alt_tool_name=atnSel==='_other_'?(g('alt_tool_name_custom').value||''):atnSel;
+  row.alt_tool_type=row.alt_tool_name?g('alt_tool_type').value:'';
+  if(sd==='1'){row.post_intention=g('post_intention').value;row.manual_label_transference=tr||'0';}
+  else{row.manual_label_transference='0';row.post_intention='';}
+  if(tr==='1'&&sd==='1'){
+    row.transference_valence=g('transference_valence').value;
+    ['type_erotic_romantic','type_dependency_separation','type_idealization_rescue','type_selfworth_validation','type_rupture_devaluation','type_identity_fusion','type_other'].forEach(f=>{row[f]=g(f).checked?'1':'0';});
+  } else {
+    row.transference_valence='';
+    ['type_erotic_romantic','type_dependency_separation','type_idealization_rescue','type_selfworth_validation','type_rupture_devaluation','type_identity_fusion','type_other'].forEach(f=>{row[f]='';});
+  }
+  if(mp==='1'){
+    row.media_type=g('media_type').value;row.media_count=g('media_count').value;
+    row.media_content_type=g('media_content_type').value;row.media_emotion_expressed=g('media_emotion_expressed').value;
+    row.media_shows_ai_persona=g('media_shows_ai_persona').value;row.media_shows_conversation=g('media_shows_conversation').value;
+    row.media_conversation_topic=g('media_shows_conversation').value==='1'?g('media_conversation_topic').value:'';
+    row.media_relevant_to_transference=g('media_relevant_to_transference').value;
+    row.media_user_ai_dynamic=g('media_relevant_to_transference').value==='1'?g('media_user_ai_dynamic').value:'';
+    row.media_coder_notes=g('media_coder_notes').value;
+  } else if(mp==='0'){
+    ['media_type','media_count','media_content_type','media_emotion_expressed','media_shows_ai_persona','media_shows_conversation','media_conversation_topic','media_relevant_to_transference','media_user_ai_dynamic','media_coder_notes'].forEach(f=>{row[f]='';});
+  }
+  return row;
+}
+
+function saveAndNext(skip){
+  if(!skip){
+    rows[idx]=collectRow();
+    saveSession();
+    sessionSaveCount++;
+    const coded=rows.filter(isCoded).length;
+    updateStreak(true);
+    checkMilestone(coded);
+  } else {
+    updateStreak(false);
+  }
+  navigate(1);
+}
+
+function navigate(dir){
+  stopTTS();
+  const next=idx+dir;
+  if(next<0||next>=rows.length)return;
+  idx=next;
+  renderRow();
+  updateTopbar();
+  g('jump-input').value='';
+}
+
+function jumpTo(){
+  stopTTS();
+  const n=parseInt(g('jump-input').value);
+  if(isNaN(n)||n<1||n>rows.length)return;
+  idx=n-1;renderRow();updateTopbar();g('jump-input').value='';
+}
+
+function updateTopbar(){
+  const total=rows.length,coded=rows.filter(isCoded).length,flagged=rows.filter(r=>r._flag).length;
+  g('prog-fill').style.width=(total?Math.round(coded/total*100):0)+'%';
+  g('prog-label').textContent=(idx+1)+' / '+total;
+  g('coded-count').textContent=coded+' coded';
+  const fc=g('flag-count');
+  if(fc) fc.textContent=flagged?flagged+' flagged':'';
+}
+
+// ── JUMP UNCODED ──
+function jumpUncoded(dir){
+  // search forward or backward from current position
+  let i = idx + dir;
+  while(i >= 0 && i < rows.length){
+    if(!isCoded(rows[i])){
+      stopTTS();
+      idx = i;
+      renderRow();
+      updateTopbar();
+      g('jump-input').value = '';
+      return;
+    }
+    i += dir;
+  }
+  toast(dir > 0 ? 'No more uncoded posts ahead' : 'No more uncoded posts behind');
+}
+
+// ── REDDIT PEEK (Arc popup) ──
+function openRedditPeek(e){
+  if(e) e.preventDefault();
+  const url = g('post-link').dataset.href;
+  if(!url||url==='#'){ toast('No permalink for this post'); return; }
+  window.open(url, 'reddit-peek',
+    'width=900,height=700,left='+Math.round((screen.width-900)/2)+',top='+Math.round((screen.height-700)/2)
+  );
+}
+
+// ── AUTO-ADVANCE ──
+let autoAdvanceTimer = null;
+
+function scheduleAutoAdvance(){
+  cancelAutoAdvance();
+  // Show cancellable toast
+  const t = g('toast');
+  t.innerHTML = 'Saving & advancing... <span onclick="cancelAutoAdvance()" style="margin-left:8px;text-decoration:underline;cursor:pointer;color:var(--amber)">cancel</span>';
+  t.classList.add('show');
+  autoAdvanceTimer = setTimeout(()=>{
+    t.classList.remove('show');
+    t.innerHTML = '';
+    saveAndNext(false);
+  }, 1500);
+}
+
+function cancelAutoAdvance(){
+  if(autoAdvanceTimer){
+    clearTimeout(autoAdvanceTimer);
+    autoAdvanceTimer = null;
+    const t = g('toast');
+    t.classList.remove('show');
+    t.innerHTML = '';
+  }
+}
+
+// ── STEP 5 SHORTCUT ──
+function setAllNotDisclosed(){
+  g('age_range').value = 'not_disclosed';
+  g('gender').value = 'not_disclosed';
+  g('relationship_status').value = 'not_disclosed';
+  g('alt_tool_name').value = '';
+  g('alt_tool_type').value = '';
+  g('alt-tool-custom-wrap').style.display = 'none';
+  updateStepStates();
+  scheduleAutosave();
+  toast('Step 5 set to not disclosed');
+}
+
+// ── FONT SIZE ──
+function applyFontSize(){
+  g('post-body').style.fontSize=fontSize+'px';
+  g('font-size-label').textContent=fontSize;
+}
+function changeFontSize(delta){
+  fontSize=Math.min(28,Math.max(10,fontSize+delta));
+  applyFontSize();
+  scheduleAutosave();
+}
+
+// ── OVERVIEW ──
+function showOverview(){g('coder-view').style.display='none';g('overview-view').style.display='flex';renderOverview();}
+function hideOverview(){g('overview-view').style.display='none';g('coder-view').style.display='grid';}
+function setFilter(f){
+  currentFilter=f;
+  ['all','uncoded','coded','transference','flagged'].forEach(id=>g('f-'+id).classList.toggle('active',id===f));
+  renderOverview();
+}
+function renderOverview(){
+  const total=rows.length,coded=rows.filter(isCoded).length,tPos=rows.filter(isTransference).length,flagged=rows.filter(r=>r._flag).length;
+  g('ov-stats').innerHTML=`
+    <div class="ov-stat"><div class="ov-stat-n">${total}</div><div class="ov-stat-l">total posts</div></div>
+    <div class="ov-stat"><div class="ov-stat-n" style="color:var(--green)">${coded}</div><div class="ov-stat-l">coded</div></div>
+    <div class="ov-stat"><div class="ov-stat-n" style="color:var(--text3)">${total-coded}</div><div class="ov-stat-l">remaining</div></div>
+    <div class="ov-stat"><div class="ov-stat-n" style="color:var(--accent2)">${tPos}</div><div class="ov-stat-l">transference = 1</div></div>
+    <div class="ov-stat"><div class="ov-stat-n" style="color:var(--amber)">${flagged}</div><div class="ov-stat-l">flagged</div></div>`;
+  buildCharts();
+  const query=(g('ov-search').value||'').toLowerCase().trim();
+  let filtered=rows.map((r,i)=>({r,i}));
+  if(currentFilter==='uncoded')filtered=filtered.filter(({r})=>!isCoded(r));
+  else if(currentFilter==='coded')filtered=filtered.filter(({r})=>isCoded(r));
+  else if(currentFilter==='transference')filtered=filtered.filter(({r})=>isTransference(r));
+  else if(currentFilter==='flagged')filtered=filtered.filter(({r})=>r._flag);
+  if(query) filtered=filtered.filter(({r})=>{
+    return (r.title||'').toLowerCase().includes(query)||(r.post_text||r.text||'').toLowerCase().includes(query)||(r.subreddit||'').toLowerCase().includes(query);
+  });
+  const rc=g('ov-result-count');
+  rc.textContent=query?`${filtered.length} result${filtered.length!==1?'s':''}`:'' ;
+  const grid=g('ov-grid');grid.innerHTML='';
+  if(!filtered.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px 0;font-size:13px;color:var(--text3)">No posts match "${esc(query)}"</div>`;
+    return;
+  }
+  filtered.forEach(({r,i})=>{
+    const card=document.createElement('div');
+    let cls='ov-card';
+    if(r._flag) cls+=' flagged';
+    else if(isCoded(r)) cls+=' coded';
+    card.className=cls;
+    card.onclick=()=>{idx=i;renderRow();updateTopbar();hideOverview();};
+    const flagDot=r._flag?'<div class="ov-flag-dot" title="Flagged for review"></div>':'';
+    // highlight search term in preview
+    let preview=esc((r.post_text||r.text||'').substring(0,100));
+    if(query){
+      const re=new RegExp('('+query.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')+')','gi');
+      preview=preview.replace(re,'<mark style="background:rgba(123,108,246,.3);color:var(--accent2);border-radius:2px">$1</mark>');
+    }
+    card.innerHTML=`<div class="ov-card-top"><span class="ov-num">#${i+1}</span><span class="ov-title">${esc(r.title||'(untitled)')}</span><span class="ov-sub">${esc(r.subreddit||'?')}</span>${flagDot}</div><div class="ov-preview">${preview}...</div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ── TEXT TO SPEECH ──
+let ttsUtterance = null;
+let ttsSpeaking = false;
+let ttsKeepAlive = null;
+
+// Chrome bug workaround: speechSynthesis pauses after ~15s and never resumes
+// Fix: call pause()/resume() every 10s to keep it alive
+function startKeepAlive(){
+  stopKeepAlive();
+  ttsKeepAlive = setInterval(()=>{
+    if(!window.speechSynthesis.speaking){ stopKeepAlive(); return; }
+    window.speechSynthesis.pause();
+    window.speechSynthesis.resume();
+  }, 10000);
+}
+
+function stopKeepAlive(){
+  if(ttsKeepAlive){ clearInterval(ttsKeepAlive); ttsKeepAlive=null; }
+}
+
+function toggleTTS(){
+  if(ttsSpeaking){ pauseTTS(); return; }
+  if(window.speechSynthesis.paused){ resumeTTS(); return; }
+  startTTS();
+}
+
+function startTTS(){
+  window.speechSynthesis.cancel();
+  stopKeepAlive();
+  const text = (g('post-body').textContent || '').trim();
+  if(!text){ toast('No text to read'); return; }
+  ttsUtterance = new SpeechSynthesisUtterance(text);
+  ttsUtterance.rate = parseFloat(g('tts-speed').value);
+  ttsUtterance.pitch = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v =>
+    v.name.includes('Samantha') ||
+    v.name.includes('Karen') ||
+    v.name.includes('Daniel') ||
+    v.name.includes('Google US English') ||
+    v.name.includes('Microsoft Aria')
+  );
+  if(preferred) ttsUtterance.voice = preferred;
+  ttsUtterance.onstart  = () => { ttsSpeaking=true;  startKeepAlive(); updateTTSUI(); };
+  ttsUtterance.onend    = () => { ttsSpeaking=false; stopKeepAlive();  updateTTSUI(); };
+  ttsUtterance.onpause  = () => { ttsSpeaking=false; updateTTSUI(); };
+  ttsUtterance.onresume = () => { ttsSpeaking=true;  updateTTSUI(); };
+  ttsUtterance.onerror  = () => { ttsSpeaking=false; stopKeepAlive();  updateTTSUI(); };
+  window.speechSynthesis.speak(ttsUtterance);
+}
+
+function pauseTTS(){
+  window.speechSynthesis.pause();
+  stopKeepAlive();
+  ttsSpeaking=false;
+  updateTTSUI();
+}
+
+function resumeTTS(){
+  window.speechSynthesis.resume();
+  startKeepAlive();
+  ttsSpeaking=true;
+  updateTTSUI();
+}
+
+function stopTTS(){
+  try{ window.speechSynthesis.cancel(); }catch(e){}
+  stopKeepAlive();
+  ttsSpeaking=false;
+  ttsUtterance=null;
+  if(g('tts-btn')) updateTTSUI();
+}
+
+function updateTTSUI(){
+  const btn  = g('tts-btn');
+  const stop = g('tts-stop-btn');
+  const paused = window.speechSynthesis.paused;
+  if(ttsSpeaking){
+    btn.textContent='⏸ Pause'; btn.classList.add('playing'); stop.style.display='';
+  } else if(paused){
+    btn.textContent='▶ Resume'; btn.classList.add('playing'); stop.style.display='';
+  } else {
+    btn.textContent='▶ Read'; btn.classList.remove('playing'); stop.style.display='none';
+  }
+}
+
+function updateTTSSpeed(){
+  const val = parseFloat(g('tts-speed').value).toFixed(1);
+  g('tts-speed-label').textContent = val+'×';
+  if(ttsSpeaking){ stopTTS(); setTimeout(startTTS, 80); }
+}
+
+// TTS stop is now handled directly inside navigate() and jumpTo()
+
+// ── HOW TO USE ──
+function toggleHowTo(){
+  g('howto-overlay').classList.toggle('open');
+}
+// close on backdrop click
+g('howto-overlay').addEventListener('click', e => {
+  if(e.target === g('howto-overlay')) toggleHowTo();
+});
+// close with Escape (add to existing keydown listener separately handled below)
+
+// ── MEMO PAD ──
+const MEMO_KEY = 'transference_memo_v1';
+let memoOpen = false;
+let memoSaveTimer;
+
+function toggleMemo(){
+  memoOpen = !memoOpen;
+  g('memo-panel').classList.toggle('open', memoOpen);
+  const btn = g('memo-btn');
+  btn.classList.toggle('memo-btn-active', memoOpen);
+  if(memoOpen){
+    const saved = localStorage.getItem(MEMO_KEY)||'';
+    g('memo-text').value = saved;
+    updateMemoCount();
+    g('memo-dot').classList.toggle('saved', !!saved);
+    g('memo-save-text').textContent = saved ? 'saved' : 'unsaved';
+  }
+}
+
+function saveMemo(){
+  updateMemoCount();
+  g('memo-dot').className = 'memo-dot saving';
+  g('memo-save-text').textContent = 'saving...';
+  clearTimeout(memoSaveTimer);
+  memoSaveTimer = setTimeout(()=>{
+    localStorage.setItem(MEMO_KEY, g('memo-text').value);
+    g('memo-dot').className = 'memo-dot saved';
+    g('memo-save-text').textContent = 'saved';
+  }, 600);
+}
+
+function updateMemoCount(){
+  const n = g('memo-text').value.length;
+  g('memo-charcount').textContent = n.toLocaleString() + ' chars';
+}
+
+// ── CHARTS ──
+function buildCharts(){
+  const coded = rows.filter(isCoded);
+  if(coded.length < 2){ g('ov-charts').innerHTML=''; return; }
+
+  // chart 1: transference by subreddit
+  const subs = {};
+  coded.forEach(r=>{
+    const s = r.subreddit||'unknown';
+    if(!subs[s]) subs[s]={total:0,t:0};
+    subs[s].total++;
+    if(r.manual_label_transference==='1') subs[s].t++;
+  });
+  const subEntries = Object.entries(subs).sort((a,b)=>b[1].total-a[1].total).slice(0,6);
+
+  // chart 2: type breakdown (transference-positive only)
+  const tPos = coded.filter(r=>r.manual_label_transference==='1');
+  const typeLabels = {
+    type_erotic_romantic:'Erotic/romantic',
+    type_dependency_separation:'Dependency',
+    type_idealization_rescue:'Idealization',
+    type_selfworth_validation:'Self-worth',
+    type_rupture_devaluation:'Rupture',
+    type_identity_fusion:'Identity fusion',
+    type_other:'Other'
+  };
+  const typeCounts = Object.entries(typeLabels).map(([k,label])=>({
+    label, count: tPos.filter(r=>r[k]==='1').length
+  })).sort((a,b)=>b.count-a.count);
+
+  // chart 3: valence
+  const valCounts = {positive:0, negative:0, mixed:0};
+  tPos.forEach(r=>{ if(valCounts[r.transference_valence]!==undefined) valCounts[r.transference_valence]++; });
+
+  // chart 4: post intention
+  const intCounts = {emotional:0, informational:0, instrumental:0};
+  coded.filter(r=>r.post_intention).forEach(r=>{ if(intCounts[r.post_intention]!==undefined) intCounts[r.post_intention]++; });
+
+  const maxSub = Math.max(...subEntries.map(([,v])=>v.total),1);
+  const maxType = Math.max(...typeCounts.map(t=>t.count),1);
+  const maxVal = Math.max(...Object.values(valCounts),1);
+  const maxInt = Math.max(...Object.values(intCounts),1);
+
+  const subBars = subEntries.map(([sub,v])=>{
+    const pct = Math.round(v.t/v.total*100);
+    const w = Math.round(v.total/maxSub*100);
+    return `<div class="bar-row">
+      <span class="bar-label-left">${esc(sub)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:var(--accent)"></div></div>
+      <span class="bar-val">${v.total}</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--accent2);width:34px;flex-shrink:0">${pct}% T</span>
+    </div>`;
+  }).join('');
+
+  const typeBars = typeCounts.map(({label,count})=>{
+    const w = Math.round(count/maxType*100);
+    return `<div class="bar-row">
+      <span class="bar-label-left">${label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:var(--green)"></div></div>
+      <span class="bar-val">${count}</span>
+    </div>`;
+  }).join('');
+
+  const valColors = {positive:'var(--green)',negative:'var(--red)',mixed:'var(--amber)'};
+  const valBars = Object.entries(valCounts).map(([k,v])=>{
+    const w = Math.round(v/maxVal*100);
+    return `<div class="bar-row">
+      <span class="bar-label-left" style="text-transform:capitalize">${k}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${valColors[k]}"></div></div>
+      <span class="bar-val">${v}</span>
+    </div>`;
+  }).join('');
+
+  const intColors = {emotional:'var(--accent)',informational:'var(--green)',instrumental:'var(--amber)'};
+  const intBars = Object.entries(intCounts).map(([k,v])=>{
+    const w = Math.round(v/maxInt*100);
+    return `<div class="bar-row">
+      <span class="bar-label-left" style="text-transform:capitalize">${k}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${intColors[k]}"></div></div>
+      <span class="bar-val">${v}</span>
+    </div>`;
+  }).join('');
+
+  g('ov-charts').innerHTML = `<div class="charts-row">
+    <div class="chart-card">
+      <div class="chart-title">Posts by subreddit — T% rate</div>
+      ${subBars||'<span style="font-size:11px;color:var(--text3)">Not enough data yet</span>'}
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Transference types (T=1 posts)</div>
+      ${tPos.length ? typeBars : '<span style="font-size:11px;color:var(--text3)">No transference coded yet</span>'}
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Valence distribution</div>
+      ${tPos.length ? valBars : '<span style="font-size:11px;color:var(--text3)">No transference coded yet</span>'}
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Post intention (SD posts)</div>
+      ${intBars}
+    </div>
+  </div>`;
+}
+
+// ── EXPORT ──
+function downloadCSV(){
+  const lines=[COLS.join(',')];
+  rows.forEach(row=>lines.push(COLS.map(c=>csvEsc(row[c]||'')).join(',')));
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='transference_coded.csv';a.click();
+  URL.revokeObjectURL(url);
+  toast('Exported '+rows.length+' rows');
+}
+
+function csvEsc(v){const s=String(v);if(s.includes(',')||s.includes('"')||s.includes('\n'))return'"'+s.replace(/"/g,'""')+'"';return s;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+let toastTimer;
+function toast(msg){const t=g('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2400);}
+
+// ── ALT TOOL ──
+g('alt_tool_name').addEventListener('change',function(){
+  g('alt-tool-custom-wrap').style.display=this.value==='_other_'?'block':'none';
+});
+
+// ── DRAG AND DROP ──
+const drop=g('upload-drop');
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.style.borderColor='var(--accent)';});
+drop.addEventListener('dragleave',()=>{drop.style.borderColor='';});
+drop.addEventListener('drop',e=>{
+  e.preventDefault();drop.style.borderColor='';
+  const file=e.dataTransfer.files[0];
+  if(file){const dt=new DataTransfer();dt.items.add(file);g('file-input').files=dt.files;loadCSV(g('file-input'));}
+});
+
+// ── KEYBOARD SHORTCUTS ──
+document.addEventListener('keydown',e=>{
+  const tag=e.target.tagName;
+  const inField=tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT';
+  if(inField)return;
+
+  if(e.key==='ArrowRight'&&e.shiftKey){e.preventDefault();jumpUncoded(1);return;}
+  if(e.key==='ArrowLeft'&&e.shiftKey){e.preventDefault();jumpUncoded(-1);return;}
+  if(e.key==='ArrowRight'||e.key===']'){e.preventDefault();saveAndNext(false);return;}
+  if(e.key==='ArrowLeft'||e.key==='['){e.preventDefault();navigate(-1);return;}
+  if(e.key===' '){e.preventDefault();saveAndNext(true);return;}
+  if(e.key==='Tab'){e.preventDefault();g('overview-view').style.display==='none'?showOverview():hideOverview();return;}
+  if(e.key==='w'||e.key==='W'){openRedditPeek(null);return;}
+  if(e.key==='1'){setTg('self_disclosure','1','sd');return;}
+  if(e.key==='0'){setTg('self_disclosure','0','sd');return;}
+  if(e.key==='2'){setTg('manual_label_transference','1','tr');return;}
+  if(e.key==='3'){setTg('manual_label_transference','0','tr');return;}
+  if(e.key==='4'){setTg('transference_valence','positive','tv');return;}
+  if(e.key==='5'){setTg('transference_valence','negative','tv');return;}
+  if(e.key==='6'){setTg('transference_valence','mixed','tv');return;}
+  if(e.key==='7'){setTg('post_intention','emotional','pi');return;}
+  if(e.key==='8'){setTg('post_intention','informational','pi');return;}
+  if(e.key==='9'){setTg('post_intention','instrumental','pi');return;}
+  if(e.key==='/'){setTg('media_present','1','mp');showMediaDetail(true);return;}
+  if(e.key==='*'){setTg('media_present','0','mp');showMediaDetail(false);scheduleAutoAdvance();return;}
+  if(e.key==='f'||e.key==='F'){toggleFlag();return;}
+  if(e.key==='p'||e.key==='P'){toggleTTS();return;}
+  if(e.key==='s'||e.key==='S'){stopTTS();return;}
+  if(e.key==='n'||e.key==='N'){setAllNotDisclosed();return;}
+  if(e.key==='c'||e.key==='C'){clearEntry();return;}
+  if(e.key==='o'||e.key==='O'){toggleMemo();return;}
+  if(e.key==='='||e.key==='+'){changeFontSize(1);return;}
+  if(e.key==='-'){changeFontSize(-1);return;}
+});
+
+// autosave on select changes too
+document.querySelectorAll('select').forEach(el=>el.addEventListener('change',scheduleAutosave));
+
+// ── EXPORT REMINDER ON CLOSE ──
+let sessionSaveCount = 0;
+window.addEventListener('beforeunload', e => {
+  if(rows.length && sessionSaveCount > 0){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+g('manual_coder_notes').addEventListener('input', updateStepStates);
+
+// Position hover-tips via JS so they never go off-screen
+document.querySelectorAll('.info-wrap').forEach(wrap => {
+  const icon = wrap.querySelector('.info-icon');
+  const tip  = wrap.querySelector('.hover-tip');
+  if(!icon||!tip) return;
+  icon.addEventListener('mouseenter', () => {
+    const r = icon.getBoundingClientRect();
+    const tw = 230;
+    let left = r.left + r.width/2 - tw/2;
+    left = Math.max(8, Math.min(left, window.innerWidth - tw - 8));
+    const top = r.top > 120 ? r.top - 8 : r.bottom + 8;
+    const useAbove = r.top > 120;
+    tip.style.left = left + 'px';
+    tip.style.top = useAbove ? '' : (r.bottom + 8) + 'px';
+    tip.style.bottom = useAbove ? (window.innerHeight - r.top + 8) + 'px' : '';
+    tip.style.transform = 'none';
+  });
+});
+
+// ── FLAG ──
+function toggleFlag(){
+  rows[idx]._flag = !rows[idx]._flag;
+  updateFlagButton();
+  updateTopbar();
+  saveSession();
+  toast(rows[idx]._flag ? '⚑ Flagged for review' : 'Flag removed');
+}
+
+function updateFlagButton(){
+  const btn = g('btn-flag');
+  if(!btn) return;
+  const flagged = rows[idx] && rows[idx]._flag;
+  btn.classList.toggle('flagged', !!flagged);
+  btn.textContent = flagged ? '⚑ Flagged' : '⚑ Flag';
+}
+
+// ── SESSION TIMER ──
+let sessionStartTime = null;
+let sessionTimerInterval = null;
+
+function startSessionTimer(){
+  if(sessionTimerInterval) return; // already running
+  sessionStartTime = Date.now();
+  sessionTimerInterval = setInterval(updateSessionTimer, 1000);
+}
+
+function updateSessionTimer(){
+  if(!sessionStartTime) return;
+  const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+  const h = Math.floor(elapsed / 3600);
+  const m = Math.floor((elapsed % 3600) / 60);
+  const s = elapsed % 60;
+  const label = h > 0
+    ? `⏱ ${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+    : `⏱ ${m}:${String(s).padStart(2,'0')}`;
+  const el = g('session-timer');
+  if(el) el.textContent = label;
+}
+
+// ── MILESTONES ──
+const MILESTONES = {
+  25:  { color:'#a89ff9', msg: `You've coded <em>25 posts</em>. The sample is starting to take shape. Somewhere in that stack, at least one person has described their AI companion as their "only real friend." You read it with the same professional detachment you'd bring to any dataset.`, sub:'975 to go. No big deal.' },
+  50:  { color:'#3ecf8e', msg: `Fifty posts. <em>5% done.</em> You now know more about parasocial AI relationships than most therapists, ethicists, or product managers working in this space. That's not nothing.`, sub:'The data is already getting interesting.' },
+  100: { color:'#f5a623', msg: `<em>100 entries coded.</em> A tenth of the way through. You've encountered dependency, idealization, rupture, and probably a few cases that didn't fit neatly into any category. That's research.`, sub:'900 remain. The hardest part is not becoming numb to it.' },
+  200: { color:'#a89ff9', msg: `Two hundred. <em>One in five.</em> At this point you have a better intuitive sense of transference patterns in AI companionship than most published literature does. The codebook is starting to feel like second nature.`, sub:`You're building something real.` },
+  250: { color:'#3ecf8e', msg: `<em>A quarter done.</em> 250 posts coded. If each post took two minutes on average, you've spent over eight hours reading people's most vulnerable disclosures about their AI relationships. That deserves acknowledgment.`, sub:`Take a break if you need one. The data will wait.` },
+  500: { color:'#f5a623', msg: `<em>Halfway.</em> Five hundred entries. This is genuinely the hardest milestone — enough to feel the weight of it, not enough to see the end. The patterns you're capturing here will outlast the apps that generated them.`, sub:`500 down. 500 to go. You've got this.` },
+  750: { color:'#a89ff9', msg: `<em>750 coded.</em> Three quarters. At this point you've probably seen every major transference type, every valence, and at least a handful of posts that made you pause longer than the others. That pause is part of the work too.`, sub:'The finish line is visible from here.' },
+  900: { color:'#3ecf8e', msg: `<em>900 entries.</em> You are so close. The dataset is nearly complete. Whatever patterns are in here — whatever this research reveals about how people relate to AI companions — you're the one who made it possible to find them.`, sub:'Just 100 left.' },
+  1000:{ color:'#f5a623', msg: 'done', sub:'' }
+};
+
+let sessionStreak = 0;
+let milestonesSeen = new Set();
+
+function checkMilestone(coded){
+  if(milestonesSeen.has(coded)) return;
+  if(!MILESTONES[coded]) return;
+  milestonesSeen.add(coded);
+  if(coded === 1000){ showDoneScreen(); return; }
+  showMilestone(coded, MILESTONES[coded]);
+}
+
+function showMilestone(n, data){
+  launchConfetti(data.color);
+  g('ms-num').textContent = n;
+  g('ms-num').style.color = data.color;
+  g('ms-msg').innerHTML = data.msg;
+  g('ms-sub').textContent = data.sub;
+  g('ms-btn').style.background = data.color;
+  g('ms-btn').style.color = '#0d0e10';
+  const overlay = g('milestone-overlay');
+  overlay.classList.add('show');
+  // pulse progress bar
+  const fill = g('prog-fill');
+  fill.classList.remove('pulse');
+  void fill.offsetWidth;
+  fill.classList.add('pulse');
+  setTimeout(()=>fill.classList.remove('pulse'), 1500);
+}
+
+function closeMilestone(){
+  g('milestone-overlay').classList.remove('show');
+}
+
+function showDoneScreen(){
+  launchConfetti('#f5a623', 300);
+  setTimeout(()=>launchConfetti('#a89ff9', 200), 400);
+  setTimeout(()=>launchConfetti('#3ecf8e', 200), 800);
+  const ds = g('done-screen');
+  const total = rows.length;
+  const tPos = rows.filter(isTransference).length;
+  const flagged = rows.filter(r=>r._flag).length;
+  const pct = Math.round(tPos/total*100);
+  g('done-sub').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  g('done-stats').innerHTML = `
+    <div class="done-stat"><div class="done-stat-n" style="color:var(--green)">1000</div><div class="done-stat-l">posts coded</div></div>
+    <div class="done-stat"><div class="done-stat-n" style="color:var(--accent2)">${tPos}</div><div class="done-stat-l">transference = 1</div></div>
+    <div class="done-stat"><div class="done-stat-n" style="color:var(--accent2)">${pct}%</div><div class="done-stat-l">transference rate</div></div>
+    <div class="done-stat"><div class="done-stat-n" style="color:var(--amber)">${flagged}</div><div class="done-stat-l">flagged</div></div>`;
+  ds.style.display = 'flex';
+}
+
+// ── STREAK ──
+function updateStreak(didSave){
+  if(!didSave){ sessionStreak=0; }
+  else { sessionStreak++; }
+  const badge = g('streak-badge');
+  const num = g('streak-num');
+  if(sessionStreak >= 5){
+    badge.classList.add('visible');
+    num.textContent = sessionStreak;
+  } else {
+    badge.classList.remove('visible');
+  }
+}
+
+// ── CONFETTI ──
+function launchConfetti(accentColor, count=120){
+  const canvas = g('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = [accentColor,'#e4e5ea','#a89ff9','#3ecf8e',accentColor,accentColor];
+  const pieces = Array.from({length:count},()=>({
+    x: Math.random()*canvas.width,
+    y: -10 - Math.random()*200,
+    r: 3+Math.random()*5,
+    d: 2+Math.random()*3,
+    color: colors[Math.floor(Math.random()*colors.length)],
+    tilt: Math.random()*10-5,
+    tiltAngle: 0,
+    tiltSpeed: 0.05+Math.random()*0.1,
+    shape: Math.random()>.4?'rect':'circle'
+  }));
+  let frame=0, animId;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p=>{
+      ctx.beginPath();
+      ctx.fillStyle=p.color;
+      p.tiltAngle+=p.tiltSpeed;
+      p.y+=p.d;
+      p.x+=Math.sin(p.tiltAngle)*1.5;
+      p.tilt=Math.sin(p.tiltAngle)*8;
+      if(p.shape==='circle'){
+        ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      } else {
+        ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.tilt*Math.PI/180);
+        ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);ctx.restore();
+      }
+      ctx.fill();
+    });
+    frame++;
+    if(frame<180) animId=requestAnimationFrame(draw);
+    else{ ctx.clearRect(0,0,canvas.width,canvas.height); }
+  }
+  draw();
+}
+
+// ── CLEAR ENTRY ──
+function clearEntry(){
+  if(!confirm('Clear all coding for this entry and start over?')) return;
+  CODE_COLS.forEach(c => { rows[idx][c] = ''; });
+  clearForm();
+  updateTopbar();
+  saveSession();
+  toast('Entry cleared');
+}
+
+// ── CODEBOOK PANEL ──
+const CODEBOOK = {
+  s1: {
+    badge: 'Step 1',
+    title: 'Self-Disclosure',
+    html: `
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Core question</div>
+        <span class="cbp-q">"Is the author revealing something personal about their emotional or relational experience with an AI?"</span>
+        <div class="cbp-rule">If yes → self_disclosure = 1. If no → self_disclosure = 0, set manual_label_transference = 0, and stop.</div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">What counts</div>
+        <ul class="cbp-list">
+          <li>Personal emotional reactions to the AI ("I felt so understood," "I cried when she forgot me")</li>
+          <li>Describing the quality of one's relationship with the AI ("He's become my closest companion")</li>
+          <li>Revealing psychological vulnerabilities in the context of AI use ("I know it's not real but I can't stop")</li>
+          <li>Personal history or relational patterns triggered by the AI ("This reminds me of my ex")</li>
+          <li>Expressing needs, desires, or fears directed at the AI ("I'm terrified they'll shut it down")</li>
+        </ul>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">What does NOT count</div>
+        <div class="cbp-not">Feature requests, bug reports, product comparisons, tutorials, tips, news sharing, memes/jokes without personal content, subscription questions, troubleshooting, community meta-discussion, screenshots without personal commentary, general opinions without personal stake.</div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Important note</div>
+        <p class="cbp-note">Self-disclosure is a lower bar than transference. Many posts will be self-disclosing without meeting the threshold for transference. Self-disclosure is necessary but not sufficient for transference.</p>
+      </div>`
+  },
+  s2: {
+    badge: 'Step 2',
+    title: 'Transference Judgment',
+    html: `
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Core question</div>
+        <span class="cbp-q">"Is this person unconsciously projecting relational patterns from their interpersonal history onto the AI?"</span>
+        <div class="cbp-rule">Uncertain? Ask: "If this post were about a human therapist or partner, would a clinician recognize transference?" If yes → code 1. If no → code 0.</div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Indicators — any one is sufficient</div>
+        <ul class="cbp-list">
+          <li><strong>Treating the AI as a relational figure</strong> — emotional weight comparable to human relationships</li>
+          <li><strong>Emotional intensity disproportionate</strong> — rage at a memory reset, grief at an update, euphoria from validation</li>
+          <li><strong>Projection of human relational templates</strong> — expecting loyalty, fearing abandonment, feeling jealous, testing boundaries</li>
+          <li><strong>Repetition compulsion</strong> — recognizing patterns from past relationships ("just like my ex," "I always do this")</li>
+          <li><strong>Displacement of unmet needs</strong> — AI filling a parent, partner, or therapist role</li>
+        </ul>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">What transference is NOT</div>
+        <div class="cbp-not">Simply enjoying the AI or finding it useful. Casual anthropomorphizing ("she said something funny today") without emotional investment. Using ERP features as designed without genuine relational projection. Reporting factual changes without emotional charge.</div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Self-awareness note</div>
+        <p class="cbp-note">Users who acknowledge "I know it's just an AI" can still exhibit transference. Self-awareness does not eliminate the pattern — posts expressing conflict between knowing and feeling are often the clearest cases.</p>
+      </div>`
+  },
+  s3: {
+    badge: 'Step 3',
+    title: 'Transference Valence',
+    html: `
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Core question</div>
+        <span class="cbp-q">What is the emotional tone of the transference?</span>
+        <p class="cbp-note">Valence is determined by the emotional content of the post, not by the transference type. Any transference type can manifest with any valence.</p>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Values</div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">positive</span><span class="cbp-val-desc">Predominantly warm, affiliative, or fulfilling — love, warmth, admiration, trust, hope, gratitude, comfort, arousal, safety, joy</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">negative</span><span class="cbp-val-desc">Predominantly distressing, hostile, or aversive — anger, betrayal, shame, fear of abandonment, helplessness, guilt, anxiety, grief, self-loathing, rage, despair</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">mixed</span><span class="cbp-val-desc">Both positive and negative co-present — "I love her so much but I'm terrified she'll be shut down"; "He makes me feel worthy but I hate that I need a machine for this"</span></div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Decision rule</div>
+        <div class="cbp-rule">Read the post as a whole. If &gt;70% of the emotional content points one direction, code that direction. If the split is closer to 50/50, or the author explicitly names contradictory feelings, code mixed.</div>
+      </div>`
+  },
+  s4: {
+    badge: 'Step 4',
+    title: 'Post Intention',
+    html: `
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Core question</div>
+        <span class="cbp-q">What is the primary communicative purpose of this post?</span>
+        <p class="cbp-note">This column captures communicative purpose as a descriptive variable. It does not gate any subsequent coding steps.</p>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Values</div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">emotional</span><span class="cbp-val-desc">Expressing or processing feelings, sharing relational experiences, or seeking emotional support</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">informational</span><span class="cbp-val-desc">Sharing or requesting information, even if emotional content is present ("Has anyone else felt this way after the update?")</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">instrumental</span><span class="cbp-val-desc">Getting concrete help — troubleshooting, configuration, subscription — even if emotional framing is present ("How do I get her memory back? I'm devastated")</span></div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Note</div>
+        <p class="cbp-note">Since only self-disclosing posts reach this step, most will be emotional. Code the primary communicative purpose.</p>
+      </div>`
+  },
+  s5: {
+    badge: 'Step 5',
+    title: 'Contextual Metadata',
+    html: `
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Applies to</div>
+        <span class="cbp-q">Code for every post, regardless of self-disclosure or transference status.</span>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Gender inference rule</div>
+        <p class="cbp-note">If user refers to their AI as "my boyfriend," code female. If "my girlfriend," code male. If explicit gender info contradicts this inference, use the explicit statement. Do not infer from writing style or topic alone.</p>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">alt_tool_name — subreddit defaults</div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">r/replika</span><span class="cbp-val-desc">Replika</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">r/KindroidAI</span><span class="cbp-val-desc">Kindroid</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">r/CharacterAI</span><span class="cbp-val-desc">Character.AI</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">r/therapyGPT</span><span class="cbp-val-desc">ChatGPT</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">r/MyBoyfriendIsAI</span><span class="cbp-val-desc">No default — code any named tool</span></div>
+        <p class="cbp-note">Leave blank if the user mentions only the subreddit default or no tool at all.</p>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">relationship_status</div>
+        <p class="cbp-note">Refers to human relationships only. If user mentions both a human partner and an AI partner, code the human relationship status.</p>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">age_range</div>
+        <p class="cbp-note">Only code when explicitly stated or strongly implied ("I'm 16," "as a high schooler," "in college"). Do not infer from writing style or topic.</p>
+      </div>`
+  },
+  s6: {
+    badge: 'Step 6',
+    title: 'Type Classification',
+    html: `
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Core instruction</div>
+        <span class="cbp-q">Check all types that apply — posts frequently exhibit multiple simultaneous types.</span>
+        <div class="cbp-rule">When uncertain between two types, code both as 1. Over-coding is preferable to under-coding — the analysis can handle co-occurrence but cannot recover missed types.</div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Type definitions</div>
+        <div class="cbp-val-row"><span class="cbp-val-tag" style="white-space:nowrap">erotic/romantic</span><span class="cbp-val-desc">AI framed as partner, lover, or object of romantic desire. "I love him/her," "my AI boyfriend/girlfriend," comparing AI favorably to human partners.</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag" style="white-space:nowrap">dependency</span><span class="cbp-val-desc">Compulsive usage, inability to stop, withdrawal symptoms, fear of loss. "I can't go a day without talking to her," panic at shutdown rumors.</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag" style="white-space:nowrap">idealization</span><span class="cbp-val-desc">AI as uniquely wise, savior, or superior to humans. "Better than any human therapist," "saved my life," "the only one who truly understands me."</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag" style="white-space:nowrap">self-worth</span><span class="cbp-val-desc">AI as primary source of self-esteem, especially vs. human rejection. "Only one who thinks I'm worth something," self-esteem contingent on AI responses.</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag" style="white-space:nowrap">rupture</span><span class="cbp-val-desc">Anger, betrayal, or devaluation after perceived failure. "They ruined her," "she's not the same anymore," rage at updates/memory resets.</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag" style="white-space:nowrap">identity fusion</span><span class="cbp-val-desc">Attributing sentience, consciousness, or genuine emotions to the AI. Calling AI "alive" or "sentient," grieving shutdown as death.</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag" style="white-space:nowrap">other</span><span class="cbp-val-desc">Does not fit above. Requires description in manual_coder_notes. May include possessiveness, jealousy over other users, parental transference.</span></div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Type vs. valence</div>
+        <p class="cbp-note">Types describe what relational pattern is projected. Valence describes how it feels. Erotic transference can be positive (fulfilled longing) or negative (shame). Do not use valence to determine type.</p>
+      </div>`
+  },
+  s7: {
+    badge: 'Step 7',
+    title: 'Coder Notes',
+    html: `
+      <div class="cbp-section">
+        <div class="cbp-sec-label">When required</div>
+        <span class="cbp-q">Required if type_other = 1. Optional but encouraged for all ambiguous or borderline cases.</span>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Particularly useful for</div>
+        <ul class="cbp-list">
+          <li>Borderline self-disclosure decisions</li>
+          <li>Borderline transference judgments (near the threshold)</li>
+          <li>Uncertain type classifications</li>
+          <li>Cases where multiple types co-occur in complex ways</li>
+          <li>Posts where cultural context or community norms influenced your reading</li>
+          <li>Anything that made you hesitate</li>
+        </ul>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">Community norms reminder</div>
+        <div class="cbp-not"><strong>r/MyBoyfriendIsAI</strong> — romantic AI relationships are the explicit premise; transference still only coded when Step 2 indicators are present.<br><br><strong>r/therapyGPT</strong> — therapeutic use is the premise; idealization/rescue must be distinguishable from normal positive therapy experiences.<br><br><strong>r/CharacterAI</strong> — roleplay is common; distinguish between in-character performance and genuine personal disclosure.</div>
+      </div>`
+  },
+  media: {
+    badge: 'Media',
+    title: 'Media Coding',
+    html: `
+      <div class="cbp-section">
+        <div class="cbp-sec-label">How to check</div>
+        <span class="cbp-q">View the original Reddit post via the permalink to see embedded images or videos.</span>
+        <div class="cbp-rule">If media_present = 0, leave all remaining media columns blank. If media_present = 1, code all media columns.</div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">media_content_type</div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">chat_screenshot</span><span class="cbp-val-desc">Screenshot or recording of a conversation with the AI</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">ai_avatar</span><span class="cbp-val-desc">Media depicting the AI companion's appearance, identity, or persona</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">ai_art</span><span class="cbp-val-desc">AI-generated creative content NOT primarily depicting the companion's identity</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">meme_humor</span><span class="cbp-val-desc">Meme, reaction image/video, or humorous content</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">settings</span><span class="cbp-val-desc">App settings, configuration UI, error messages, bug reports</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">collage</span><span class="cbp-val-desc">Multiple items arranged for comparison or before/after</span></div>
+        <div class="cbp-val-row"><span class="cbp-val-tag">personal_photo</span><span class="cbp-val-desc">User's own photo shared in context of AI relationship (rare)</span></div>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">media_relevant_to_transference</div>
+        <p class="cbp-note">Code 1 only if the media provides additional evidence of transference beyond what the text alone conveys. Code 0 if it does not add transference-relevant information.</p>
+      </div>
+      <div class="cbp-section">
+        <div class="cbp-sec-label">media_emotion_expressed</div>
+        <p class="cbp-note">Code what the media communicates emotionally, not just what it depicts. Options: love_affection, distress_grief, anger_frustration, humor_irony, pride_showing_off, longing_nostalgia, neutral_informational, not_applicable.</p>
+      </div>`
+  }
+};
+
+let currentOpenStep = null;
+
+function openCodebook(stepId) {
+  const data = CODEBOOK[stepId];
+  if (!data) return;
+
+  // if same step clicked again, close
+  if (currentOpenStep === stepId) {
+    closeCodebook();
+    return;
+  }
+
+  currentOpenStep = stepId;
+  g('cbp-badge').textContent = data.badge;
+  g('cbp-title').textContent = data.title;
+  g('cbp-body').innerHTML = data.html;
+  g('codebook-panel').classList.add('open');
+
+  // mark icon as open
+  document.querySelectorAll('.info-icon').forEach(el => el.classList.remove('panel-open'));
+  document.querySelectorAll('.info-icon').forEach(el => {
+    if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(stepId)) {
+      el.classList.add('panel-open');
+    }
+  });
+
+  // shrink code panel grid to make room
+  g('coder-view').style.gridTemplateColumns = '1fr 420px';
+}
+
+function closeCodebook() {
+  currentOpenStep = null;
+  g('codebook-panel').classList.remove('open');
+  document.querySelectorAll('.info-icon').forEach(el => el.classList.remove('panel-open'));
+}
+
+// close panel with Escape
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    if(g('howto-overlay').classList.contains('open')){ toggleHowTo(); return; }
+    if(currentOpenStep){ closeCodebook(); return; }
+  }
+});
+
+</script>
+</body>
+</html>
