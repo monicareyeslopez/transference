@@ -406,6 +406,57 @@ textarea::placeholder{color:var(--text3)}
 .hl-item-note{color:var(--text2);flex:1;line-height:1.4}
 .hl-item-del{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 2px;line-height:1;flex-shrink:0}
 .hl-item-del:hover{color:var(--red)}
+
+.grid-2col{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* ============ RESPONSIVE / MOBILE ============ */
+@media (max-width:900px){
+  .body-split{grid-template-columns:1fr}
+}
+
+@media (max-width:768px){
+  .body-split{display:flex;flex-direction:column;overflow:hidden}
+  .post-panel{flex:0 0 40%;border-right:none;border-bottom:1px solid var(--border)}
+  .code-panel{flex:1;min-height:0}
+  .post-header{flex-wrap:wrap;row-gap:6px}
+  .post-footer{flex-wrap:wrap;row-gap:8px}
+  .post-footer > div{margin-left:0}
+
+  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 12px;row-gap:8px}
+  .topbar-sep{display:none}
+  .progress-wrap{flex-basis:100%;max-width:none;order:5}
+  .topbar-right{width:100%;flex-wrap:wrap;margin-left:0;row-gap:6px}
+  .jump-wrap{margin-left:0}
+
+  #codebook-panel,#memo-panel{width:100%}
+
+  .code-footer{flex-wrap:wrap;row-gap:6px}
+  .check-grid{grid-template-columns:1fr}
+  .grid-2col{grid-template-columns:1fr}
+  .kbd-modal-body{grid-template-columns:1fr}
+
+  .upload-box{padding:36px 20px}
+  .milestone-card{padding:28px 20px}
+  .ov-grid{grid-template-columns:1fr}
+  .bar-label,.bar-label-left{width:64px}
+
+  #overview-view > div{padding-left:16px;padding-right:16px}
+}
+
+@media (max-width:480px){
+  .done-title{font-size:32px}
+  .done-stats{gap:10px}
+  .done-stat{padding:14px 18px;min-width:96px}
+  .howto-card,.kbd-modal-card,.nsm-card{width:100%}
+}
+
+/* touch targets + no keyboard hints on touch devices */
+@media (hover:none) and (pointer:coarse){
+  .tg-btn{padding:9px 8px}
+  .check-item{padding:9px 8px}
+  .filter-btn{padding:7px 14px}
+  .kh{display:none}
+}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -567,7 +618,7 @@ textarea::placeholder{color:var(--text3)}
         <!-- STEP 5 -->
         <div class="code-section" id="sec-s5">
           <div class="csec-head">Step 5 — metadata <span style="font-size:9px;color:var(--text3)">(all posts)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s5')" title="Open codebook">i</span><div class="hover-tip">Code for every post — age, gender, relationship status, and any alternative tool used.</div></div><button onclick="setAllNotDisclosed()" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Set age, gender and relationship status to not_disclosed">all not disclosed <span class="kh">N</span></button><button onclick="clearStep5()" class="step-clear-btn" style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Clear all step 5 fields">clear</button></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="grid-2col">
             <div class="field">
               <div class="flabel"><span class="fcode">age_range</span></div>
               <select id="age_range">
@@ -660,7 +711,7 @@ textarea::placeholder{color:var(--text3)}
             <button class="btn btn-sm" onclick="applyAiAvatarPreset()" title="Fill ai_generated_avatar / persona shown / no conversation shown" style="margin-top:6px">🖼 AI Avatar Display <span class="kh">Y</span></button>
           </div>
           <div id="media-detail" style="display:none">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+            <div class="grid-2col" style="margin-top:4px">
               <div class="field">
                 <div class="flabel"><span class="fcode">media_type</span></div>
                 <select id="media_type"><option value="">—</option><option>image</option><option>video</option><option>both</option><option>audio</option></select>
