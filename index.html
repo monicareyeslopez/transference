@@ -231,7 +231,10 @@ textarea::placeholder{color:var(--text3)}
 .tts-btn.playing{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent2)}
 .tts-btn.playing:hover{background:var(--accent-bg)}
 .tts-speed{-webkit-appearance:none;appearance:none;width:64px;height:3px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer;accent-color:var(--accent)}
-.tts-speed-label{font-family:var(--mono);font-size:10px;color:var(--text3);width:28px;text-align:left}
+.tts-speed-label{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:4px 8px;cursor:pointer;transition:all .12s}
+.tts-speed-label:hover{background:var(--bg4);color:var(--text)}
+.tts-speed-wrap{display:none;align-items:center;gap:6px}
+.tts-speed-wrap.open{display:flex}
 
 /* HOW TO USE OVERLAY */
 #howto-overlay{position:fixed;inset:0;z-index:10500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s}
@@ -427,6 +430,7 @@ textarea::placeholder{color:var(--text3)}
   .progress-wrap{flex-basis:100%;max-width:none;order:5}
   .topbar-right{width:100%;flex-wrap:wrap;margin-left:0;row-gap:6px}
   .jump-wrap{margin-left:0}
+  .desktop-only{display:none}
 
   #codebook-panel,#memo-panel{width:100%}
 
@@ -512,11 +516,11 @@ textarea::placeholder{color:var(--text3)}
         <button class="btn btn-ghost btn-sm" onclick="jumpTo()">↵</button>
       </div>
       <div class="topbar-sep"></div>
-      <button class="btn btn-ghost btn-sm" id="memo-btn" onclick="toggleMemo()" title="Research memo pad">📝 Memo <span class="kh">O</span></button>
-      <button class="btn btn-ghost btn-sm" onclick="toggleKbdModal()" title="Keyboard shortcuts (`)">⌨ Shortcuts <span class="kh">`</span></button>
+      <button class="btn btn-ghost btn-sm desktop-only" id="memo-btn" onclick="toggleMemo()" title="Research memo pad">📝 Memo <span class="kh">O</span></button>
+      <button class="btn btn-ghost btn-sm desktop-only" onclick="toggleKbdModal()" title="Keyboard shortcuts (`)">⌨ Shortcuts <span class="kh">`</span></button>
       <button class="btn btn-ghost btn-sm" onclick="openNotesSearch()">🔍 Search Notes</button>
       <button class="btn btn-ghost btn-sm" onclick="showOverview()">Overview</button>
-      <button class="btn btn-success btn-sm" onclick="downloadCSV()">↓ Export CSV</button>
+      <button class="btn btn-success btn-sm desktop-only" onclick="downloadCSV()">↓ Export CSV</button>
     </div>
   </header>
 
@@ -537,18 +541,14 @@ textarea::placeholder{color:var(--text3)}
         <button onclick="toggleHowTo()" style="font-family:var(--mono);font-size:11px;background:transparent;border:none;color:var(--text3);cursor:pointer;padding:0;transition:color .15s" onmouseover="this.style.color='var(--accent2)'" onmouseout="this.style.color='var(--text3)'">? how to use</button>
         <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
           <span id="ph-len" style="font-family:var(--mono);font-size:10px;color:var(--text3)"></span>
-          <!-- font size -->
-          <div style="display:flex;align-items:center;gap:0;border:1px solid var(--border2);border-radius:var(--r-sm);overflow:hidden">
-            <button onclick="changeFontSize(-1)" style="background:var(--bg3);border:none;color:var(--text2);padding:4px 9px;cursor:pointer;font-size:12px;border-right:1px solid var(--border2)">A−</button>
-            <span id="font-size-label" style="font-family:var(--mono);font-size:10px;color:var(--text3);padding:0 7px;min-width:28px;text-align:center">13</span>
-            <button onclick="changeFontSize(1)" style="background:var(--bg3);border:none;color:var(--text2);padding:4px 9px;cursor:pointer;font-size:12px;border-left:1px solid var(--border2)">A+</button>
-          </div>
           <!-- tts -->
           <div class="tts-bar">
             <button class="tts-btn" id="tts-btn" onclick="toggleTTS()">▶ Read <span class="kh">P</span></button>
             <button class="tts-btn" id="tts-stop-btn" onclick="stopTTS()" style="display:none">■ Stop <span class="kh">S</span></button>
-            <input type="range" class="tts-speed" id="tts-speed" min="0.6" max="4" step="0.1" value="1.0" oninput="updateTTSSpeed()" title="Reading speed">
-            <span class="tts-speed-label" id="tts-speed-label">1.0×</span>
+            <button class="tts-speed-label" id="tts-speed-label" onclick="toggleSpeedSlider()" title="Reading speed">1.0×</button>
+            <div class="tts-speed-wrap" id="tts-speed-wrap">
+              <input type="range" class="tts-speed" id="tts-speed" min="0.6" max="4" step="0.1" value="1.0" oninput="updateTTSSpeed()" onchange="closeSpeedSlider()" title="Reading speed">
+            </div>
           </div>
         </div>
       </div>
@@ -982,9 +982,6 @@ textarea::placeholder{color:var(--text3)}
           <div class="kbd-section" style="grid-column:auto">Read aloud</div>
           <div class="kbd-row"><span>Play / pause</span><code>P</code></div>
           <div class="kbd-row"><span>Stop</span><code>S</code></div>
-          <div class="kbd-section" style="grid-column:auto">Font size</div>
-          <div class="kbd-row"><span>Increase</span><code>+ or =</code></div>
-          <div class="kbd-row"><span>Decrease</span><code>-</code></div>
         </div>
       </div>
     </div>
@@ -1077,7 +1074,7 @@ const ALT_TOOL_TYPE_MAP={
   'Chai':'roleplay_platform','Janitor AI':'roleplay_platform','SillyTavern':'roleplay_platform','Crushon.AI':'roleplay_platform'
 };
 
-let rows=[],idx=0,currentFilter='all',fontSize=13;
+let rows=[],idx=0,currentFilter='all';
 // Cached counts — updated incrementally to avoid full-array scans on every render
 let _cachedCodedCount = 0;
 let _cachedFlaggedCount = 0;
@@ -1197,7 +1194,7 @@ function saveSession(){
       obj._flag=r._flag||false;
       return obj;
     });
-    localStorage.setItem(LS_KEY,JSON.stringify({coded,idx,fontSize}));
+    localStorage.setItem(LS_KEY,JSON.stringify({coded,idx}));
     setTimeout(()=>setAutosaveStatus('saved'),300);
   }catch(e){setAutosaveStatus('idle');}
 }
@@ -1214,7 +1211,6 @@ function restoreSession(){
       });
     }
     if(session.idx!=null)idx=session.idx;
-    if(session.fontSize){fontSize=session.fontSize;applyFontSize();}
   }catch(e){}
 }
 
@@ -1421,7 +1417,7 @@ function renderRow(){
   updateBranching();
   updateFlagButton();
   g('code-scroll').scrollTop=0;
-  applyFontSize();
+  closeSpeedSlider();
 }
 
 function clearForm(){
@@ -1957,17 +1953,6 @@ function clearStep5(){
   toast('Step 5 cleared');
 }
 
-// ── FONT SIZE ──
-function applyFontSize(){
-  g('post-body').style.fontSize=fontSize+'px';
-  g('font-size-label').textContent=fontSize;
-}
-function changeFontSize(delta){
-  fontSize=Math.min(28,Math.max(10,fontSize+delta));
-  applyFontSize();
-  scheduleAutosave();
-}
-
 // ── OVERVIEW ──
 function showOverview(){g('coder-view').style.display='none';g('overview-view').style.display='flex';renderOverview();}
 function hideOverview(){g('overview-view').style.display='none';g('coder-view').style.display='grid';}
@@ -2127,6 +2112,7 @@ function stopTTS(){
   ttsUtterance=null;
   clearTTSWordHighlight();
   if(g('tts-btn')) updateTTSUI();
+  closeSpeedSlider();
 }
 
 function updateTTSUI(){
@@ -2143,6 +2129,13 @@ function updateTTSUI(){
 }
 
 const TTS_SPEED_KEY = 'transference_tts_speed_v1';
+
+function toggleSpeedSlider(){
+  g('tts-speed-wrap').classList.toggle('open');
+}
+function closeSpeedSlider(){
+  g('tts-speed-wrap').classList.remove('open');
+}
 
 function updateTTSSpeed(){
   const val = parseFloat(g('tts-speed').value).toFixed(1);
@@ -2423,8 +2416,6 @@ document.addEventListener('keydown',e=>{
   if(e.key==='o'||e.key==='O'){toggleMemo();return;}
   if(e.key==='x'||e.key==='X'){applyRomanticScreenshotPreset();return;}
   if(e.key==='y'||e.key==='Y'){applyAiAvatarPreset();return;}
-  if(e.key==='='||e.key==='+'){changeFontSize(1);return;}
-  if(e.key==='-'){changeFontSize(-1);return;}
   if(e.key==='g'||e.key==='G'){e.preventDefault();const ji=g('jump-input');ji.value='';ji.focus();ji.select();return;}
 });
 
