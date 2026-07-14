@@ -1274,14 +1274,24 @@ function gsSetStatus(state){
   if(btn) btn.textContent = state==='off' ? 'Connect Sheets' : 'Reconnect';
 }
 
+// Waiters for gsRequestTokenSilently() — resolved/rejected from the shared token
+// client callback below, separately from the normal "user clicked Connect" flow.
+let gsAuthWaiters=[];
+
 function gsInitTokenClient(){
   if(gsTokenClient||typeof google==='undefined'||!google.accounts)return;
   gsTokenClient=google.accounts.oauth2.initTokenClient({
     client_id:GS_CLIENT_ID,
     scope:GS_SCOPE,
     callback:(resp)=>{
-      if(resp.error){toast('Google sign-in failed: '+resp.error);gsSetStatus('error');return;}
+      const waiters=gsAuthWaiters; gsAuthWaiters=[];
+      if(resp.error){
+        waiters.forEach(w=>w.reject(new Error(resp.error)));
+        if(!waiters.length){toast('Google sign-in failed: '+resp.error);gsSetStatus('error');}
+        return;
+      }
       gsAccessToken=resp.access_token;
+      if(waiters.length){ waiters.forEach(w=>w.resolve()); return; }
       gsLoadHeaderAndIndex().then(()=>{
         gsFlushQueue();
         if(gsPendingLoad){gsPendingLoad=false;loadFromSheetsData();}
@@ -1294,6 +1304,27 @@ function gsConnect(){
   gsInitTokenClient();
   if(!gsTokenClient){toast('Still loading Google sign-in — try again in a second');return;}
   gsTokenClient.requestAccessToken({prompt:gsAccessToken?'':'consent'});
+}
+
+// Silently attempt to refresh the access token (no visible prompt) — used to
+// recover automatically from ordinary token expiry (Google's implicit-flow tokens
+// last ~1hr and this app never refreshes them proactively). Backgrounding the tab
+// on mobile — switching apps, locking the phone — is exactly when this expiry gets
+// hit mid-session, since wall-clock time keeps moving even while the tab is
+// suspended. Times out rather than hanging if the browser blocks the silent
+// request (e.g. a popup blocker), falling back to the existing error/reconnect path.
+function gsRequestTokenSilently(){
+  gsInitTokenClient();
+  if(!gsTokenClient) return Promise.reject(new Error('token client not ready'));
+  return new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>{
+      const i=gsAuthWaiters.indexOf(waiter); if(i>=0)gsAuthWaiters.splice(i,1);
+      reject(new Error('silent refresh timed out'));
+    },6000);
+    const waiter={resolve:()=>{clearTimeout(timer);resolve();},reject:(e)=>{clearTimeout(timer);reject(e);}};
+    gsAuthWaiters.push(waiter);
+    gsTokenClient.requestAccessToken({prompt:''});
+  });
 }
 
 async function gsApiFetch(url,opts={}){
@@ -1366,34 +1397,46 @@ function gsRowToValues(row){
   return values;
 }
 
+async function gsPushRowOnce(row){
+  gsSetStatus('syncing');
+  const values=gsRowToValues(row);
+  const maxIdx=Math.max(...Object.values(gsHeaderMap));
+  let rowNum=gsPermalinkToRow[row.permalink];
+  if(!rowNum){
+    const appendRange=encodeURIComponent(GS_TAB+'!A1');
+    const resp=await gsApiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${GS_SPREADSHEET_ID}/values/${appendRange}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[values]})
+    });
+    const updatedRange=resp.updates&&resp.updates.updatedRange;
+    const m=updatedRange&&updatedRange.match(/!(?:[A-Z]+)(\d+)/);
+    if(m)gsPermalinkToRow[row.permalink]=parseInt(m[1]);
+  }else{
+    const range=GS_TAB+'!A'+rowNum+':'+colToLetter(maxIdx)+rowNum;
+    await gsApiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${GS_SPREADSHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`,{
+      method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({range,values:[values]})
+    });
+  }
+  gsQueue=gsQueue.filter(r=>r.permalink!==row.permalink);
+  try{localStorage.setItem(GS_QUEUE_KEY,JSON.stringify(gsQueue));}catch(e){}
+  gsSetStatus('connected');
+}
+
 async function gsPushRow(row){
   if(!row||!row.permalink)return;
   if(!gsAccessToken||!gsHeaderMap||!gsPermalinkToRow){gsQueueRow(row);return;}
   try{
-    gsSetStatus('syncing');
-    const values=gsRowToValues(row);
-    const maxIdx=Math.max(...Object.values(gsHeaderMap));
-    let rowNum=gsPermalinkToRow[row.permalink];
-    if(!rowNum){
-      const appendRange=encodeURIComponent(GS_TAB+'!A1');
-      const resp=await gsApiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${GS_SPREADSHEET_ID}/values/${appendRange}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,{
-        method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[values]})
-      });
-      const updatedRange=resp.updates&&resp.updates.updatedRange;
-      const m=updatedRange&&updatedRange.match(/!(?:[A-Z]+)(\d+)/);
-      if(m)gsPermalinkToRow[row.permalink]=parseInt(m[1]);
-    }else{
-      const range=GS_TAB+'!A'+rowNum+':'+colToLetter(maxIdx)+rowNum;
-      await gsApiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${GS_SPREADSHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`,{
-        method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({range,values:[values]})
-      });
-    }
-    gsQueue=gsQueue.filter(r=>r.permalink!==row.permalink);
-    try{localStorage.setItem(GS_QUEUE_KEY,JSON.stringify(gsQueue));}catch(e){}
-    gsSetStatus('connected');
+    await gsPushRowOnce(row);
   }catch(e){
     console.error(e);
-    gsQueueRow(row);
+    // Most likely cause: the access token quietly expired (~1hr lifespan, never
+    // refreshed proactively) — try one silent re-auth and retry before giving up.
+    try{
+      await gsRequestTokenSilently();
+      await gsPushRowOnce(row);
+    }catch(e2){
+      console.error(e2);
+      gsQueueRow(row);
+    }
   }
 }
 
