@@ -233,10 +233,10 @@ textarea::placeholder{color:var(--text3)}
 .tts-btn:hover{background:var(--bg4);color:var(--text)}
 .tts-btn.playing{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent2)}
 .tts-btn.playing:hover{background:var(--accent-bg)}
-.tts-speed{-webkit-appearance:none;appearance:none;width:64px;height:3px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer;accent-color:var(--accent)}
+.tts-speed{-webkit-appearance:none;appearance:none;flex:1;width:100%;height:3px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer;accent-color:var(--accent)}
 .tts-speed-label{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:4px 8px;cursor:pointer;transition:all .12s}
 .tts-speed-label:hover{background:var(--bg4);color:var(--text)}
-.tts-speed-wrap{display:none;align-items:center;gap:6px}
+.tts-speed-wrap{display:none;align-items:center;gap:10px;width:100%;padding:8px 20px;border-top:1px solid var(--border);flex-shrink:0;box-sizing:border-box}
 .tts-speed-wrap.open{display:flex}
 
 /* HOW TO USE OVERLAY */
@@ -572,11 +572,14 @@ textarea::placeholder{color:var(--text3)}
             <button class="tts-btn" id="tts-btn" onclick="toggleTTS()">▶ Read <span class="kh">P</span></button>
             <button class="tts-btn" id="tts-stop-btn" onclick="stopTTS()" style="display:none">■ Stop <span class="kh">S</span></button>
             <button class="tts-speed-label" id="tts-speed-label" onclick="toggleSpeedSlider()" title="Reading speed">1.0×</button>
-            <div class="tts-speed-wrap" id="tts-speed-wrap">
-              <input type="range" class="tts-speed" id="tts-speed" min="0.6" max="4" step="0.1" value="1.0" oninput="updateTTSSpeed()" onchange="closeSpeedSlider()" title="Reading speed">
-            </div>
           </div>
         </div>
+      </div>
+      <!-- full-width reading-speed slider: hidden until the speed chip is tapped, closes itself once a value is picked -->
+      <div class="tts-speed-wrap" id="tts-speed-wrap">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">0.6×</span>
+        <input type="range" class="tts-speed" id="tts-speed" min="0.6" max="4" step="0.1" value="1.0" oninput="updateTTSSpeed()" onchange="closeSpeedSlider()" title="Reading speed">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">4×</span>
       </div>
     </div>
 
@@ -1565,6 +1568,12 @@ function updateStepStates(){
   const tvSet  = tv !== '';
   const piSet  = pi !== '';
   const mpSet  = mp !== '';
+  const metaDone = (()=>{
+    const age = (g('age_range')||{}).value||'';
+    const gen = (g('gender')||{}).value||'';
+    const rel = (g('relationship_status')||{}).value||'';
+    return age!==''&&gen!==''&&rel!=='';
+  })();
 
   // Step 1 — always active first; done once set
   setState('sec-s1', sdSet ? 'done' : 'active');
@@ -1575,8 +1584,11 @@ function updateStepStates(){
   else if(!trSet)    setState('sec-s2', 'active');
   else               setState('sec-s2', 'done');
 
-  // Step 3 — na if SD=0 or TR=0; waiting until TR set; active if TR=1 and not set; done if set
-  if(!sdSet||!trSet) setState('sec-s3', 'waiting');
+  // Step 3 — na as soon as SD=0 (transference is auto-0, valence never applies); otherwise
+  // waiting until TR set, na if TR=0, active/done once TR=1
+  if(!sdSet)         setState('sec-s3', 'waiting');
+  else if(!sdYes)    setState('sec-s3', 'na');
+  else if(!trSet)    setState('sec-s3', 'waiting');
   else if(!trYes)    setState('sec-s3', 'na');
   else if(!tvSet)    setState('sec-s3', 'active');
   else               setState('sec-s3', 'done');
@@ -1588,15 +1600,20 @@ function updateStepStates(){
   else if(sdYes && trSet && !piSet) setState('sec-s4', 'active');
   else                              setState('sec-s4', 'done');
 
-  // Step 5 — always reachable once SD set
-  if(!sdSet) setState('sec-s5', 'waiting');
-  else       setState('sec-s5', 'active');  // metadata can always be edited
+  // Step 5 — reachable once SD set; done once age/gender/relationship are all filled in
+  // (previously stayed 'active' forever, which stalled auto-scroll before it ever reached
+  // step 6/7/media — the scanner stops at the first 'active' section in document order)
+  if(!sdSet)        setState('sec-s5', 'waiting');
+  else if(metaDone) setState('sec-s5', 'done');
+  else              setState('sec-s5', 'active');
 
-  // Step 6 — na if TR=0 or SD=0; waiting if TR not set; active if TR=1 and no types checked; done if any type checked
+  // Step 6 — na as soon as SD=0; otherwise waiting until TR set, na if TR=0, active/done once TR=1
   const anyType = ['type_erotic_romantic','type_dependency_separation','type_idealization_rescue',
     'type_selfworth_validation','type_rupture_devaluation','type_identity_fusion','type_other']
     .some(f => { const el=g(f); return el && el.checked; });
-  if(!sdSet||!trSet)  setState('sec-s6', 'waiting');
+  if(!sdSet)          setState('sec-s6', 'waiting');
+  else if(!sdYes)     setState('sec-s6', 'na');
+  else if(!trSet)     setState('sec-s6', 'waiting');
   else if(!trYes)     setState('sec-s6', 'na');
   else if(!anyType)   setState('sec-s6', 'active');
   else                setState('sec-s6', 'done');
@@ -1613,12 +1630,6 @@ function updateStepStates(){
   else           setState('sec-media', 'active');
 
   // Glow when all required steps for this branch are complete
-  const metaDone = (()=>{
-    const age = (g('age_range')||{}).value||'';
-    const gen = (g('gender')||{}).value||'';
-    const rel = (g('relationship_status')||{}).value||'';
-    return age!==''&&gen!==''&&rel!=='';
-  })();
   let complete = false;
   if(sdSet){
     if(!sdYes){
@@ -1740,9 +1751,16 @@ function scrollToActiveSection(){
   const el = g(active);
   const scroll = g('code-scroll');
   if(!el || !scroll) return;
-  const elTop = el.offsetTop;
+  // el.offsetTop is relative to el's offsetParent, which is <body> here (no ancestor
+  // is positioned) — not relative to code-scroll's own content box. That's a no-op
+  // difference when code-scroll starts at the top of the page, but once code-panel is
+  // no longer flush with the page top (e.g. it sits below post-panel in the mobile
+  // stacked layout), offsetTop is off by however far code-scroll itself has been pushed
+  // down, so the scroll target lands hundreds of pixels away. Measure the element's
+  // position relative to the scroll container directly instead.
   const scrollTop = scroll.scrollTop;
   const scrollH = scroll.clientHeight;
+  const elTop = el.getBoundingClientRect().top - scroll.getBoundingClientRect().top + scrollTop;
   // only scroll if not already in view
   if(elTop < scrollTop || elTop + el.offsetHeight > scrollTop + scrollH - 20){
     scroll.scrollTo({ top: Math.max(0, elTop - 16), behavior: 'smooth' });
