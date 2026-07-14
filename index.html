@@ -1854,9 +1854,15 @@ function collectRow(){
 }
 
 function saveAndNext(skip){
+  // Cancel any pending debounced autosave first — it targets the CURRENT idx, and if
+  // it fired after navigate() below changed idx, it would push the wrong row (or the
+  // just-saved row would never reach Sheets at all). Push explicitly and immediately
+  // instead of relying on the debounce timer to have already fired in time.
+  clearTimeout(autosaveTimer);
   if(!skip){
     rows[idx]=collectRow();
     saveSession();
+    gsPushRow(rows[idx]);
     sessionSaveCount++;
     rebuildCounts();
     const coded=_cachedCodedCount;
@@ -1872,6 +1878,7 @@ function navigate(dir){
   stopTTS();
   const next=idx+dir;
   if(next<0||next>=rows.length)return;
+  clearTimeout(autosaveTimer);
   idx=next;
   renderRow();
   updateTopbar();
@@ -1882,6 +1889,7 @@ function jumpTo(){
   stopTTS();
   const n=parseInt(g('jump-input').value);
   if(isNaN(n)||n<1||n>rows.length)return;
+  clearTimeout(autosaveTimer);
   idx=n-1;renderRow();updateTopbar();g('jump-input').value='';
 }
 
@@ -1906,6 +1914,7 @@ function jumpUncoded(dir){
   while(i >= 0 && i < rows.length){
     if(!isCoded(rows[i])){
       stopTTS();
+      clearTimeout(autosaveTimer);
       idx = i;
       renderRow();
       updateTopbar();
