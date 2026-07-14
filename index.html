@@ -1300,7 +1300,7 @@ async function gsPushRow(row){
     let rowNum=gsPermalinkToRow[row.permalink];
     if(!rowNum){
       const appendRange=encodeURIComponent(GS_TAB+'!A1');
-      const resp=await gsApiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${GS_SPREADSHEET_ID}/values/${appendRange}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,{
+      const resp=await gsApiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${GS_SPREADSHEET_ID}/values/${appendRange}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,{
         method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({values:[values]})
       });
       const updatedRange=resp.updates&&resp.updates.updatedRange;
@@ -1308,7 +1308,7 @@ async function gsPushRow(row){
       if(m)gsPermalinkToRow[row.permalink]=parseInt(m[1]);
     }else{
       const range=GS_TAB+'!A'+rowNum+':'+colToLetter(maxIdx)+rowNum;
-      await gsApiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${GS_SPREADSHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,{
+      await gsApiFetch(`https://sheets.googleapis.com/v4/spreadsheets/${GS_SPREADSHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`,{
         method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({range,values:[values]})
       });
     }
