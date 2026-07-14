@@ -41,6 +41,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .progress-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
 .progress-label{font-family:var(--mono);font-size:11px;color:var(--text3);white-space:nowrap}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+/* wrapper divs exist for mobile grouping only — on desktop they're transparent to the flex layout */
+.topbar-row-main,.topbar-extra{display:contents}
+.topbar-nav-mobile,.topbar-toggle{display:none}
 
 /* BODY */
 .body-split{display:grid;grid-template-columns:1fr 420px;flex:1;overflow:hidden}
@@ -427,14 +430,21 @@ textarea::placeholder{color:var(--text3)}
 
   .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 12px;row-gap:8px}
   .topbar-sep{display:none}
-  .progress-wrap{flex-basis:100%;max-width:none;order:5}
+  .progress-wrap{max-width:none}
+  .desktop-only{display:none}
+
+  .topbar-row-main{display:flex;align-items:center;width:100%;gap:8px}
+  .topbar-toggle{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;line-height:1;cursor:pointer;margin-left:auto;flex-shrink:0;transition:transform .2s}
+  .topbar.expanded .topbar-toggle{transform:rotate(180deg)}
+  .topbar-nav-mobile{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+  .topbar-extra{display:none;flex-wrap:wrap;align-items:center;width:100%;gap:8px}
+  .topbar.expanded .topbar-extra{display:flex}
   .topbar-right{width:100%;flex-wrap:wrap;margin-left:0;row-gap:6px}
   .jump-wrap{margin-left:0}
-  .desktop-only{display:none}
 
   #codebook-panel,#memo-panel{width:100%}
 
-  .code-footer{flex-wrap:wrap;row-gap:6px}
+  .code-footer{display:none}
   .check-grid{grid-template-columns:1fr}
   .grid-2col{grid-template-columns:1fr}
   .kbd-modal-body{grid-template-columns:1fr}
@@ -485,42 +495,58 @@ textarea::placeholder{color:var(--text3)}
 <div id="app" style="display:none;height:100vh;flex-direction:column">
 
   <!-- TOPBAR -->
-  <header class="topbar">
-    <span class="topbar-logo">TRANSFERENCE CODER</span>
-    <div class="topbar-sep"></div>
-    <div class="progress-wrap">
-      <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
-      <span class="progress-label" id="prog-label">0 / 0</span>
+  <header class="topbar" id="topbar">
+    <div class="topbar-row-main">
+      <span class="topbar-logo">TRANSFERENCE CODER</span>
+      <div class="topbar-sep"></div>
+      <div class="progress-wrap">
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+        <span class="progress-label" id="prog-label">0 / 0</span>
+      </div>
+      <button class="topbar-toggle" id="topbar-toggle-btn" onclick="toggleTopbarExpand()" title="Show more">▾</button>
     </div>
-    <div class="topbar-sep"></div>
-    <span id="coded-count" style="font-family:var(--mono);font-size:11px;color:var(--green)">0 coded</span>
-    <span id="flag-count" style="font-family:var(--mono);font-size:11px;color:var(--amber)"></span>
-    <span class="streak-badge" id="streak-badge">🔥 <span id="streak-num">0</span></span>
-    <div class="topbar-sep"></div>
-    <span id="session-timer" style="font-family:var(--mono);font-size:11px;color:var(--text3)" title="Session time">⏱ 0:00</span>
-    <div class="topbar-sep"></div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <div class="autosave-dot" id="autosave-dot" title="Autosave status"></div>
-      <span id="autosave-label" style="font-family:var(--mono);font-size:10px;color:var(--text3)">autosave</span>
+
+    <!-- mobile-only nav: kept out of the code-panel footer so it's never hidden behind the browser's bottom toolbar -->
+    <div class="topbar-nav-mobile">
+      <button class="btn btn-ghost btn-sm" onclick="navigate(-1)" title="Previous">← Prev</button>
+      <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
+      <button class="btn btn-skip btn-sm" onclick="saveAndNext(true)" title="Skip without saving">Skip</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
+      <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(-1)" title="Previous uncoded">↑ uncoded</button>
+      <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(1)" title="Next uncoded">↓ uncoded</button>
     </div>
-    <div class="topbar-sep"></div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <div class="autosave-dot" id="gsheets-dot" title="Google Sheets sync status"></div>
-      <span id="gsheets-label" style="font-family:var(--mono);font-size:10px;color:var(--text3)">Sheets: off</span>
-      <button class="btn btn-ghost btn-sm" id="gsheets-btn" onclick="gsConnect()" title="Connect to Google Sheets">Connect Sheets</button>
-    </div>
-    <div class="topbar-right">
-      <div style="display:flex;align-items:center;gap:5px;margin-right:4px">
-        <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">go to</span>
-        <input type="number" class="jump-input" id="jump-input" min="1" placeholder="#" onkeydown="if(event.key==='Enter')jumpTo()" title="Jump to post number">
-        <button class="btn btn-ghost btn-sm" onclick="jumpTo()">↵</button>
+
+    <div class="topbar-extra" id="topbar-extra">
+      <div class="topbar-sep"></div>
+      <span id="coded-count" style="font-family:var(--mono);font-size:11px;color:var(--green)">0 coded</span>
+      <span id="flag-count" style="font-family:var(--mono);font-size:11px;color:var(--amber)"></span>
+      <span class="streak-badge" id="streak-badge">🔥 <span id="streak-num">0</span></span>
+      <div class="topbar-sep"></div>
+      <span id="session-timer" style="font-family:var(--mono);font-size:11px;color:var(--text3)" title="Session time">⏱ 0:00</span>
+      <div class="topbar-sep"></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="autosave-dot" id="autosave-dot" title="Autosave status"></div>
+        <span id="autosave-label" style="font-family:var(--mono);font-size:10px;color:var(--text3)">autosave</span>
       </div>
       <div class="topbar-sep"></div>
-      <button class="btn btn-ghost btn-sm desktop-only" id="memo-btn" onclick="toggleMemo()" title="Research memo pad">📝 Memo <span class="kh">O</span></button>
-      <button class="btn btn-ghost btn-sm desktop-only" onclick="toggleKbdModal()" title="Keyboard shortcuts (`)">⌨ Shortcuts <span class="kh">`</span></button>
-      <button class="btn btn-ghost btn-sm" onclick="openNotesSearch()">🔍 Search Notes</button>
-      <button class="btn btn-ghost btn-sm" onclick="showOverview()">Overview</button>
-      <button class="btn btn-success btn-sm desktop-only" onclick="downloadCSV()">↓ Export CSV</button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <div class="autosave-dot" id="gsheets-dot" title="Google Sheets sync status"></div>
+        <span id="gsheets-label" style="font-family:var(--mono);font-size:10px;color:var(--text3)">Sheets: off</span>
+        <button class="btn btn-ghost btn-sm" id="gsheets-btn" onclick="gsConnect()" title="Connect to Google Sheets">Connect Sheets</button>
+      </div>
+      <div class="topbar-right">
+        <div style="display:flex;align-items:center;gap:5px;margin-right:4px">
+          <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">go to</span>
+          <input type="number" class="jump-input" id="jump-input" min="1" placeholder="#" onkeydown="if(event.key==='Enter')jumpTo()" title="Jump to post number">
+          <button class="btn btn-ghost btn-sm" onclick="jumpTo()">↵</button>
+        </div>
+        <div class="topbar-sep"></div>
+        <button class="btn btn-ghost btn-sm desktop-only" id="memo-btn" onclick="toggleMemo()" title="Research memo pad">📝 Memo <span class="kh">O</span></button>
+        <button class="btn btn-ghost btn-sm desktop-only" onclick="toggleKbdModal()" title="Keyboard shortcuts (`)">⌨ Shortcuts <span class="kh">`</span></button>
+        <button class="btn btn-ghost btn-sm" onclick="openNotesSearch()">🔍 Search Notes</button>
+        <button class="btn btn-ghost btn-sm" onclick="showOverview()">Overview</button>
+        <button class="btn btn-success btn-sm desktop-only" onclick="downloadCSV()">↓ Export CSV</button>
+      </div>
     </div>
   </header>
 
@@ -2166,6 +2192,13 @@ g('howto-overlay').addEventListener('click', e => {
   if(e.target === g('howto-overlay')) toggleHowTo();
 });
 // close with Escape (add to existing keydown listener separately handled below)
+
+// ── TOPBAR (mobile collapsible extra info) ──
+function toggleTopbarExpand(){
+  const bar = g('topbar');
+  const expanded = bar.classList.toggle('expanded');
+  g('topbar-toggle-btn').title = expanded ? 'Show less' : 'Show more';
+}
 
 // ── MEMO PAD ──
 const MEMO_KEY = 'transference_memo_v1';
