@@ -18,7 +18,12 @@
   --r:8px;--r-sm:5px;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.6;overflow:hidden}
+/* overflow:hidden alone doesn't reliably stop iOS Safari from letting the page itself
+   get nudged/bounced by touch, especially with nested scrollable regions (code-scroll)
+   inside — position:fixed on html/body is the standard belt-and-suspenders fix so the
+   fixed header can never be dragged out of view with nothing left to tap to bring it back */
+html{height:100%;overflow:hidden}
+body{position:fixed;inset:0;width:100%;height:100%;font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;overflow:hidden}
 
 /* UPLOAD */
 #upload-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:24px;padding:40px}
@@ -33,7 +38,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 #app{height:100vh;flex-direction:column}
 
 /* TOPBAR */
-.topbar{height:48px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
+.topbar{position:sticky;top:0;z-index:600;height:48px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
 .topbar-logo{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--accent2);letter-spacing:.06em}
 .topbar-sep{width:1px;height:18px;background:var(--border2)}
 .progress-wrap{flex:1;max-width:320px;display:flex;align-items:center;gap:10px}
@@ -514,6 +519,7 @@ textarea::placeholder{color:var(--text3)}
       <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
       <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(-1)" title="Previous uncoded">↑ uncoded</button>
       <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(1)" title="Next uncoded">↓ uncoded</button>
+      <button class="btn btn-success btn-sm" onclick="downloadCSV()" title="Export CSV">↓ Export CSV</button>
     </div>
 
     <div class="topbar-extra" id="topbar-extra">
@@ -1421,11 +1427,18 @@ async function gsPushRowOnce(row){
   gsSetStatus('connected');
 }
 
+// Tracks whether the last failure was already surfaced to the user, so a run of
+// repeated failures (e.g. every debounced autosave while genuinely broken) doesn't
+// spam a toast on every single attempt — only the first failure after a working
+// state gets one, since that message is the only diagnostic the user can see.
+let gsLastErrorToasted=false;
+
 async function gsPushRow(row){
   if(!row||!row.permalink)return;
   if(!gsAccessToken||!gsHeaderMap||!gsPermalinkToRow){gsQueueRow(row);return;}
   try{
     await gsPushRowOnce(row);
+    gsLastErrorToasted=false;
   }catch(e){
     console.error(e);
     // Most likely cause: the access token quietly expired (~1hr lifespan, never
@@ -1433,9 +1446,14 @@ async function gsPushRow(row){
     try{
       await gsRequestTokenSilently();
       await gsPushRowOnce(row);
+      gsLastErrorToasted=false;
     }catch(e2){
       console.error(e2);
       gsQueueRow(row);
+      if(!gsLastErrorToasted){
+        gsLastErrorToasted=true;
+        toast('Sheets sync error: '+e2.message);
+      }
     }
   }
 }
