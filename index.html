@@ -1583,8 +1583,8 @@ function setTg(field,val,prefix){
   g(field).value=val;
   updateBranching();
   scheduleAutosave();
-  // scroll to media detail if media present
-  if(field==='media_present'&&val==='1'){
+  // scroll to media detail if media present (desktop only)
+  if(field==='media_present'&&val==='1'&&isDesktopView()){
     setTimeout(()=>g('code-scroll').scrollTo({top:g('code-scroll').scrollHeight,behavior:'smooth'}),120);
   }
 }
@@ -1810,6 +1810,7 @@ function hasConsistencyIssues(row){
 // ── AUTO-SCROLL ──
 let lastActiveSection = null;
 function scrollToActiveSection(){
+  if(!isDesktopView()) return;
   const sections = ['sec-s1','sec-s2','sec-s3','sec-s4','sec-s5','sec-s6','sec-s7','sec-media'];
   // find first active section
   const active = sections.find(id => {
