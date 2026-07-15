@@ -751,6 +751,7 @@ textarea::placeholder{color:var(--text3)}
             <input type="hidden" id="media_present">
             <button class="btn btn-sm" onclick="applyRomanticScreenshotPreset()" title="Fill chat_screenshot / love_affection / romantic_sexual / relevant=yes / intimacy_closeness" style="margin-top:6px">💗 Romantic Screenshot <span class="kh">X</span></button>
             <button class="btn btn-sm" onclick="applyAiAvatarPreset()" title="Fill ai_generated_avatar / persona shown / no conversation shown" style="margin-top:6px">🖼 AI Avatar Display <span class="kh">Y</span></button>
+            <button class="btn btn-sm" onclick="applyLoveSongPreset()" title="Fill audio / ai_generated_art / love_affection / no persona or conversation shown / relevant=yes / intimacy_closeness" style="margin-top:6px">🎵 Love Song <span class="kh">L</span></button>
           </div>
           <div id="media-detail" style="display:none">
             <div class="grid-2col" style="margin-top:4px">
@@ -1009,6 +1010,7 @@ textarea::placeholder{color:var(--text3)}
           <div class="kbd-row"><span>absent</span><code>*</code></div>
           <div class="kbd-row"><span>Romantic Screenshot preset</span><code>X</code></div>
           <div class="kbd-row"><span>AI Avatar Display preset</span><code>Y</code></div>
+          <div class="kbd-row"><span>Love Song preset</span><code>L</code></div>
           <div class="kbd-section" style="grid-column:auto">Gender</div>
           <div class="kbd-row"><span>female</span><code>F</code></div>
           <div class="kbd-row"><span>male</span><code>M</code></div>
@@ -1883,6 +1885,27 @@ function applyAiAvatarPreset(){
   updateWarningBanner();
 }
 
+// ── PRESET: Love Song ──
+// One-key fill for the recurring pattern: an AI-generated love song (audio),
+// not showing the AI's persona or a conversation, expressing love/affection
+// and relevant to transference via an intimacy/closeness dynamic.
+function applyLoveSongPreset(){
+  setTg('media_present','1','mp');
+  showMediaDetail(true,false);
+  g('media_type').value='audio';
+  g('media_content_type').value='ai_generated_art';
+  g('media_emotion_expressed').value='love_affection';
+  g('media_shows_ai_persona').value='0';
+  g('media_shows_conversation').value='0';
+  g('media_conversation_topic').value='';
+  toggleConvoTopic();
+  g('media_relevant_to_transference').value='1';
+  toggleMediaDynamic();
+  g('media_user_ai_dynamic').value='intimacy_closeness';
+  scheduleAutosave();
+  updateWarningBanner();
+}
+
 // ── COLLECT ROW ──
 function collectRow(){
   const sd=g('self_disclosure').value;
@@ -2568,6 +2591,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='o'||e.key==='O'){toggleMemo();return;}
   if(e.key==='x'||e.key==='X'){applyRomanticScreenshotPreset();return;}
   if(e.key==='y'||e.key==='Y'){applyAiAvatarPreset();return;}
+  if(e.key==='l'||e.key==='L'){applyLoveSongPreset();return;}
   if(e.key==='g'||e.key==='G'){e.preventDefault();const ji=g('jump-input');ji.value='';ji.focus();ji.select();return;}
   if((e.key==='='||e.key==='+'||e.key==='-')&&isDesktopView()){e.preventDefault();changeFontSize(e.key==='-'?-1:1);return;}
 });
