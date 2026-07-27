@@ -452,11 +452,14 @@ textarea::placeholder{color:var(--text3)}
   .topbar-toggle{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;line-height:1;cursor:pointer;flex-shrink:0;transition:transform .2s}
   .topbar.expanded .topbar-toggle{transform:rotate(180deg)}
 
-  /* always-visible mini nav (Clear/Skip/Save & Next) sits right below the single line;
-     the rest of the day-to-day controls (Prev, Reddit, Read) live in the persistent
-     footer at the bottom instead, and everything else collapses behind the toggle */
+  /* always-visible mini nav (Clear/Skip/Read) sits right below the single line;
+     the rest of the day-to-day controls (Prev, Reddit link, Save & Next) live in the
+     persistent footer at the bottom instead, and everything else collapses behind the toggle */
   .topbar-nav-mobile{display:flex;gap:6px;width:100%}
   .topbar-nav-mobile .btn{flex:1;justify-content:center}
+  /* emoji-only buttons (header Read, footer Prev/link) don't need as much width as a
+     labeled button — bump the glyph size instead so they stay an easy tap target */
+  .emoji-btn{font-size:18px!important;flex:0 0 auto!important;padding:10px 16px!important}
   .topbar-extra{display:none;flex-wrap:wrap;align-items:center;width:100%;gap:8px}
   .topbar.expanded .topbar-extra{display:flex}
   .topbar-right{width:100%;flex-wrap:wrap;margin-left:0;row-gap:6px}
@@ -632,7 +635,7 @@ textarea::placeholder{color:var(--text3)}
     <div class="topbar-nav-mobile">
       <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
       <button class="btn btn-skip btn-sm" onclick="saveAndNext(true)" title="Skip without saving">Skip</button>
-      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
+      <button class="btn btn-ghost btn-sm tts-btn emoji-btn" id="m-tts-btn" onclick="toggleTTS()" title="Read post aloud">▶</button>
     </div>
 
     <div class="topbar-extra" id="topbar-extra">
@@ -988,13 +991,13 @@ textarea::placeholder{color:var(--text3)}
       </div>
     </div><!-- end code-panel -->
 
-    <!-- mobile-only persistent footer: always present regardless of scroll/step position -->
+    <!-- mobile-only persistent footer: always present regardless of scroll/step position.
+         Clear lives in the header nav now (topbar-nav-mobile) and Read moved up there too,
+         so the footer is just prev / reddit link / save&next. -->
     <div class="mobile-footer">
-      <button class="btn btn-ghost btn-sm" onclick="navigate(-1)" title="Previous post">◀</button>
-      <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
-      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
-      <a href="#" class="btn btn-ghost btn-sm" id="m-reddit-link-footer" onclick="openRedditPeek(event)" title="Open on Reddit">↗</a>
-      <button class="btn btn-ghost btn-sm tts-btn" id="m-tts-btn" onclick="toggleTTS()" title="Read post aloud">▶ Read</button>
+      <button class="btn btn-ghost btn-sm emoji-btn" onclick="navigate(-1)" title="Previous post">👈</button>
+      <a href="#" class="btn btn-ghost btn-sm emoji-btn" id="m-reddit-link-footer" onclick="openRedditPeek(event)" title="Open on Reddit">🔗</a>
+      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">💾✅👉</button>
     </div>
   </div><!-- end body-split -->
 
@@ -2657,7 +2660,7 @@ function updateTTSUI(){
   else if(paused){ label='▶ Resume'; playing=true; stop.style.display=''; }
   else{ label='▶ Read'; playing=false; stop.style.display='none'; }
   btn.textContent=label; btn.classList.toggle('playing',playing);
-  if(mBtn){ mBtn.textContent=label; mBtn.classList.toggle('playing',playing); }
+  if(mBtn){ mBtn.textContent = ttsSpeaking ? '⏸' : '▶'; mBtn.classList.toggle('playing',playing); }
 }
 
 const TTS_SPEED_KEY = 'transference_tts_speed_v1';
