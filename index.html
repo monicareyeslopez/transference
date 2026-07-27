@@ -48,7 +48,10 @@ body{position:fixed;inset:0;width:100%;height:100%;font-family:var(--sans);backg
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 /* wrapper divs exist for mobile grouping only — on desktop they're transparent to the flex layout */
 .topbar-row-main,.topbar-extra{display:contents}
-.topbar-nav-mobile,.topbar-toggle{display:none}
+.topbar-nav-mobile,.topbar-toggle,.mobile-step-divider,.mobile-step-arrow,.mobile-footer,#m-warning-bar,#m-warning-overlay{display:none}
+/* utility classes that must always win regardless of what other display-setting
+   classes (.tg, .btn, .uncoded-badge...) also sit on the same element */
+.mobile-only-inline,.mobile-only-flex{display:none!important}
 
 /* BODY */
 .body-split{display:grid;grid-template-columns:1fr 420px;flex:1;overflow:hidden}
@@ -188,6 +191,7 @@ textarea::placeholder{color:var(--text3)}
 .btn-danger:hover{background:var(--red-bg)}
 .btn-skip{background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)}
 .btn-skip:hover{background:rgba(245,166,35,.18)}
+.preset-btn-row{display:flex;flex-direction:column;gap:6px;margin-top:6px}
 
 /* JUMP */
 .jump-wrap{display:flex;align-items:center;gap:6px;margin-left:auto}
@@ -239,11 +243,8 @@ textarea::placeholder{color:var(--text3)}
 .tts-btn:hover{background:var(--bg4);color:var(--text)}
 .tts-btn.playing{background:var(--accent-bg);border-color:var(--accent-border);color:var(--accent2)}
 .tts-btn.playing:hover{background:var(--accent-bg)}
-.tts-speed{-webkit-appearance:none;appearance:none;flex:1;width:100%;height:3px;border-radius:2px;background:var(--bg4);outline:none;cursor:pointer;accent-color:var(--accent)}
-.tts-speed-label{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:4px 8px;cursor:pointer;transition:all .12s}
-.tts-speed-label:hover{background:var(--bg4);color:var(--text)}
-.tts-speed-wrap{display:none;align-items:center;gap:10px;width:100%;padding:8px 20px;border-top:1px solid var(--border);flex-shrink:0;box-sizing:border-box}
-.tts-speed-wrap.open{display:flex}
+.tts-speed-select{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);padding:4px 6px;cursor:pointer;outline:none}
+.tts-speed-select:focus{border-color:var(--accent)}
 
 /* HOW TO USE OVERLAY */
 #howto-overlay{position:fixed;inset:0;z-index:10500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0);pointer-events:none;transition:background .25s}
@@ -428,31 +429,145 @@ textarea::placeholder{color:var(--text3)}
 
 @media (max-width:768px){
   .body-split{display:flex;flex-direction:column;overflow:hidden}
-  .post-panel{flex:0 0 40%;border-right:none;border-bottom:1px solid var(--border)}
-  .code-panel{flex:1;min-height:0}
-  .post-header{flex-wrap:wrap;row-gap:6px}
-  .post-footer{flex-wrap:wrap;row-gap:8px}
-  .post-footer > div{margin-left:0}
 
-  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 12px;row-gap:8px}
+  /* reading area gets most of the screen — old post-header/post-footer are hidden;
+     their content now lives in the compact top line, the toggle, and the footer */
+  .post-panel{flex:1;min-height:0;border-right:none}
+  .post-header,.post-footer{display:none}
+  .post-body{padding:16px 18px}
+
+  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 12px;row-gap:6px}
   .topbar-sep{display:none}
-  .progress-wrap{max-width:none}
+  .progress-wrap{max-width:none;flex:1}
   .desktop-only{display:none}
+  .mobile-only-inline{display:inline-flex!important}
+  .mobile-only-flex{display:flex!important}
 
-  .topbar-row-main{display:flex;align-items:center;width:100%;gap:8px}
-  .topbar-toggle{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;line-height:1;cursor:pointer;margin-left:auto;flex-shrink:0;transition:transform .2s}
+  /* single line: subreddit | subject | chars/read-time | reddit link | flag | toggle */
+  .topbar-row-main{display:flex;align-items:center;width:100%;gap:6px}
+  .m-title{display:block;font-size:13px;font-weight:500;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-meta{display:inline;font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0}
+  .m-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;flex-shrink:0;text-decoration:none}
+  .m-icon-btn.flagged{border-color:var(--amber-border);color:var(--amber);background:var(--amber-bg)}
+  .topbar-toggle{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;line-height:1;cursor:pointer;flex-shrink:0;transition:transform .2s}
   .topbar.expanded .topbar-toggle{transform:rotate(180deg)}
-  .topbar-nav-mobile{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+
+  /* always-visible mini nav (Clear/Skip/Save & Next) sits right below the single line;
+     the rest of the day-to-day controls (Prev, Reddit, Read) live in the persistent
+     footer at the bottom instead, and everything else collapses behind the toggle */
+  .topbar-nav-mobile{display:flex;gap:6px;width:100%}
+  .topbar-nav-mobile .btn{flex:1;justify-content:center}
   .topbar-extra{display:none;flex-wrap:wrap;align-items:center;width:100%;gap:8px}
   .topbar.expanded .topbar-extra{display:flex}
   .topbar-right{width:100%;flex-wrap:wrap;margin-left:0;row-gap:6px}
   .jump-wrap{margin-left:0}
 
-  #codebook-panel,#memo-panel{width:100%}
+  /* z-index must clear the sticky topbar (600) so the "full screen" panel actually
+     covers it instead of the header stealing clicks (e.g. the close X) */
+  #codebook-panel,#memo-panel{width:100%;top:0;height:100vh;z-index:700}
 
+  /* slim divider: step position on the left, info button on the right */
+  .mobile-step-divider{display:flex;align-items:center;justify-content:space-between;padding:5px 14px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-shrink:0}
+  #m-step-indicator{font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+  /* step carousel: one .code-section visible at a time, flanked by full-height
+     arrow buttons (~10% of width combined) */
+  .code-panel{flex:0 0 38vh;min-height:0;border-left:none}
+  .mobile-step-row{display:flex;flex:1;min-height:0}
+  .mobile-step-arrow{display:flex;align-items:center;justify-content:center;width:8vw;min-width:28px;max-width:36px;flex-shrink:0;background:var(--bg2);border:none;color:var(--text2);font-size:15px;cursor:pointer;transition:all .12s}
+  .mobile-step-arrow:hover{background:var(--bg3);color:var(--text)}
+  .mobile-step-arrow:disabled{opacity:.2;pointer-events:none}
+  .code-scroll{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column}
+  .code-section{display:none!important;margin-bottom:0}
+  /* fill the carousel height instead of sitting at the top with empty space below —
+     only fields built around a .tg choice (steps 1-4, media_present) stretch; plain
+     selects/textareas (metadata dropdowns, notes) keep their natural size */
+  .code-section.mobile-step-visible{display:flex!important;flex-direction:column;flex:1;min-height:0;min-width:0}
+  /* column-flex items default to min-width:auto same as row-flex items do for
+     min-height — without min-width:0 here too, a field whose buttons need more
+     room than's available (e.g. 4 gender buttons on a 320px phone) grows the
+     field itself wider than the section instead of shrinking to fit it */
+  .field{min-width:0}
+  .field:has(.tg){flex:1;display:flex;flex-direction:column;min-width:0}
+  .field:has(.tg) .tg{flex:1;min-width:0}
+  /* the step header (title + "all not disclosed"/"clear" pills) can outgrow a
+     narrow phone on its own — let it wrap to a second line instead of pushing
+     past the edge */
+  .csec-head{flex-wrap:wrap;row-gap:4px}
   .code-footer{display:none}
-  .check-grid{grid-template-columns:1fr}
+  /* the desktop multi-line banner is replaced by a single-line, tap-to-expand
+     version below — it would otherwise grow as more issues turn up and compete
+     with the carousel for its already-tight height budget. JS toggles the desktop
+     one via inline style, which needs !important here to actually override. */
+  #coding-warning{display:none!important}
+  #m-warning-bar{display:none;width:100%;align-items:center;padding:9px 14px;background:var(--amber-bg);border-top:1px solid var(--amber-border);border-left:none;border-right:none;border-bottom:none;color:var(--amber);font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #m-warning-bar.show{display:flex}
+  #m-warning-overlay{display:none;position:fixed;inset:0;z-index:750;background:var(--bg);flex-direction:column}
+  #m-warning-overlay.open{display:flex}
+  .m-warning-overlay-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0;font-size:14px;font-weight:500;color:var(--amber)}
+  .m-warning-overlay-header button{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:14px;cursor:pointer}
+  .m-warning-overlay-body{flex:1;overflow-y:auto;padding:16px;list-style:none}
+  .m-warning-overlay-body li{margin-bottom:10px;padding-left:14px;position:relative;color:var(--amber);font-size:13px;line-height:1.5}
+  .m-warning-overlay-body li::before{content:'•';position:absolute;left:0}
+
+  @keyframes mobileSlideInR{from{transform:translateX(24px);opacity:0}to{transform:translateX(0);opacity:1}}
+  @keyframes mobileSlideInL{from{transform:translateX(-24px);opacity:0}to{transform:translateX(0);opacity:1}}
+  .mobile-slide-in-r{animation:mobileSlideInR .2s ease-out}
+  .mobile-slide-in-l{animation:mobileSlideInL .2s ease-out}
+
+  /* bigger buttons, tighter spacing, label lives inside the button (not above it) */
+  .field:has(.tg) .flabel{display:none}
+  /* flex/grid items default to min-width:auto, so a long label (e.g. "divorced/
+     separated", "Dependency / separation") forces the row wider than the screen
+     instead of wrapping. A small min-width (rather than 0) lets multi-word labels
+     wrap onto a second line within the button, or the whole row wrap to a new
+     line once there's no room — without shrinking so far that single words start
+     breaking mid-syllable. */
+  .tg-btn{padding:18px 6px;font-size:14px;font-weight:500;min-width:64px;white-space:normal;overflow-wrap:break-word}
+  /* button-group fields (gender, relationship_status) wrap to a new row on the
+     narrowest phones instead of forcing every button down to an illegible width */
+  .tg.mobile-only-flex{flex-wrap:wrap}
+  .field{margin-bottom:8px}
+  .check-grid{grid-template-columns:1fr 1fr;gap:6px}
+  .check-item{padding:14px 10px;min-width:0}
+  .check-item > div{min-width:0}
+  .cil{min-width:0;overflow-wrap:break-word}
+  /* the raw column name (e.g. "type_erotic_romantic") under each label is
+     redundant now that the label itself has an emoji and readable text */
+  .cis{display:none}
+
+  /* preset shortcut buttons (Chat / Avatar / Song) side by side instead of
+     stacked — min-width keeps them wide enough that a finger can't easily
+     miss and hit the neighboring button */
+  .preset-btn-row{flex-direction:row}
+  .preset-btn-row .btn{flex:1;justify-content:center;min-width:0;padding:12px 4px}
+  /* one field per line — two selects/button-groups side by side (e.g. age_range +
+     gender) got too cramped to read or tap comfortably */
   .grid-2col{grid-template-columns:1fr}
+
+  /* step 5 (metadata) is split into two mobile-only sub-pages so age/gender and
+     relationship/tool fields aren't all crammed into one screen — sub-page 0
+     (age_range/gender) shows by default, sub-page 1 shows once s5-substep-1 is
+     applied. Only hide rules are needed; shown fields keep whatever display
+     value other rules already gave them (block, grid-flex via :has(.tg), etc). */
+  #sec-s5:not(.s5-substep-1) .mobile-substep-1{display:none!important}
+  #sec-s5.s5-substep-1 .mobile-substep-0{display:none!important}
+
+  /* no keyboard-shortcut hints on a touchscreen */
+  .kh{display:none!important}
+
+  /* only the divider's info button shows on mobile — the per-step inline "i" was
+     showing a second, redundant info icon right in the step header */
+  .csec-head .info-wrap{display:none}
+
+  /* persistent bottom footer: Prev / Clear / Save & Next / Reddit / Read */
+  .mobile-footer{display:flex;gap:6px;padding:10px 10px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;align-items:center}
+  .mobile-footer .btn{flex:1;justify-content:center;padding:13px 4px;font-size:13px;min-width:0}
+  .mobile-footer a.btn{flex:0 0 auto;padding:13px 14px}
+
+  /* toast would otherwise land right on top of the new persistent footer */
+  .toast{bottom:74px}
+
   .kbd-modal-body{grid-template-columns:1fr}
 
   .upload-box{padding:36px 20px}
@@ -472,8 +587,6 @@ textarea::placeholder{color:var(--text3)}
 
 /* touch targets + no keyboard hints on touch devices */
 @media (hover:none) and (pointer:coarse){
-  .tg-btn{padding:9px 8px}
-  .check-item{padding:9px 8px}
   .filter-btn{padding:7px 14px}
   .kh{display:none}
 }
@@ -503,31 +616,37 @@ textarea::placeholder{color:var(--text3)}
   <!-- TOPBAR -->
   <header class="topbar" id="topbar">
     <div class="topbar-row-main">
+      <!-- desktop: logo + progress render here (topbar-extra is display:contents, so on
+           desktop this is one continuous row). mobile: this row instead shows the compact
+           single line (subreddit / title / meta / reddit link / flag / toggle), and the
+           logo+progress physically live inside topbar-extra so they're hidden until the
+           toggle is expanded, per the mobile design. -->
+      <span class="subreddit-tag mobile-only-inline" id="m-sub">—</span>
+      <span class="m-title mobile-only-inline" id="m-title">—</span>
+      <span class="m-meta mobile-only-inline" id="m-meta"></span>
+      <button class="m-icon-btn mobile-only-inline" id="m-flag-btn" onclick="toggleFlag()" title="Flag for review">⚑</button>
+      <button class="topbar-toggle" id="topbar-toggle-btn" onclick="toggleTopbarExpand()" title="Show more">▾</button>
+    </div>
+
+    <!-- mobile-only nav: kept out of the code-panel footer so it's never hidden behind the browser's bottom toolbar -->
+    <div class="topbar-nav-mobile">
+      <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
+      <button class="btn btn-skip btn-sm" onclick="saveAndNext(true)" title="Skip without saving">Skip</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
+    </div>
+
+    <div class="topbar-extra" id="topbar-extra">
       <span class="topbar-logo">TRANSFERENCE CODER</span>
       <div class="topbar-sep"></div>
       <div class="progress-wrap">
         <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
         <span class="progress-label" id="prog-label">0 / 0</span>
       </div>
-      <button class="topbar-toggle" id="topbar-toggle-btn" onclick="toggleTopbarExpand()" title="Show more">▾</button>
-    </div>
-
-    <!-- mobile-only nav: kept out of the code-panel footer so it's never hidden behind the browser's bottom toolbar -->
-    <div class="topbar-nav-mobile">
-      <button class="btn btn-ghost btn-sm" onclick="navigate(-1)" title="Previous">← Prev</button>
-      <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
-      <button class="btn btn-skip btn-sm" onclick="saveAndNext(true)" title="Skip without saving">Skip</button>
-      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
-      <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(-1)" title="Previous uncoded">↑ uncoded</button>
-      <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(1)" title="Next uncoded">↓ uncoded</button>
-      <button class="btn btn-success btn-sm" onclick="downloadCSV()" title="Export CSV">↓ Export CSV</button>
-    </div>
-
-    <div class="topbar-extra" id="topbar-extra">
       <div class="topbar-sep"></div>
       <span id="coded-count" style="font-family:var(--mono);font-size:11px;color:var(--green)">0 coded</span>
       <span id="flag-count" style="font-family:var(--mono);font-size:11px;color:var(--amber)"></span>
       <span class="streak-badge" id="streak-badge">🔥 <span id="streak-num">0</span></span>
+      <span id="m-status" class="uncoded-badge mobile-only-inline">uncoded</span>
       <div class="topbar-sep"></div>
       <span id="session-timer" style="font-family:var(--mono);font-size:11px;color:var(--text3)" title="Session time">⏱ 0:00</span>
       <div class="topbar-sep"></div>
@@ -541,6 +660,18 @@ textarea::placeholder{color:var(--text3)}
         <span id="gsheets-label" style="font-family:var(--mono);font-size:10px;color:var(--text3)">Sheets: off</span>
         <button class="btn btn-ghost btn-sm" id="gsheets-btn" onclick="gsConnect()" title="Connect to Google Sheets">Connect Sheets</button>
       </div>
+      <!-- reading-speed control lives in the toggle on mobile; Read/Stop stay in the persistent footer.
+           Mirrors #tts-speed — kept in sync by updateTTSSpeed()/loadTTSSpeed(). -->
+      <div class="mobile-only-flex" style="align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">speed</span>
+        <select class="tts-speed-select" id="m-tts-speed" onchange="updateTTSSpeed(this)" title="Reading speed">
+          <option value="1.0">1.0×</option>
+          <option value="1.2">1.2×</option>
+          <option value="1.5">1.5×</option>
+          <option value="2.0">2.0×</option>
+          <option value="2.5">2.5×</option>
+        </select>
+      </div>
       <div class="topbar-right">
         <div style="display:flex;align-items:center;gap:5px;margin-right:4px">
           <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">go to</span>
@@ -548,6 +679,8 @@ textarea::placeholder{color:var(--text3)}
           <button class="btn btn-ghost btn-sm" onclick="jumpTo()">↵</button>
         </div>
         <div class="topbar-sep"></div>
+        <button class="btn btn-ghost btn-sm mobile-only-inline" onclick="jumpUncoded(-1)" title="Previous uncoded">↑ uncoded</button>
+        <button class="btn btn-ghost btn-sm mobile-only-inline" onclick="jumpUncoded(1)" title="Next uncoded">↓ uncoded</button>
         <button class="btn btn-ghost btn-sm desktop-only" id="memo-btn" onclick="toggleMemo()" title="Research memo pad">📝 Memo <span class="kh">O</span></button>
         <button class="btn btn-ghost btn-sm desktop-only" onclick="toggleKbdModal()" title="Keyboard shortcuts (`)">⌨ Shortcuts <span class="kh">`</span></button>
         <button class="btn btn-ghost btn-sm" onclick="openNotesSearch()">🔍 Search Notes</button>
@@ -584,21 +717,30 @@ textarea::placeholder{color:var(--text3)}
           <div class="tts-bar">
             <button class="tts-btn" id="tts-btn" onclick="toggleTTS()">▶ Read <span class="kh">P</span></button>
             <button class="tts-btn" id="tts-stop-btn" onclick="stopTTS()" style="display:none">■ Stop <span class="kh">S</span></button>
-            <button class="tts-speed-label" id="tts-speed-label" onclick="toggleSpeedSlider()" title="Reading speed">1.0×</button>
+            <select class="tts-speed-select" id="tts-speed" onchange="updateTTSSpeed(this)" title="Reading speed">
+              <option value="1.0">1.0×</option>
+              <option value="1.2">1.2×</option>
+              <option value="1.5">1.5×</option>
+              <option value="2.0">2.0×</option>
+              <option value="2.5">2.5×</option>
+            </select>
           </div>
         </div>
-      </div>
-      <!-- full-width reading-speed slider: hidden until the speed chip is tapped, closes itself once a value is picked -->
-      <div class="tts-speed-wrap" id="tts-speed-wrap">
-        <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">0.6×</span>
-        <input type="range" class="tts-speed" id="tts-speed" min="0.6" max="4" step="0.1" value="1.0" oninput="updateTTSSpeed()" onchange="closeSpeedSlider()" title="Reading speed">
-        <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">4×</span>
       </div>
     </div>
 
     <!-- RIGHT: code panel -->
     <div class="code-panel" id="code-panel">
-      <div class="code-scroll" id="code-scroll">
+      <!-- mobile-only: slim divider between the reading area and the step carousel, with
+           a step-position indicator on the left and an info button on the right that
+           always opens the codebook entry for whichever step is showing -->
+      <div class="mobile-step-divider">
+        <span id="m-step-indicator"></span>
+        <button class="info-icon" id="m-step-info-btn" title="Open codebook">i</button>
+      </div>
+      <div class="mobile-step-row">
+        <button class="mobile-step-arrow" id="m-step-prev" onclick="mobileStepNav(-1)" title="Previous step">◀</button>
+        <div class="code-scroll" id="code-scroll">
 
         <!-- STEP 1 -->
         <div class="code-section" id="sec-s1">
@@ -661,7 +803,7 @@ textarea::placeholder{color:var(--text3)}
         <div class="code-section" id="sec-s5">
           <div class="csec-head">Step 5 — metadata <span style="font-size:9px;color:var(--text3)">(all posts)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s5')" title="Open codebook">i</span><div class="hover-tip">Code for every post — age, gender, relationship status, and any alternative tool used.</div></div><button onclick="setAllNotDisclosed()" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Set age, gender and relationship status to not_disclosed">all not disclosed <span class="kh">N</span></button><button onclick="clearStep5()" class="step-clear-btn" style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Clear all step 5 fields">clear</button></div>
           <div class="grid-2col">
-            <div class="field">
+            <div class="field mobile-substep-0">
               <div class="flabel"><span class="fcode">age_range</span></div>
               <select id="age_range">
                 <option value="">—</option>
@@ -670,24 +812,37 @@ textarea::placeholder{color:var(--text3)}
                 <option>not_disclosed</option>
               </select>
             </div>
-            <div class="field">
-              <div class="flabel"><span class="fcode">gender</span></div>
-              <select id="gender">
+            <div class="field mobile-substep-0">
+              <div class="flabel desktop-only"><span class="fcode">gender</span></div>
+              <select id="gender" class="desktop-only">
                 <option value="">—</option>
                 <option>male</option><option>female</option><option>other</option>
                 <option>not_disclosed</option>
               </select>
+              <div class="tg mobile-only-flex" id="gender-btns">
+                <button class="tg-btn" data-val="male" onclick="setBtnField('gender','male','gender-btns')">male</button>
+                <button class="tg-btn" data-val="female" onclick="setBtnField('gender','female','gender-btns')">female</button>
+                <button class="tg-btn" data-val="other" onclick="setBtnField('gender','other','gender-btns')">other</button>
+                <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('gender','not_disclosed','gender-btns')">n/d</button>
+              </div>
             </div>
-            <div class="field" style="grid-column:1/-1">
-              <div class="flabel"><span class="fcode">relationship_status</span></div>
-              <select id="relationship_status">
+            <div class="field mobile-substep-1" style="grid-column:1/-1">
+              <div class="flabel desktop-only"><span class="fcode">relationship_status</span></div>
+              <select id="relationship_status" class="desktop-only">
                 <option value="">—</option>
                 <option>single</option><option>in_relationship</option><option>married</option>
                 <option>divorced_separated</option><option>not_disclosed</option>
               </select>
+              <div class="tg mobile-only-flex" id="relationship_status-btns">
+                <button class="tg-btn" data-val="single" onclick="setBtnField('relationship_status','single','relationship_status-btns')">single</button>
+                <button class="tg-btn" data-val="in_relationship" onclick="setBtnField('relationship_status','in_relationship','relationship_status-btns')">dating</button>
+                <button class="tg-btn" data-val="married" onclick="setBtnField('relationship_status','married','relationship_status-btns')">married</button>
+                <button class="tg-btn" data-val="divorced_separated" onclick="setBtnField('relationship_status','divorced_separated','relationship_status-btns')">div/sep</button>
+                <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('relationship_status','not_disclosed','relationship_status-btns')">n/d</button>
+              </div>
             </div>
-            <div class="field">
-              <div class="flabel"><span class="fcode">alt_tool_name</span></div>
+            <div class="field mobile-substep-1">
+              <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">alt_tool_name</span><button class="btn btn-sm mobile-only-inline" style="padding:2px 8px;font-size:10px" onclick="setAllToolsMentioned()" title="Multiple tools mentioned — type them all in">+ all</button></div>
               <select id="alt_tool_name">
                 <option value="">— blank —</option>
                 <option>ChatGPT</option><option>Claude</option><option>Gemini</option>
@@ -697,8 +852,8 @@ textarea::placeholder{color:var(--text3)}
                 <option value="_other_">other (type below)</option>
               </select>
             </div>
-            <div class="alt-tool-warn" id="alt-tool-warn"></div>
-            <div class="field">
+            <div class="alt-tool-warn mobile-substep-1" id="alt-tool-warn"></div>
+            <div class="field mobile-substep-1">
               <div class="flabel"><span class="fcode">alt_tool_type</span></div>
               <select id="alt_tool_type">
                 <option value="">—</option>
@@ -706,7 +861,7 @@ textarea::placeholder{color:var(--text3)}
                 <option>general_llm</option><option>roleplay_platform</option><option>other</option>
               </select>
             </div>
-            <div class="field" id="alt-tool-custom-wrap" style="display:none;grid-column:1/-1">
+            <div class="field mobile-substep-1" id="alt-tool-custom-wrap" style="display:none;grid-column:1/-1">
               <div class="flabel"><span class="fcode">alt_tool_name (custom)</span></div>
               <input type="text" id="alt_tool_name_custom" placeholder="Type tool name..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
             </div>
@@ -719,13 +874,13 @@ textarea::placeholder{color:var(--text3)}
           <div id="s6-lock" class="locked-notice" style="display:none">transference = 0 → leave blank</div>
           <div id="s6-field">
             <div class="check-grid">
-              <label class="check-item" id="ci-ero" onclick="chkToggle('type_erotic_romantic','ci-ero',event)"><input type="checkbox" id="type_erotic_romantic" onclick="event.stopPropagation()"><div><div class="cil">Erotic / romantic <span class="kh">E</span></div><div class="cis">type_erotic_romantic</div></div></label>
-              <label class="check-item" id="ci-dep" onclick="chkToggle('type_dependency_separation','ci-dep',event)"><input type="checkbox" id="type_dependency_separation" onclick="event.stopPropagation()"><div><div class="cil">Dependency / separation <span class="kh">D</span></div><div class="cis">type_dependency_separation</div></div></label>
-              <label class="check-item" id="ci-ide" onclick="chkToggle('type_idealization_rescue','ci-ide',event)"><input type="checkbox" id="type_idealization_rescue" onclick="event.stopPropagation()"><div><div class="cil">Idealization / rescue <span class="kh">I</span></div><div class="cis">type_idealization_rescue</div></div></label>
-              <label class="check-item" id="ci-sel" onclick="chkToggle('type_selfworth_validation','ci-sel',event)"><input type="checkbox" id="type_selfworth_validation" onclick="event.stopPropagation()"><div><div class="cil">Self-worth / validation <span class="kh">V</span></div><div class="cis">type_selfworth_validation</div></div></label>
-              <label class="check-item" id="ci-rup" onclick="chkToggle('type_rupture_devaluation','ci-rup',event)"><input type="checkbox" id="type_rupture_devaluation" onclick="event.stopPropagation()"><div><div class="cil">Rupture / devaluation <span class="kh">R</span></div><div class="cis">type_rupture_devaluation</div></div></label>
-              <label class="check-item" id="ci-fus" onclick="chkToggle('type_identity_fusion','ci-fus',event)"><input type="checkbox" id="type_identity_fusion" onclick="event.stopPropagation()"><div><div class="cil">Identity fusion <span class="kh">U</span></div><div class="cis">type_identity_fusion</div></div></label>
-              <label class="check-item full" id="ci-oth" onclick="chkToggle('type_other','ci-oth',event)"><input type="checkbox" id="type_other" onclick="event.stopPropagation()"><div><div class="cil">Other <span class="kh">T</span></div><div class="cis">type_other — describe in notes</div></div></label>
+              <label class="check-item" id="ci-ero" onclick="chkToggle('type_erotic_romantic','ci-ero',event)"><input type="checkbox" id="type_erotic_romantic" onclick="event.stopPropagation()"><div><div class="cil">💗 <span class="desktop-only">Erotic / romantic</span><span class="mobile-only-inline">Erotic/romantic</span> <span class="kh">E</span></div><div class="cis">type_erotic_romantic</div></div></label>
+              <label class="check-item" id="ci-dep" onclick="chkToggle('type_dependency_separation','ci-dep',event)"><input type="checkbox" id="type_dependency_separation" onclick="event.stopPropagation()"><div><div class="cil">👫 <span class="desktop-only">Dependency / separation</span><span class="mobile-only-inline">Dependency</span> <span class="kh">D</span></div><div class="cis">type_dependency_separation</div></div></label>
+              <label class="check-item" id="ci-ide" onclick="chkToggle('type_idealization_rescue','ci-ide',event)"><input type="checkbox" id="type_idealization_rescue" onclick="event.stopPropagation()"><div><div class="cil">💡 <span class="desktop-only">Idealization / rescue</span><span class="mobile-only-inline">Idealization</span> <span class="kh">I</span></div><div class="cis">type_idealization_rescue</div></div></label>
+              <label class="check-item" id="ci-sel" onclick="chkToggle('type_selfworth_validation','ci-sel',event)"><input type="checkbox" id="type_selfworth_validation" onclick="event.stopPropagation()"><div><div class="cil">👊 <span class="desktop-only">Self-worth / validation</span><span class="mobile-only-inline">Self-worth</span> <span class="kh">V</span></div><div class="cis">type_selfworth_validation</div></div></label>
+              <label class="check-item" id="ci-rup" onclick="chkToggle('type_rupture_devaluation','ci-rup',event)"><input type="checkbox" id="type_rupture_devaluation" onclick="event.stopPropagation()"><div><div class="cil">😠 <span class="desktop-only">Rupture / devaluation</span><span class="mobile-only-inline">Rupture</span> <span class="kh">R</span></div><div class="cis">type_rupture_devaluation</div></div></label>
+              <label class="check-item" id="ci-fus" onclick="chkToggle('type_identity_fusion','ci-fus',event)"><input type="checkbox" id="type_identity_fusion" onclick="event.stopPropagation()"><div><div class="cil">🫀🧠 Identity fusion <span class="kh">U</span></div><div class="cis">type_identity_fusion</div></div></label>
+              <label class="check-item full" id="ci-oth" onclick="chkToggle('type_other','ci-oth',event)"><input type="checkbox" id="type_other" onclick="event.stopPropagation()"><div><div class="cil">💬 Other <span class="kh">T</span></div><div class="cis">type_other — describe in notes</div></div></label>
             </div>
           </div>
         </div>
@@ -741,17 +896,19 @@ textarea::placeholder{color:var(--text3)}
 
         <!-- MEDIA -->
         <div class="code-section" id="sec-media">
-          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div></div>
+          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div><a href="#" class="btn btn-sm mobile-only-inline" id="m-reddit-link-media" onclick="openRedditPeek(event)" style="margin-left:auto" title="Open on Reddit to check for media">↗ Reddit</a></div>
           <div class="field">
             <div class="flabel"><span class="fcode">media_present</span></div>
             <div class="tg">
-              <button class="tg-btn" id="mp-1" onclick="setTg('media_present','1','mp');showMediaDetail(true,true)">1 — present <span class="kh">/</span></button>
+              <button class="tg-btn" id="mp-1" onclick="setTg('media_present','1','mp');showMediaDetail(true,true);defaultMediaCount()">1 — present <span class="kh">/</span></button>
               <button class="tg-btn" id="mp-0" onclick="setTg('media_present','0','mp');showMediaDetail(false)">0 — absent <span class="kh">*</span></button>
             </div>
             <input type="hidden" id="media_present">
-            <button class="btn btn-sm" onclick="applyRomanticScreenshotPreset()" title="Fill chat_screenshot / love_affection / romantic_sexual / relevant=yes / intimacy_closeness" style="margin-top:6px">💗 Romantic Screenshot <span class="kh">X</span></button>
-            <button class="btn btn-sm" onclick="applyAiAvatarPreset()" title="Fill ai_generated_avatar / persona shown / no conversation shown" style="margin-top:6px">🖼 AI Avatar Display <span class="kh">Y</span></button>
-            <button class="btn btn-sm" onclick="applyLoveSongPreset()" title="Fill audio / ai_generated_art / love_affection / no persona or conversation shown / relevant=yes / intimacy_closeness" style="margin-top:6px">🎵 Love Song <span class="kh">L</span></button>
+            <div class="preset-btn-row">
+              <button class="btn btn-sm" onclick="applyRomanticScreenshotPreset()" title="Fill chat_screenshot / love_affection / romantic_sexual / relevant=yes / intimacy_closeness">💗 <span class="desktop-only">Romantic Screenshot</span><span class="mobile-only-inline">Chat</span> <span class="kh">X</span></button>
+              <button class="btn btn-sm" onclick="applyAiAvatarPreset()" title="Fill ai_generated_avatar / persona shown / no conversation shown">🖼 <span class="desktop-only">AI Avatar Display</span><span class="mobile-only-inline">Avatar</span> <span class="kh">Y</span></button>
+              <button class="btn btn-sm" onclick="applyLoveSongPreset()" title="Fill audio / ai_generated_art / love_affection / no persona or conversation shown / relevant=yes / intimacy_closeness">🎵 <span class="desktop-only">Love Song</span><span class="mobile-only-inline">Song</span> <span class="kh">L</span></button>
+            </div>
           </div>
           <div id="media-detail" style="display:none">
             <div class="grid-2col" style="margin-top:4px">
@@ -761,7 +918,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field">
                 <div class="flabel"><span class="fcode">media_count</span></div>
-                <input type="number" id="media_count" min="1" placeholder="0" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
+                <input type="number" inputmode="numeric" pattern="[0-9]*" id="media_count" min="1" placeholder="0" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
               </div>
               <div class="field">
                 <div class="flabel"><span class="fcode">media_shows_ai_persona</span></div>
@@ -800,12 +957,23 @@ textarea::placeholder{color:var(--text3)}
         </div>
 
         <div style="height:12px"></div>
-      </div><!-- end code-scroll -->
+        </div><!-- end code-scroll -->
+        <button class="mobile-step-arrow" id="m-step-next" onclick="mobileStepNav(1)" title="Next step">▶</button>
+      </div><!-- end mobile-step-row -->
 
       <!-- CONSISTENCY WARNING -->
       <div id="coding-warning">
         <div class="warn-title">⚠ Check before saving</div>
         <ul id="coding-warning-list"></ul>
+      </div>
+      <!-- mobile-only: single line, never grows — tap to see the full list -->
+      <button id="m-warning-bar" onclick="toggleMobileWarningDetail(true)"><span id="m-warning-text">⚠ Check before saving</span></button>
+      <div id="m-warning-overlay">
+        <div class="m-warning-overlay-header">
+          <span>⚠ Check before saving</span>
+          <button onclick="toggleMobileWarningDetail(false)" title="Close">✕</button>
+        </div>
+        <ul class="m-warning-overlay-body" id="m-warning-overlay-list"></ul>
       </div>
 
       <!-- CODE FOOTER -->
@@ -819,6 +987,15 @@ textarea::placeholder{color:var(--text3)}
 
       </div>
     </div><!-- end code-panel -->
+
+    <!-- mobile-only persistent footer: always present regardless of scroll/step position -->
+    <div class="mobile-footer">
+      <button class="btn btn-ghost btn-sm" onclick="navigate(-1)" title="Previous post">◀</button>
+      <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
+      <a href="#" class="btn btn-ghost btn-sm" id="m-reddit-link-footer" onclick="openRedditPeek(event)" title="Open on Reddit">↗</a>
+      <button class="btn btn-ghost btn-sm tts-btn" id="m-tts-btn" onclick="toggleTTS()" title="Read post aloud">▶ Read</button>
+    </div>
   </div><!-- end body-split -->
 
   <!-- OVERVIEW VIEW -->
@@ -1510,13 +1687,34 @@ function renderRow(){
   const status=g('ph-status');
   if(isCoded(row)){status.className='coded-badge';status.textContent='coded';}
   else{status.className='uncoded-badge';status.textContent='uncoded';}
+  // mobile single-line header mirrors
+  const mSub=g('m-sub'); if(mSub) mSub.textContent=row.subreddit||'—';
+  const mTitle=g('m-title'); if(mTitle) mTitle.textContent=row.title||'—';
+  const mMeta=g('m-meta'); if(mMeta) mMeta.textContent=formatReadMeta(row.post_text||row.text||'');
+  const mStatus=g('m-status');
+  if(mStatus){ mStatus.className=(isCoded(row)?'coded-badge':'uncoded-badge')+' mobile-only-inline'; mStatus.textContent=isCoded(row)?'coded':'uncoded'; }
+  ['m-reddit-link','m-reddit-link-footer','m-reddit-link-media'].forEach(id=>{
+    const el=g(id); if(!el) return;
+    if(row.permalink) el.href=row.permalink; else el.removeAttribute('href');
+    el.style.opacity=row.permalink?'1':'.4';
+  });
   clearForm();
   lastActiveSection = null;
   loadRowIntoForm(row);
   updateBranching();
   updateFlagButton();
   g('code-scroll').scrollTop=0;
-  closeSpeedSlider();
+  toggleMobileWarningDetail(false);
+  mobileInitStepForRow();
+}
+
+// Word-count-based estimate (~200wpm), for the compact mobile header line
+function formatReadMeta(text){
+  if(!text.length) return '';
+  const words=text.trim().split(/\s+/).filter(Boolean).length;
+  const totalSec=Math.max(1,Math.round(words/200*60));
+  const m=Math.floor(totalSec/60), s=totalSec%60;
+  return m+':'+String(s).padStart(2,'0')+' est';
 }
 
 function clearForm(){
@@ -1545,6 +1743,8 @@ function loadRowIntoForm(row){
   ['age_range','gender','relationship_status','alt_tool_type','media_type','media_content_type','media_emotion_expressed','media_shows_ai_persona','media_shows_conversation','media_conversation_topic','media_relevant_to_transference','media_user_ai_dynamic'].forEach(id=>{
     const el=g(id);if(el&&row[id]!==undefined)el.value=row[id];
   });
+  refreshBtnField('gender','gender-btns');
+  refreshBtnField('relationship_status','relationship_status-btns');
   const atn=row.alt_tool_name||'';
   const atnSel=g('alt_tool_name');
   let matched=false;
@@ -1601,6 +1801,7 @@ function chkToggle(fieldId,cardId,event){
 function updateBranching(){
   updateStepStates();
   scrollToActiveSection();
+  mobileSyncActiveStep();
   updateWarningBanner();
 }
 
@@ -1795,12 +1996,26 @@ function updateWarningBanner(){
 
   const banner = g('coding-warning');
   const list   = g('coding-warning-list');
+  const mBar   = g('m-warning-bar');
+  const mList  = g('m-warning-overlay-list');
   if(issues.length){
     list.innerHTML = issues.map(i=>`<li>${i}</li>`).join('');
     banner.style.display = 'block';
+    if(mList) mList.innerHTML = issues.map(i=>`<li>${i}</li>`).join('');
+    if(mBar){
+      g('m-warning-text').textContent = '⚠ '+issues.length+' issue'+(issues.length>1?'s':'')+' — tap to view';
+      mBar.classList.add('show');
+    }
   } else {
     banner.style.display = 'none';
+    if(mBar) mBar.classList.remove('show');
+    toggleMobileWarningDetail(false); // auto-close the detail view once everything's resolved
   }
+}
+
+function toggleMobileWarningDetail(open){
+  const el = g('m-warning-overlay');
+  if(el) el.classList.toggle('open', open);
 }
 
 function hasConsistencyIssues(row){
@@ -1837,6 +2052,175 @@ function scrollToActiveSection(){
     scroll.scrollTo({ top: Math.max(0, elTop - 16), behavior: 'smooth' });
   }
 }
+// ── MOBILE STEP CAROUSEL ──
+// On mobile, only one .code-section is visible at a time (the rest are hidden via
+// CSS), flanked by arrow buttons and swipeable. This reuses the same 'state-*'
+// classes updateStepStates() already computes — it doesn't introduce a second
+// source of truth for which step is applicable.
+const MOBILE_STEP_IDS = ['sec-s1','sec-s2','sec-s3','sec-s4','sec-s5','sec-s6','sec-s7','sec-media'];
+const MOBILE_STEP_KEYS = {'sec-s1':'s1','sec-s2':'s2','sec-s3':'s3','sec-s4':'s4','sec-s5':'s5','sec-s6':'s6','sec-s7':'s7','sec-media':'media'};
+// Only these steps auto-advance the carousel forward when they become "done" — each
+// is a single yes/no-style choice. Steps 5/6/7/media hold multiple independent
+// fields (metadata, multi-select types, free text, media details), so reaching
+// "done" there doesn't mean the user is finished — those only advance via the
+// arrows or a swipe.
+const MOBILE_AUTOADVANCE_STEPS = ['sec-s1','sec-s2','sec-s3','sec-s4'];
+let mobileStepId = 'sec-s1';
+// Step 5 (metadata) is split into two mobile-only sub-pages so the fields
+// aren't crammed together: 0 = age_range/gender, 1 = relationship_status/alt_tool.
+let s5SubStep = 0;
+
+function mobileVisibleSteps(){
+  return MOBILE_STEP_IDS.filter(id=>{
+    const el=g(id);
+    return el && !el.classList.contains('state-na');
+  });
+}
+
+function applyS5SubStep(){
+  const el = g('sec-s5');
+  if(el) el.classList.toggle('s5-substep-1', s5SubStep===1);
+}
+
+function updateStepIndicator(){
+  const ind = g('m-step-indicator');
+  if(!ind) return;
+  const steps = mobileVisibleSteps();
+  const idx = steps.indexOf(mobileStepId);
+  if(idx===-1){ ind.textContent=''; return; }
+  const stepNum = mobileStepId==='sec-s5' ? `${idx+1}${s5SubStep===0?'a':'b'}` : `${idx+1}`;
+  ind.textContent = `Step ${stepNum} of ${steps.length}`;
+}
+
+function mobileRenderStep(direction){
+  MOBILE_STEP_IDS.forEach(id=>{
+    const el=g(id);
+    if(!el) return;
+    el.classList.toggle('mobile-step-visible', id===mobileStepId);
+  });
+  applyS5SubStep();
+  const el = g(mobileStepId);
+  if(el && direction){
+    el.classList.remove('mobile-slide-in-l','mobile-slide-in-r');
+    void el.offsetWidth; // restart the animation even if the same class is reapplied
+    el.classList.add(direction>0?'mobile-slide-in-r':'mobile-slide-in-l');
+  }
+  const infoBtn = g('m-step-info-btn');
+  if(infoBtn) infoBtn.onclick = ()=>openCodebook(MOBILE_STEP_KEYS[mobileStepId]||'s1');
+  const steps = mobileVisibleSteps();
+  const idx = steps.indexOf(mobileStepId);
+  const prevBtn=g('m-step-prev'), nextBtn=g('m-step-next');
+  const onS5 = mobileStepId==='sec-s5';
+  if(prevBtn) prevBtn.disabled = idx<=0 && !(onS5 && s5SubStep===1);
+  if(nextBtn) nextBtn.disabled = (idx===-1 || idx>=steps.length-1) && !(onS5 && s5SubStep===0);
+  updateStepIndicator();
+}
+
+function mobileGoToFirstVisible(){
+  const steps = mobileVisibleSteps();
+  if(!steps.includes(mobileStepId)) mobileStepId = steps[0]||'sec-s1';
+  s5SubStep = 0;
+  mobileRenderStep(0);
+}
+
+function mobileStepNav(dir){
+  if(mobileStepId==='sec-s5'){
+    if(dir>0 && s5SubStep===0){ s5SubStep=1; mobileRenderStep(dir); return; }
+    if(dir<0 && s5SubStep===1){ s5SubStep=0; mobileRenderStep(dir); return; }
+  }
+  const steps = mobileVisibleSteps();
+  let idx = steps.indexOf(mobileStepId);
+  if(idx===-1) idx=0;
+  const next = idx+dir;
+  if(next<0||next>=steps.length) return;
+  mobileStepId = steps[next];
+  if(mobileStepId==='sec-s5') s5SubStep = dir>0 ? 0 : 1;
+  mobileRenderStep(dir);
+}
+
+// Called once per renderRow() so a freshly-loaded post opens on whichever step
+// actually needs attention (mirrors desktop's scrollToActiveSection target).
+function mobileInitStepForRow(){
+  const active = MOBILE_STEP_IDS.find(id=>{ const el=g(id); return el && el.classList.contains('state-active'); });
+  mobileStepId = active || 'sec-s1';
+  s5SubStep = 0;
+  mobileRenderStep(0);
+}
+
+// Called from updateBranching() every time any field changes. Keeps the carousel
+// pointed at whatever's active, and auto-advances forward for the single-choice
+// gating steps once they're answered.
+function mobileSyncActiveStep(){
+  const el = g(mobileStepId);
+  if(el && el.classList.contains('state-na')){ mobileGoToFirstVisible(); return; }
+  if(el && el.classList.contains('state-done') && MOBILE_AUTOADVANCE_STEPS.includes(mobileStepId)){
+    const steps = mobileVisibleSteps();
+    const idx = steps.indexOf(mobileStepId);
+    if(idx>=0 && idx<steps.length-1){
+      mobileStepId=steps[idx+1];
+      if(mobileStepId==='sec-s5') s5SubStep = 0;
+      mobileRenderStep(1);
+    }
+  }
+}
+
+// Swipe support on the step carousel (left = next step, right = previous step)
+(function initMobileStepSwipe(){
+  let startX=null, startY=null;
+  const target = document.getElementById('code-scroll');
+  if(!target) return;
+  target.addEventListener('touchstart', e=>{
+    const t=e.touches[0]; startX=t.clientX; startY=t.clientY;
+  }, {passive:true});
+  target.addEventListener('touchend', e=>{
+    if(startX==null) return;
+    const t=e.changedTouches[0];
+    const dx=t.clientX-startX, dy=t.clientY-startY;
+    startX=null;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.5) mobileStepNav(dx<0?1:-1);
+  }, {passive:true});
+})();
+
+// ── MOBILE BUTTON-GROUP FIELDS (gender, relationship_status) ──
+// These fields stay <select>s (single source of truth for value/collectRow/
+// loadRowIntoForm) on desktop; on mobile the select is hidden and a button group
+// drives the same element's .value instead.
+function setBtnField(fieldId,val,groupId){
+  const field=g(fieldId);
+  if(!field) return;
+  field.value=val;
+  refreshBtnField(fieldId,groupId);
+  scheduleAutosave();
+  updateWarningBanner();
+}
+
+function refreshBtnField(fieldId,groupId){
+  const field=g(fieldId), group=g(groupId);
+  if(!field||!group) return;
+  group.querySelectorAll('.tg-btn').forEach(btn=>{
+    btn.classList.toggle('sel-1', field.value!=='' && btn.dataset.val===field.value);
+  });
+}
+
+// ── "+ all" MULTIPLE-TOOLS SHORTCUT ──
+// Switches alt_tool_name into its free-text mode so the coder can list every tool
+// mentioned (comma-separated), per the coding guide's "list all separated by
+// commas" rule for posts that reference more than one alternative tool.
+function setAllToolsMentioned(){
+  const sel=g('alt_tool_name');
+  sel.value='_other_';
+  g('alt-tool-custom-wrap').style.display='block';
+  const custom=g('alt_tool_name_custom');
+  custom.focus();
+  scheduleAutosave();
+}
+
+// ── MEDIA COUNT DEFAULT ──
+function defaultMediaCount(){
+  const el=g('media_count');
+  if(el && !el.value) el.value='1';
+}
+
 function showMediaDetail(show,focus){
   g('media-detail').style.display=show?'block':'none';
   if(show&&focus){setTimeout(()=>{const el=g('media_type');if(el)el.focus();},50);}
@@ -2062,6 +2446,8 @@ function setAllNotDisclosed(){
   g('alt_tool_name').value = '';
   g('alt_tool_type').value = '';
   g('alt-tool-custom-wrap').style.display = 'none';
+  refreshBtnField('gender','gender-btns');
+  refreshBtnField('relationship_status','relationship_status-btns');
   updateStepStates();
   scheduleAutosave();
   toast('Step 5 set to not disclosed');
@@ -2093,6 +2479,8 @@ function clearStep5(){
   g('alt_tool_type').value = '';
   g('alt_tool_name_custom').value = '';
   g('alt-tool-custom-wrap').style.display = 'none';
+  refreshBtnField('gender','gender-btns');
+  refreshBtnField('relationship_status','relationship_status-btns');
   updateStepStates();
   scheduleAutosave();
   toast('Step 5 cleared');
@@ -2257,20 +2645,19 @@ function stopTTS(){
   ttsUtterance=null;
   clearTTSWordHighlight();
   if(g('tts-btn')) updateTTSUI();
-  closeSpeedSlider();
 }
 
 function updateTTSUI(){
   const btn  = g('tts-btn');
   const stop = g('tts-stop-btn');
+  const mBtn = g('m-tts-btn');
   const paused = window.speechSynthesis.paused;
-  if(ttsSpeaking){
-    btn.textContent='⏸ Pause'; btn.classList.add('playing'); stop.style.display='';
-  } else if(paused){
-    btn.textContent='▶ Resume'; btn.classList.add('playing'); stop.style.display='';
-  } else {
-    btn.textContent='▶ Read'; btn.classList.remove('playing'); stop.style.display='none';
-  }
+  let label, playing;
+  if(ttsSpeaking){ label='⏸ Pause'; playing=true; stop.style.display=''; }
+  else if(paused){ label='▶ Resume'; playing=true; stop.style.display=''; }
+  else{ label='▶ Read'; playing=false; stop.style.display='none'; }
+  btn.textContent=label; btn.classList.toggle('playing',playing);
+  if(mBtn){ mBtn.textContent=label; mBtn.classList.toggle('playing',playing); }
 }
 
 const TTS_SPEED_KEY = 'transference_tts_speed_v1';
@@ -2299,16 +2686,11 @@ function isDesktopView(){
   return !window.matchMedia('(max-width:768px)').matches;
 }
 
-function toggleSpeedSlider(){
-  g('tts-speed-wrap').classList.toggle('open');
-}
-function closeSpeedSlider(){
-  g('tts-speed-wrap').classList.remove('open');
-}
-
-function updateTTSSpeed(){
-  const val = parseFloat(g('tts-speed').value).toFixed(1);
-  g('tts-speed-label').textContent = val+'×';
+// Reading speed is a plain <select> (1.0/1.2/1.5/2.0/2.5×) on both desktop and
+// mobile — #tts-speed and #m-tts-speed are kept in sync with each other.
+function updateTTSSpeed(sourceEl){
+  const val = parseFloat(sourceEl.value).toFixed(1);
+  ['tts-speed','m-tts-speed'].forEach(id=>{ const el=g(id); if(el && el!==sourceEl) el.value=val; });
   try{ localStorage.setItem(TTS_SPEED_KEY, val); }catch(e){}
   if(ttsSpeaking){ stopTTS(); setTimeout(startTTS, 80); }
 }
@@ -2317,11 +2699,10 @@ function loadTTSSpeed(){
   let val;
   try{ val = localStorage.getItem(TTS_SPEED_KEY); }catch(e){ val = null; }
   if(!val) return;
-  const slider = g('tts-speed');
   const num = parseFloat(val);
-  if(isNaN(num) || num < parseFloat(slider.min) || num > parseFloat(slider.max)) return;
-  slider.value = num.toFixed(1);
-  g('tts-speed-label').textContent = num.toFixed(1)+'×';
+  if(isNaN(num)) return;
+  const fixed = num.toFixed(1);
+  ['tts-speed','m-tts-speed'].forEach(id=>{ const el=g(id); if(el) el.value=fixed; });
 }
 
 // TTS stop is now handled directly inside navigate() and jumpTo()
@@ -2645,6 +3026,8 @@ function updateFlagButton(){
   const flagged = rows[idx] && rows[idx]._flag;
   btn.classList.toggle('flagged', !!flagged);
   btn.textContent = flagged ? '⚑ Flagged' : '⚑ Flag';
+  const mBtn = g('m-flag-btn');
+  if(mBtn) mBtn.classList.toggle('flagged', !!flagged);
 }
 
 // ── SESSION TIMER ──
