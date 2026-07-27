@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Transference Coder</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d0e10">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-512.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Transference">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 <style>
@@ -436,7 +444,9 @@ textarea::placeholder{color:var(--text3)}
   .post-header,.post-footer{display:none}
   .post-body{padding:16px 18px}
 
-  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 12px;row-gap:6px}
+  /* installed as a standalone PWA (viewport-fit=cover), the sticky header sits right
+     against the notch/dynamic island with no browser chrome to buffer it */
+  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left));row-gap:6px}
   .topbar-sep{display:none}
   .progress-wrap{max-width:none;flex:1}
   .desktop-only{display:none}
@@ -564,7 +574,8 @@ textarea::placeholder{color:var(--text3)}
   .csec-head .info-wrap{display:none}
 
   /* persistent bottom footer: Prev / Clear / Save & Next / Reddit / Read */
-  .mobile-footer{display:flex;gap:6px;padding:10px 10px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;align-items:center}
+  /* bottom-most element in the PWA shell — buffer the home-indicator area */
+  .mobile-footer{display:flex;gap:6px;padding:10px max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;align-items:center}
   .mobile-footer .btn{flex:1;justify-content:center;padding:13px 4px;font-size:13px;min-width:0}
   .mobile-footer a.btn{flex:0 0 auto;padding:13px 14px}
 
@@ -635,6 +646,7 @@ textarea::placeholder{color:var(--text3)}
     <div class="topbar-nav-mobile">
       <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
       <button class="btn btn-skip btn-sm" onclick="saveAndNext(true)" title="Skip without saving">Skip</button>
+      <button class="btn btn-ghost btn-sm emoji-btn" onclick="showOverview()" title="Overview">📊</button>
       <button class="btn btn-ghost btn-sm tts-btn emoji-btn" id="m-tts-btn" onclick="toggleTTS()" title="Read post aloud">▶</button>
     </div>
 
@@ -2491,7 +2503,9 @@ function clearStep5(){
 
 // ── OVERVIEW ──
 function showOverview(){g('coder-view').style.display='none';g('overview-view').style.display='flex';renderOverview();}
-function hideOverview(){g('overview-view').style.display='none';g('coder-view').style.display='grid';}
+// Clear the inline override (rather than hardcoding 'grid') so the responsive
+// CSS — grid on desktop, flex-column on mobile — decides the layout again.
+function hideOverview(){g('overview-view').style.display='none';g('coder-view').style.display='';}
 function setFilter(f){
   currentFilter=f;
   ['all','uncoded','coded','transference','flagged','review'].forEach(id=>{
@@ -3731,7 +3745,14 @@ loadHighlights();
 loadTTSSpeed();
 loadFontSize();
 
-
+// PWA: registering this makes the app installable and lets the shell load
+// offline once cached. sw.js only intercepts same-origin GETs for the app
+// shell itself — CSV uploads, Google Sheets, and Reddit links are untouched.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 
 </script>
 </body>
