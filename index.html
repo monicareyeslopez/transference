@@ -48,7 +48,10 @@ body{position:fixed;inset:0;width:100%;height:100%;font-family:var(--sans);backg
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 /* wrapper divs exist for mobile grouping only — on desktop they're transparent to the flex layout */
 .topbar-row-main,.topbar-extra{display:contents}
-.topbar-nav-mobile,.topbar-toggle{display:none}
+.topbar-nav-mobile,.topbar-toggle,.mobile-step-divider,.mobile-step-arrow,.mobile-footer{display:none}
+/* utility classes that must always win regardless of what other display-setting
+   classes (.tg, .btn, .uncoded-badge...) also sit on the same element */
+.mobile-only-inline,.mobile-only-flex{display:none!important}
 
 /* BODY */
 .body-split{display:grid;grid-template-columns:1fr 420px;flex:1;overflow:hidden}
@@ -428,31 +431,82 @@ textarea::placeholder{color:var(--text3)}
 
 @media (max-width:768px){
   .body-split{display:flex;flex-direction:column;overflow:hidden}
-  .post-panel{flex:0 0 40%;border-right:none;border-bottom:1px solid var(--border)}
-  .code-panel{flex:1;min-height:0}
-  .post-header{flex-wrap:wrap;row-gap:6px}
-  .post-footer{flex-wrap:wrap;row-gap:8px}
-  .post-footer > div{margin-left:0}
 
-  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 12px;row-gap:8px}
+  /* reading area gets most of the screen — old post-header/post-footer are hidden;
+     their content now lives in the compact top line, the toggle, and the footer */
+  .post-panel{flex:1;min-height:0;border-right:none}
+  .post-header,.post-footer{display:none}
+  .post-body{padding:16px 18px}
+
+  .topbar{flex-wrap:wrap;height:auto;min-height:48px;padding:8px 12px;row-gap:6px}
   .topbar-sep{display:none}
-  .progress-wrap{max-width:none}
+  .progress-wrap{max-width:none;flex:1}
   .desktop-only{display:none}
+  .mobile-only-inline{display:inline-flex!important}
+  .mobile-only-flex{display:flex!important}
 
-  .topbar-row-main{display:flex;align-items:center;width:100%;gap:8px}
-  .topbar-toggle{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;line-height:1;cursor:pointer;margin-left:auto;flex-shrink:0;transition:transform .2s}
+  /* single line: subreddit | subject | chars/read-time | reddit link | flag | toggle */
+  .topbar-row-main{display:flex;align-items:center;width:100%;gap:6px}
+  .m-title{display:block;font-size:13px;font-weight:500;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .m-meta{display:inline;font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0}
+  .m-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;flex-shrink:0;text-decoration:none}
+  .m-icon-btn.flagged{border-color:var(--amber-border);color:var(--amber);background:var(--amber-bg)}
+  .topbar-toggle{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;line-height:1;cursor:pointer;flex-shrink:0;transition:transform .2s}
   .topbar.expanded .topbar-toggle{transform:rotate(180deg)}
-  .topbar-nav-mobile{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+
+  /* always-visible mini nav (Clear/Skip/Save & Next) sits right below the single line;
+     the rest of the day-to-day controls (Prev, Reddit, Read) live in the persistent
+     footer at the bottom instead, and everything else collapses behind the toggle */
+  .topbar-nav-mobile{display:flex;gap:6px;width:100%}
+  .topbar-nav-mobile .btn{flex:1;justify-content:center}
   .topbar-extra{display:none;flex-wrap:wrap;align-items:center;width:100%;gap:8px}
   .topbar.expanded .topbar-extra{display:flex}
   .topbar-right{width:100%;flex-wrap:wrap;margin-left:0;row-gap:6px}
   .jump-wrap{margin-left:0}
 
-  #codebook-panel,#memo-panel{width:100%}
+  /* z-index must clear the sticky topbar (600) so the "full screen" panel actually
+     covers it instead of the header stealing clicks (e.g. the close X) */
+  #codebook-panel,#memo-panel{width:100%;top:0;height:100vh;z-index:700}
 
+  /* slim divider + info button between the reading area and the step carousel */
+  .mobile-step-divider{display:flex;align-items:center;justify-content:flex-end;padding:5px 14px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-shrink:0}
+
+  /* step carousel: one .code-section visible at a time, ~25-30% of the screen,
+     flanked by full-height arrow buttons (~10% of width combined) */
+  .code-panel{flex:0 0 30vh;min-height:0;border-left:none}
+  .mobile-step-row{display:flex;flex:1;min-height:0}
+  .mobile-step-arrow{display:flex;align-items:center;justify-content:center;width:8vw;min-width:28px;max-width:36px;flex-shrink:0;background:var(--bg2);border:none;color:var(--text2);font-size:15px;cursor:pointer;transition:all .12s}
+  .mobile-step-arrow:hover{background:var(--bg3);color:var(--text)}
+  .mobile-step-arrow:disabled{opacity:.2;pointer-events:none}
+  .code-scroll{flex:1;min-width:0;padding:12px 14px}
+  .code-section{display:none!important;margin-bottom:0}
+  .code-section.mobile-step-visible{display:block!important}
   .code-footer{display:none}
-  .check-grid{grid-template-columns:1fr}
-  .grid-2col{grid-template-columns:1fr}
+  /* would otherwise compete with the step carousel for its already-tight height budget.
+     JS toggles this via inline style, which needs !important to actually override. */
+  #coding-warning{display:none!important}
+
+  @keyframes mobileSlideInR{from{transform:translateX(24px);opacity:0}to{transform:translateX(0);opacity:1}}
+  @keyframes mobileSlideInL{from{transform:translateX(-24px);opacity:0}to{transform:translateX(0);opacity:1}}
+  .mobile-slide-in-r{animation:mobileSlideInR .2s ease-out}
+  .mobile-slide-in-l{animation:mobileSlideInL .2s ease-out}
+
+  /* bigger buttons, tighter spacing, label lives inside the button (not above it) */
+  .field:has(.tg) .flabel{display:none}
+  .tg-btn{padding:16px 8px;font-size:14px;font-weight:500}
+  .field{margin-bottom:8px}
+  .check-grid{grid-template-columns:1fr 1fr;gap:6px}
+  .check-item{padding:12px 10px}
+  .grid-2col{grid-template-columns:1fr 1fr}
+
+  /* persistent bottom footer: Prev / Clear / Save & Next / Reddit / Read */
+  .mobile-footer{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;align-items:center}
+  .mobile-footer .btn{flex:1;justify-content:center;padding:13px 6px;font-size:13px}
+  .mobile-footer a.btn{flex:0 0 auto;padding:13px 18px}
+
+  /* toast would otherwise land right on top of the new persistent footer */
+  .toast{bottom:74px}
+
   .kbd-modal-body{grid-template-columns:1fr}
 
   .upload-box{padding:36px 20px}
@@ -472,8 +526,6 @@ textarea::placeholder{color:var(--text3)}
 
 /* touch targets + no keyboard hints on touch devices */
 @media (hover:none) and (pointer:coarse){
-  .tg-btn{padding:9px 8px}
-  .check-item{padding:9px 8px}
   .filter-btn{padding:7px 14px}
   .kh{display:none}
 }
@@ -503,31 +555,38 @@ textarea::placeholder{color:var(--text3)}
   <!-- TOPBAR -->
   <header class="topbar" id="topbar">
     <div class="topbar-row-main">
+      <!-- desktop: logo + progress render here (topbar-extra is display:contents, so on
+           desktop this is one continuous row). mobile: this row instead shows the compact
+           single line (subreddit / title / meta / reddit link / flag / toggle), and the
+           logo+progress physically live inside topbar-extra so they're hidden until the
+           toggle is expanded, per the mobile design. -->
+      <span class="subreddit-tag mobile-only-inline" id="m-sub">—</span>
+      <span class="m-title mobile-only-inline" id="m-title">—</span>
+      <span class="m-meta mobile-only-inline" id="m-meta"></span>
+      <a href="#" class="m-icon-btn mobile-only-inline" id="m-reddit-link" onclick="openRedditPeek(event)" title="Open on Reddit">↗</a>
+      <button class="m-icon-btn mobile-only-inline" id="m-flag-btn" onclick="toggleFlag()" title="Flag for review">⚑</button>
+      <button class="topbar-toggle" id="topbar-toggle-btn" onclick="toggleTopbarExpand()" title="Show more">▾</button>
+    </div>
+
+    <!-- mobile-only nav: kept out of the code-panel footer so it's never hidden behind the browser's bottom toolbar -->
+    <div class="topbar-nav-mobile">
+      <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
+      <button class="btn btn-skip btn-sm" onclick="saveAndNext(true)" title="Skip without saving">Skip</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
+    </div>
+
+    <div class="topbar-extra" id="topbar-extra">
       <span class="topbar-logo">TRANSFERENCE CODER</span>
       <div class="topbar-sep"></div>
       <div class="progress-wrap">
         <div class="progress-bar-bg"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
         <span class="progress-label" id="prog-label">0 / 0</span>
       </div>
-      <button class="topbar-toggle" id="topbar-toggle-btn" onclick="toggleTopbarExpand()" title="Show more">▾</button>
-    </div>
-
-    <!-- mobile-only nav: kept out of the code-panel footer so it's never hidden behind the browser's bottom toolbar -->
-    <div class="topbar-nav-mobile">
-      <button class="btn btn-ghost btn-sm" onclick="navigate(-1)" title="Previous">← Prev</button>
-      <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
-      <button class="btn btn-skip btn-sm" onclick="saveAndNext(true)" title="Skip without saving">Skip</button>
-      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
-      <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(-1)" title="Previous uncoded">↑ uncoded</button>
-      <button class="btn btn-ghost btn-sm" onclick="jumpUncoded(1)" title="Next uncoded">↓ uncoded</button>
-      <button class="btn btn-success btn-sm" onclick="downloadCSV()" title="Export CSV">↓ Export CSV</button>
-    </div>
-
-    <div class="topbar-extra" id="topbar-extra">
       <div class="topbar-sep"></div>
       <span id="coded-count" style="font-family:var(--mono);font-size:11px;color:var(--green)">0 coded</span>
       <span id="flag-count" style="font-family:var(--mono);font-size:11px;color:var(--amber)"></span>
       <span class="streak-badge" id="streak-badge">🔥 <span id="streak-num">0</span></span>
+      <span id="m-status" class="uncoded-badge mobile-only-inline">uncoded</span>
       <div class="topbar-sep"></div>
       <span id="session-timer" style="font-family:var(--mono);font-size:11px;color:var(--text3)" title="Session time">⏱ 0:00</span>
       <div class="topbar-sep"></div>
@@ -541,6 +600,12 @@ textarea::placeholder{color:var(--text3)}
         <span id="gsheets-label" style="font-family:var(--mono);font-size:10px;color:var(--text3)">Sheets: off</span>
         <button class="btn btn-ghost btn-sm" id="gsheets-btn" onclick="gsConnect()" title="Connect to Google Sheets">Connect Sheets</button>
       </div>
+      <!-- reading-speed control lives in the toggle on mobile; Read/Stop stay in the persistent footer.
+           Mirrors #tts-speed-label — kept in sync by updateTTSSpeed()/loadTTSSpeed(). -->
+      <div class="mobile-only-flex" style="align-items:center;gap:6px">
+        <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">speed</span>
+        <button class="tts-speed-label" id="m-tts-speed-label" onclick="toggleSpeedSlider()" title="Reading speed">1.0×</button>
+      </div>
       <div class="topbar-right">
         <div style="display:flex;align-items:center;gap:5px;margin-right:4px">
           <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">go to</span>
@@ -548,6 +613,8 @@ textarea::placeholder{color:var(--text3)}
           <button class="btn btn-ghost btn-sm" onclick="jumpTo()">↵</button>
         </div>
         <div class="topbar-sep"></div>
+        <button class="btn btn-ghost btn-sm mobile-only-inline" onclick="jumpUncoded(-1)" title="Previous uncoded">↑ uncoded</button>
+        <button class="btn btn-ghost btn-sm mobile-only-inline" onclick="jumpUncoded(1)" title="Next uncoded">↓ uncoded</button>
         <button class="btn btn-ghost btn-sm desktop-only" id="memo-btn" onclick="toggleMemo()" title="Research memo pad">📝 Memo <span class="kh">O</span></button>
         <button class="btn btn-ghost btn-sm desktop-only" onclick="toggleKbdModal()" title="Keyboard shortcuts (`)">⌨ Shortcuts <span class="kh">`</span></button>
         <button class="btn btn-ghost btn-sm" onclick="openNotesSearch()">🔍 Search Notes</button>
@@ -598,7 +665,14 @@ textarea::placeholder{color:var(--text3)}
 
     <!-- RIGHT: code panel -->
     <div class="code-panel" id="code-panel">
-      <div class="code-scroll" id="code-scroll">
+      <!-- mobile-only: slim divider between the reading area and the step carousel, with
+           an info button that always opens the codebook entry for whichever step is showing -->
+      <div class="mobile-step-divider">
+        <button class="info-icon" id="m-step-info-btn" title="Open codebook">i</button>
+      </div>
+      <div class="mobile-step-row">
+        <button class="mobile-step-arrow" id="m-step-prev" onclick="mobileStepNav(-1)" title="Previous step">◀</button>
+        <div class="code-scroll" id="code-scroll">
 
         <!-- STEP 1 -->
         <div class="code-section" id="sec-s1">
@@ -671,23 +745,36 @@ textarea::placeholder{color:var(--text3)}
               </select>
             </div>
             <div class="field">
-              <div class="flabel"><span class="fcode">gender</span></div>
-              <select id="gender">
+              <div class="flabel desktop-only"><span class="fcode">gender</span></div>
+              <select id="gender" class="desktop-only">
                 <option value="">—</option>
                 <option>male</option><option>female</option><option>other</option>
                 <option>not_disclosed</option>
               </select>
+              <div class="tg mobile-only-flex" id="gender-btns">
+                <button class="tg-btn" data-val="male" onclick="setBtnField('gender','male','gender-btns')">male</button>
+                <button class="tg-btn" data-val="female" onclick="setBtnField('gender','female','gender-btns')">female</button>
+                <button class="tg-btn" data-val="other" onclick="setBtnField('gender','other','gender-btns')">other</button>
+                <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('gender','not_disclosed','gender-btns')">n/d</button>
+              </div>
             </div>
             <div class="field" style="grid-column:1/-1">
-              <div class="flabel"><span class="fcode">relationship_status</span></div>
-              <select id="relationship_status">
+              <div class="flabel desktop-only"><span class="fcode">relationship_status</span></div>
+              <select id="relationship_status" class="desktop-only">
                 <option value="">—</option>
                 <option>single</option><option>in_relationship</option><option>married</option>
                 <option>divorced_separated</option><option>not_disclosed</option>
               </select>
+              <div class="tg mobile-only-flex" id="relationship_status-btns" style="flex-wrap:wrap">
+                <button class="tg-btn" data-val="single" onclick="setBtnField('relationship_status','single','relationship_status-btns')">single</button>
+                <button class="tg-btn" data-val="in_relationship" onclick="setBtnField('relationship_status','in_relationship','relationship_status-btns')">in relationship</button>
+                <button class="tg-btn" data-val="married" onclick="setBtnField('relationship_status','married','relationship_status-btns')">married</button>
+                <button class="tg-btn" data-val="divorced_separated" onclick="setBtnField('relationship_status','divorced_separated','relationship_status-btns')">divorced/sep.</button>
+                <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('relationship_status','not_disclosed','relationship_status-btns')">not disclosed</button>
+              </div>
             </div>
             <div class="field">
-              <div class="flabel"><span class="fcode">alt_tool_name</span></div>
+              <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">alt_tool_name</span><button class="btn btn-sm mobile-only-inline" style="padding:2px 8px;font-size:10px" onclick="setAllToolsMentioned()" title="Multiple tools mentioned — type them all in">+ all</button></div>
               <select id="alt_tool_name">
                 <option value="">— blank —</option>
                 <option>ChatGPT</option><option>Claude</option><option>Gemini</option>
@@ -741,11 +828,11 @@ textarea::placeholder{color:var(--text3)}
 
         <!-- MEDIA -->
         <div class="code-section" id="sec-media">
-          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div></div>
+          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div><a href="#" class="btn btn-sm mobile-only-inline" id="m-reddit-link-media" onclick="openRedditPeek(event)" style="margin-left:auto" title="Open on Reddit to check for media">↗ Reddit</a></div>
           <div class="field">
             <div class="flabel"><span class="fcode">media_present</span></div>
             <div class="tg">
-              <button class="tg-btn" id="mp-1" onclick="setTg('media_present','1','mp');showMediaDetail(true,true)">1 — present <span class="kh">/</span></button>
+              <button class="tg-btn" id="mp-1" onclick="setTg('media_present','1','mp');showMediaDetail(true,true);defaultMediaCount()">1 — present <span class="kh">/</span></button>
               <button class="tg-btn" id="mp-0" onclick="setTg('media_present','0','mp');showMediaDetail(false)">0 — absent <span class="kh">*</span></button>
             </div>
             <input type="hidden" id="media_present">
@@ -761,7 +848,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field">
                 <div class="flabel"><span class="fcode">media_count</span></div>
-                <input type="number" id="media_count" min="1" placeholder="0" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
+                <input type="number" inputmode="numeric" pattern="[0-9]*" id="media_count" min="1" placeholder="0" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
               </div>
               <div class="field">
                 <div class="flabel"><span class="fcode">media_shows_ai_persona</span></div>
@@ -800,7 +887,9 @@ textarea::placeholder{color:var(--text3)}
         </div>
 
         <div style="height:12px"></div>
-      </div><!-- end code-scroll -->
+        </div><!-- end code-scroll -->
+        <button class="mobile-step-arrow" id="m-step-next" onclick="mobileStepNav(1)" title="Next step">▶</button>
+      </div><!-- end mobile-step-row -->
 
       <!-- CONSISTENCY WARNING -->
       <div id="coding-warning">
@@ -819,6 +908,15 @@ textarea::placeholder{color:var(--text3)}
 
       </div>
     </div><!-- end code-panel -->
+
+    <!-- mobile-only persistent footer: always present regardless of scroll/step position -->
+    <div class="mobile-footer">
+      <button class="btn btn-ghost btn-sm" onclick="navigate(-1)" title="Previous post">◀</button>
+      <button class="btn btn-danger btn-sm" onclick="clearEntry()" title="Clear all coding for this entry">✕ Clear</button>
+      <button class="btn btn-primary btn-sm" onclick="saveAndNext(false)" title="Save & advance">Save &amp; Next</button>
+      <a href="#" class="btn btn-ghost btn-sm" id="m-reddit-link-footer" onclick="openRedditPeek(event)" title="Open on Reddit">↗</a>
+      <button class="btn btn-ghost btn-sm tts-btn" id="m-tts-btn" onclick="toggleTTS()" title="Read post aloud">▶ Read</button>
+    </div>
   </div><!-- end body-split -->
 
   <!-- OVERVIEW VIEW -->
@@ -1510,6 +1608,17 @@ function renderRow(){
   const status=g('ph-status');
   if(isCoded(row)){status.className='coded-badge';status.textContent='coded';}
   else{status.className='uncoded-badge';status.textContent='uncoded';}
+  // mobile single-line header mirrors
+  const mSub=g('m-sub'); if(mSub) mSub.textContent=row.subreddit||'—';
+  const mTitle=g('m-title'); if(mTitle) mTitle.textContent=row.title||'—';
+  const mMeta=g('m-meta'); if(mMeta) mMeta.textContent=formatReadMeta(row.post_text||row.text||'');
+  const mStatus=g('m-status');
+  if(mStatus){ mStatus.className=(isCoded(row)?'coded-badge':'uncoded-badge')+' mobile-only-inline'; mStatus.textContent=isCoded(row)?'coded':'uncoded'; }
+  ['m-reddit-link','m-reddit-link-footer','m-reddit-link-media'].forEach(id=>{
+    const el=g(id); if(!el) return;
+    if(row.permalink) el.href=row.permalink; else el.removeAttribute('href');
+    el.style.opacity=row.permalink?'1':'.4';
+  });
   clearForm();
   lastActiveSection = null;
   loadRowIntoForm(row);
@@ -1517,6 +1626,17 @@ function renderRow(){
   updateFlagButton();
   g('code-scroll').scrollTop=0;
   closeSpeedSlider();
+  mobileInitStepForRow();
+}
+
+// Word-count-based estimate (~200wpm) plus char count, for the compact mobile header line
+function formatReadMeta(text){
+  const chars=text.length;
+  if(!chars) return '';
+  const words=text.trim().split(/\s+/).filter(Boolean).length;
+  const totalSec=Math.max(1,Math.round(words/200*60));
+  const m=Math.floor(totalSec/60), s=totalSec%60;
+  return chars+' chars · '+m+':'+String(s).padStart(2,'0');
 }
 
 function clearForm(){
@@ -1545,6 +1665,8 @@ function loadRowIntoForm(row){
   ['age_range','gender','relationship_status','alt_tool_type','media_type','media_content_type','media_emotion_expressed','media_shows_ai_persona','media_shows_conversation','media_conversation_topic','media_relevant_to_transference','media_user_ai_dynamic'].forEach(id=>{
     const el=g(id);if(el&&row[id]!==undefined)el.value=row[id];
   });
+  refreshBtnField('gender','gender-btns');
+  refreshBtnField('relationship_status','relationship_status-btns');
   const atn=row.alt_tool_name||'';
   const atnSel=g('alt_tool_name');
   let matched=false;
@@ -1601,6 +1723,7 @@ function chkToggle(fieldId,cardId,event){
 function updateBranching(){
   updateStepStates();
   scrollToActiveSection();
+  mobileSyncActiveStep();
   updateWarningBanner();
 }
 
@@ -1837,6 +1960,143 @@ function scrollToActiveSection(){
     scroll.scrollTo({ top: Math.max(0, elTop - 16), behavior: 'smooth' });
   }
 }
+// ── MOBILE STEP CAROUSEL ──
+// On mobile, only one .code-section is visible at a time (the rest are hidden via
+// CSS), flanked by arrow buttons and swipeable. This reuses the same 'state-*'
+// classes updateStepStates() already computes — it doesn't introduce a second
+// source of truth for which step is applicable.
+const MOBILE_STEP_IDS = ['sec-s1','sec-s2','sec-s3','sec-s4','sec-s5','sec-s6','sec-s7','sec-media'];
+const MOBILE_STEP_KEYS = {'sec-s1':'s1','sec-s2':'s2','sec-s3':'s3','sec-s4':'s4','sec-s5':'s5','sec-s6':'s6','sec-s7':'s7','sec-media':'media'};
+// Only these steps auto-advance the carousel forward when they become "done" — each
+// is a single yes/no-style choice. Steps 5/6/7/media hold multiple independent
+// fields (metadata, multi-select types, free text, media details), so reaching
+// "done" there doesn't mean the user is finished — those only advance via the
+// arrows or a swipe.
+const MOBILE_AUTOADVANCE_STEPS = ['sec-s1','sec-s2','sec-s3','sec-s4'];
+let mobileStepId = 'sec-s1';
+
+function mobileVisibleSteps(){
+  return MOBILE_STEP_IDS.filter(id=>{
+    const el=g(id);
+    return el && !el.classList.contains('state-na');
+  });
+}
+
+function mobileRenderStep(direction){
+  MOBILE_STEP_IDS.forEach(id=>{
+    const el=g(id);
+    if(!el) return;
+    el.classList.toggle('mobile-step-visible', id===mobileStepId);
+  });
+  const el = g(mobileStepId);
+  if(el && direction){
+    el.classList.remove('mobile-slide-in-l','mobile-slide-in-r');
+    void el.offsetWidth; // restart the animation even if the same class is reapplied
+    el.classList.add(direction>0?'mobile-slide-in-r':'mobile-slide-in-l');
+  }
+  const infoBtn = g('m-step-info-btn');
+  if(infoBtn) infoBtn.onclick = ()=>openCodebook(MOBILE_STEP_KEYS[mobileStepId]||'s1');
+  const steps = mobileVisibleSteps();
+  const idx = steps.indexOf(mobileStepId);
+  const prevBtn=g('m-step-prev'), nextBtn=g('m-step-next');
+  if(prevBtn) prevBtn.disabled = idx<=0;
+  if(nextBtn) nextBtn.disabled = idx===-1 || idx>=steps.length-1;
+}
+
+function mobileGoToFirstVisible(){
+  const steps = mobileVisibleSteps();
+  if(!steps.includes(mobileStepId)) mobileStepId = steps[0]||'sec-s1';
+  mobileRenderStep(0);
+}
+
+function mobileStepNav(dir){
+  const steps = mobileVisibleSteps();
+  let idx = steps.indexOf(mobileStepId);
+  if(idx===-1) idx=0;
+  const next = idx+dir;
+  if(next<0||next>=steps.length) return;
+  mobileStepId = steps[next];
+  mobileRenderStep(dir);
+}
+
+// Called once per renderRow() so a freshly-loaded post opens on whichever step
+// actually needs attention (mirrors desktop's scrollToActiveSection target).
+function mobileInitStepForRow(){
+  const active = MOBILE_STEP_IDS.find(id=>{ const el=g(id); return el && el.classList.contains('state-active'); });
+  mobileStepId = active || 'sec-s1';
+  mobileRenderStep(0);
+}
+
+// Called from updateBranching() every time any field changes. Keeps the carousel
+// pointed at whatever's active, and auto-advances forward for the single-choice
+// gating steps once they're answered.
+function mobileSyncActiveStep(){
+  const el = g(mobileStepId);
+  if(el && el.classList.contains('state-na')){ mobileGoToFirstVisible(); return; }
+  if(el && el.classList.contains('state-done') && MOBILE_AUTOADVANCE_STEPS.includes(mobileStepId)){
+    const steps = mobileVisibleSteps();
+    const idx = steps.indexOf(mobileStepId);
+    if(idx>=0 && idx<steps.length-1){ mobileStepId=steps[idx+1]; mobileRenderStep(1); }
+  }
+}
+
+// Swipe support on the step carousel (left = next step, right = previous step)
+(function initMobileStepSwipe(){
+  let startX=null, startY=null;
+  const target = document.getElementById('code-scroll');
+  if(!target) return;
+  target.addEventListener('touchstart', e=>{
+    const t=e.touches[0]; startX=t.clientX; startY=t.clientY;
+  }, {passive:true});
+  target.addEventListener('touchend', e=>{
+    if(startX==null) return;
+    const t=e.changedTouches[0];
+    const dx=t.clientX-startX, dy=t.clientY-startY;
+    startX=null;
+    if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.5) mobileStepNav(dx<0?1:-1);
+  }, {passive:true});
+})();
+
+// ── MOBILE BUTTON-GROUP FIELDS (gender, relationship_status) ──
+// These fields stay <select>s (single source of truth for value/collectRow/
+// loadRowIntoForm) on desktop; on mobile the select is hidden and a button group
+// drives the same element's .value instead.
+function setBtnField(fieldId,val,groupId){
+  const field=g(fieldId);
+  if(!field) return;
+  field.value=val;
+  refreshBtnField(fieldId,groupId);
+  scheduleAutosave();
+  updateWarningBanner();
+}
+
+function refreshBtnField(fieldId,groupId){
+  const field=g(fieldId), group=g(groupId);
+  if(!field||!group) return;
+  group.querySelectorAll('.tg-btn').forEach(btn=>{
+    btn.classList.toggle('sel-1', field.value!=='' && btn.dataset.val===field.value);
+  });
+}
+
+// ── "+ all" MULTIPLE-TOOLS SHORTCUT ──
+// Switches alt_tool_name into its free-text mode so the coder can list every tool
+// mentioned (comma-separated), per the coding guide's "list all separated by
+// commas" rule for posts that reference more than one alternative tool.
+function setAllToolsMentioned(){
+  const sel=g('alt_tool_name');
+  sel.value='_other_';
+  g('alt-tool-custom-wrap').style.display='block';
+  const custom=g('alt_tool_name_custom');
+  custom.focus();
+  scheduleAutosave();
+}
+
+// ── MEDIA COUNT DEFAULT ──
+function defaultMediaCount(){
+  const el=g('media_count');
+  if(el && !el.value) el.value='1';
+}
+
 function showMediaDetail(show,focus){
   g('media-detail').style.display=show?'block':'none';
   if(show&&focus){setTimeout(()=>{const el=g('media_type');if(el)el.focus();},50);}
@@ -2062,6 +2322,8 @@ function setAllNotDisclosed(){
   g('alt_tool_name').value = '';
   g('alt_tool_type').value = '';
   g('alt-tool-custom-wrap').style.display = 'none';
+  refreshBtnField('gender','gender-btns');
+  refreshBtnField('relationship_status','relationship_status-btns');
   updateStepStates();
   scheduleAutosave();
   toast('Step 5 set to not disclosed');
@@ -2093,6 +2355,8 @@ function clearStep5(){
   g('alt_tool_type').value = '';
   g('alt_tool_name_custom').value = '';
   g('alt-tool-custom-wrap').style.display = 'none';
+  refreshBtnField('gender','gender-btns');
+  refreshBtnField('relationship_status','relationship_status-btns');
   updateStepStates();
   scheduleAutosave();
   toast('Step 5 cleared');
@@ -2263,14 +2527,14 @@ function stopTTS(){
 function updateTTSUI(){
   const btn  = g('tts-btn');
   const stop = g('tts-stop-btn');
+  const mBtn = g('m-tts-btn');
   const paused = window.speechSynthesis.paused;
-  if(ttsSpeaking){
-    btn.textContent='⏸ Pause'; btn.classList.add('playing'); stop.style.display='';
-  } else if(paused){
-    btn.textContent='▶ Resume'; btn.classList.add('playing'); stop.style.display='';
-  } else {
-    btn.textContent='▶ Read'; btn.classList.remove('playing'); stop.style.display='none';
-  }
+  let label, playing;
+  if(ttsSpeaking){ label='⏸ Pause'; playing=true; stop.style.display=''; }
+  else if(paused){ label='▶ Resume'; playing=true; stop.style.display=''; }
+  else{ label='▶ Read'; playing=false; stop.style.display='none'; }
+  btn.textContent=label; btn.classList.toggle('playing',playing);
+  if(mBtn){ mBtn.textContent=label; mBtn.classList.toggle('playing',playing); }
 }
 
 const TTS_SPEED_KEY = 'transference_tts_speed_v1';
@@ -2309,6 +2573,7 @@ function closeSpeedSlider(){
 function updateTTSSpeed(){
   const val = parseFloat(g('tts-speed').value).toFixed(1);
   g('tts-speed-label').textContent = val+'×';
+  const mLabel=g('m-tts-speed-label'); if(mLabel) mLabel.textContent = val+'×';
   try{ localStorage.setItem(TTS_SPEED_KEY, val); }catch(e){}
   if(ttsSpeaking){ stopTTS(); setTimeout(startTTS, 80); }
 }
@@ -2322,6 +2587,7 @@ function loadTTSSpeed(){
   if(isNaN(num) || num < parseFloat(slider.min) || num > parseFloat(slider.max)) return;
   slider.value = num.toFixed(1);
   g('tts-speed-label').textContent = num.toFixed(1)+'×';
+  const mLabel=g('m-tts-speed-label'); if(mLabel) mLabel.textContent = num.toFixed(1)+'×';
 }
 
 // TTS stop is now handled directly inside navigate() and jumpTo()
@@ -2645,6 +2911,8 @@ function updateFlagButton(){
   const flagged = rows[idx] && rows[idx]._flag;
   btn.classList.toggle('flagged', !!flagged);
   btn.textContent = flagged ? '⚑ Flagged' : '⚑ Flag';
+  const mBtn = g('m-flag-btn');
+  if(mBtn) mBtn.classList.toggle('flagged', !!flagged);
 }
 
 // ── SESSION TIMER ──
