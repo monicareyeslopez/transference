@@ -48,7 +48,7 @@ body{position:fixed;inset:0;width:100%;height:100%;font-family:var(--sans);backg
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
 /* wrapper divs exist for mobile grouping only — on desktop they're transparent to the flex layout */
 .topbar-row-main,.topbar-extra{display:contents}
-.topbar-nav-mobile,.topbar-toggle,.mobile-step-divider,.mobile-step-arrow,.mobile-footer{display:none}
+.topbar-nav-mobile,.topbar-toggle,.mobile-step-divider,.mobile-step-arrow,.mobile-footer,#m-warning-bar,#m-warning-overlay{display:none}
 /* utility classes that must always win regardless of what other display-setting
    classes (.tg, .btn, .uncoded-badge...) also sit on the same element */
 .mobile-only-inline,.mobile-only-flex{display:none!important}
@@ -471,20 +471,36 @@ textarea::placeholder{color:var(--text3)}
   /* slim divider + info button between the reading area and the step carousel */
   .mobile-step-divider{display:flex;align-items:center;justify-content:flex-end;padding:5px 14px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-shrink:0}
 
-  /* step carousel: one .code-section visible at a time, ~25-30% of the screen,
-     flanked by full-height arrow buttons (~10% of width combined) */
-  .code-panel{flex:0 0 30vh;min-height:0;border-left:none}
+  /* step carousel: one .code-section visible at a time, flanked by full-height
+     arrow buttons (~10% of width combined) */
+  .code-panel{flex:0 0 38vh;min-height:0;border-left:none}
   .mobile-step-row{display:flex;flex:1;min-height:0}
   .mobile-step-arrow{display:flex;align-items:center;justify-content:center;width:8vw;min-width:28px;max-width:36px;flex-shrink:0;background:var(--bg2);border:none;color:var(--text2);font-size:15px;cursor:pointer;transition:all .12s}
   .mobile-step-arrow:hover{background:var(--bg3);color:var(--text)}
   .mobile-step-arrow:disabled{opacity:.2;pointer-events:none}
-  .code-scroll{flex:1;min-width:0;padding:12px 14px}
+  .code-scroll{flex:1;min-width:0;padding:12px 14px;display:flex;flex-direction:column}
   .code-section{display:none!important;margin-bottom:0}
-  .code-section.mobile-step-visible{display:block!important}
+  /* fill the carousel height instead of sitting at the top with empty space below —
+     only fields built around a .tg choice (steps 1-4, media_present) stretch; plain
+     selects/textareas (metadata dropdowns, notes) keep their natural size */
+  .code-section.mobile-step-visible{display:flex!important;flex-direction:column;flex:1;min-height:0}
+  .field:has(.tg){flex:1;display:flex;flex-direction:column}
+  .field:has(.tg) .tg{flex:1}
   .code-footer{display:none}
-  /* would otherwise compete with the step carousel for its already-tight height budget.
-     JS toggles this via inline style, which needs !important to actually override. */
+  /* the desktop multi-line banner is replaced by a single-line, tap-to-expand
+     version below — it would otherwise grow as more issues turn up and compete
+     with the carousel for its already-tight height budget. JS toggles the desktop
+     one via inline style, which needs !important here to actually override. */
   #coding-warning{display:none!important}
+  #m-warning-bar{display:none;width:100%;align-items:center;padding:9px 14px;background:var(--amber-bg);border-top:1px solid var(--amber-border);border-left:none;border-right:none;border-bottom:none;color:var(--amber);font-size:12px;font-family:var(--sans);cursor:pointer;text-align:left;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #m-warning-bar.show{display:flex}
+  #m-warning-overlay{display:none;position:fixed;inset:0;z-index:750;background:var(--bg);flex-direction:column}
+  #m-warning-overlay.open{display:flex}
+  .m-warning-overlay-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0;font-size:14px;font-weight:500;color:var(--amber)}
+  .m-warning-overlay-header button{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:14px;cursor:pointer}
+  .m-warning-overlay-body{flex:1;overflow-y:auto;padding:16px;list-style:none}
+  .m-warning-overlay-body li{margin-bottom:10px;padding-left:14px;position:relative;color:var(--amber);font-size:13px;line-height:1.5}
+  .m-warning-overlay-body li::before{content:'•';position:absolute;left:0}
 
   @keyframes mobileSlideInR{from{transform:translateX(24px);opacity:0}to{transform:translateX(0);opacity:1}}
   @keyframes mobileSlideInL{from{transform:translateX(-24px);opacity:0}to{transform:translateX(0);opacity:1}}
@@ -493,11 +509,28 @@ textarea::placeholder{color:var(--text3)}
 
   /* bigger buttons, tighter spacing, label lives inside the button (not above it) */
   .field:has(.tg) .flabel{display:none}
-  .tg-btn{padding:16px 8px;font-size:14px;font-weight:500}
+  /* flex/grid items default to min-width:auto, so a long label (e.g. "divorced/
+     separated", "Dependency / separation") forces the row wider than the screen
+     instead of wrapping. A small min-width (rather than 0) lets multi-word labels
+     wrap onto a second line within the button, or the whole row wrap to a new
+     line once there's no room — without shrinking so far that single words start
+     breaking mid-syllable. */
+  .tg-btn{padding:18px 6px;font-size:14px;font-weight:500;min-width:64px;white-space:normal;overflow-wrap:break-word}
   .field{margin-bottom:8px}
   .check-grid{grid-template-columns:1fr 1fr;gap:6px}
-  .check-item{padding:12px 10px}
-  .grid-2col{grid-template-columns:1fr 1fr}
+  .check-item{padding:14px 10px;min-width:0}
+  .check-item > div{min-width:0}
+  .cil,.cis{min-width:0;overflow-wrap:break-word}
+  /* one field per line — two selects/button-groups side by side (e.g. age_range +
+     gender) got too cramped to read or tap comfortably */
+  .grid-2col{grid-template-columns:1fr}
+
+  /* no keyboard-shortcut hints on a touchscreen */
+  .kh{display:none!important}
+
+  /* only the divider's info button shows on mobile — the per-step inline "i" was
+     showing a second, redundant info icon right in the step header */
+  .csec-head .info-wrap{display:none}
 
   /* persistent bottom footer: Prev / Clear / Save & Next / Reddit / Read */
   .mobile-footer{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;align-items:center}
@@ -563,7 +596,6 @@ textarea::placeholder{color:var(--text3)}
       <span class="subreddit-tag mobile-only-inline" id="m-sub">—</span>
       <span class="m-title mobile-only-inline" id="m-title">—</span>
       <span class="m-meta mobile-only-inline" id="m-meta"></span>
-      <a href="#" class="m-icon-btn mobile-only-inline" id="m-reddit-link" onclick="openRedditPeek(event)" title="Open on Reddit">↗</a>
       <button class="m-icon-btn mobile-only-inline" id="m-flag-btn" onclick="toggleFlag()" title="Flag for review">⚑</button>
       <button class="topbar-toggle" id="topbar-toggle-btn" onclick="toggleTopbarExpand()" title="Show more">▾</button>
     </div>
@@ -806,13 +838,13 @@ textarea::placeholder{color:var(--text3)}
           <div id="s6-lock" class="locked-notice" style="display:none">transference = 0 → leave blank</div>
           <div id="s6-field">
             <div class="check-grid">
-              <label class="check-item" id="ci-ero" onclick="chkToggle('type_erotic_romantic','ci-ero',event)"><input type="checkbox" id="type_erotic_romantic" onclick="event.stopPropagation()"><div><div class="cil">Erotic / romantic <span class="kh">E</span></div><div class="cis">type_erotic_romantic</div></div></label>
-              <label class="check-item" id="ci-dep" onclick="chkToggle('type_dependency_separation','ci-dep',event)"><input type="checkbox" id="type_dependency_separation" onclick="event.stopPropagation()"><div><div class="cil">Dependency / separation <span class="kh">D</span></div><div class="cis">type_dependency_separation</div></div></label>
-              <label class="check-item" id="ci-ide" onclick="chkToggle('type_idealization_rescue','ci-ide',event)"><input type="checkbox" id="type_idealization_rescue" onclick="event.stopPropagation()"><div><div class="cil">Idealization / rescue <span class="kh">I</span></div><div class="cis">type_idealization_rescue</div></div></label>
-              <label class="check-item" id="ci-sel" onclick="chkToggle('type_selfworth_validation','ci-sel',event)"><input type="checkbox" id="type_selfworth_validation" onclick="event.stopPropagation()"><div><div class="cil">Self-worth / validation <span class="kh">V</span></div><div class="cis">type_selfworth_validation</div></div></label>
-              <label class="check-item" id="ci-rup" onclick="chkToggle('type_rupture_devaluation','ci-rup',event)"><input type="checkbox" id="type_rupture_devaluation" onclick="event.stopPropagation()"><div><div class="cil">Rupture / devaluation <span class="kh">R</span></div><div class="cis">type_rupture_devaluation</div></div></label>
-              <label class="check-item" id="ci-fus" onclick="chkToggle('type_identity_fusion','ci-fus',event)"><input type="checkbox" id="type_identity_fusion" onclick="event.stopPropagation()"><div><div class="cil">Identity fusion <span class="kh">U</span></div><div class="cis">type_identity_fusion</div></div></label>
-              <label class="check-item full" id="ci-oth" onclick="chkToggle('type_other','ci-oth',event)"><input type="checkbox" id="type_other" onclick="event.stopPropagation()"><div><div class="cil">Other <span class="kh">T</span></div><div class="cis">type_other — describe in notes</div></div></label>
+              <label class="check-item" id="ci-ero" onclick="chkToggle('type_erotic_romantic','ci-ero',event)"><input type="checkbox" id="type_erotic_romantic" onclick="event.stopPropagation()"><div><div class="cil">💗 Erotic / romantic <span class="kh">E</span></div><div class="cis">type_erotic_romantic</div></div></label>
+              <label class="check-item" id="ci-dep" onclick="chkToggle('type_dependency_separation','ci-dep',event)"><input type="checkbox" id="type_dependency_separation" onclick="event.stopPropagation()"><div><div class="cil">👫 Dependency / separation <span class="kh">D</span></div><div class="cis">type_dependency_separation</div></div></label>
+              <label class="check-item" id="ci-ide" onclick="chkToggle('type_idealization_rescue','ci-ide',event)"><input type="checkbox" id="type_idealization_rescue" onclick="event.stopPropagation()"><div><div class="cil">💡 Idealization / rescue <span class="kh">I</span></div><div class="cis">type_idealization_rescue</div></div></label>
+              <label class="check-item" id="ci-sel" onclick="chkToggle('type_selfworth_validation','ci-sel',event)"><input type="checkbox" id="type_selfworth_validation" onclick="event.stopPropagation()"><div><div class="cil">👊 Self-worth / validation <span class="kh">V</span></div><div class="cis">type_selfworth_validation</div></div></label>
+              <label class="check-item" id="ci-rup" onclick="chkToggle('type_rupture_devaluation','ci-rup',event)"><input type="checkbox" id="type_rupture_devaluation" onclick="event.stopPropagation()"><div><div class="cil">😠 Rupture / devaluation <span class="kh">R</span></div><div class="cis">type_rupture_devaluation</div></div></label>
+              <label class="check-item" id="ci-fus" onclick="chkToggle('type_identity_fusion','ci-fus',event)"><input type="checkbox" id="type_identity_fusion" onclick="event.stopPropagation()"><div><div class="cil">🫀🧠 Identity fusion <span class="kh">U</span></div><div class="cis">type_identity_fusion</div></div></label>
+              <label class="check-item full" id="ci-oth" onclick="chkToggle('type_other','ci-oth',event)"><input type="checkbox" id="type_other" onclick="event.stopPropagation()"><div><div class="cil">💬 Other <span class="kh">T</span></div><div class="cis">type_other — describe in notes</div></div></label>
             </div>
           </div>
         </div>
@@ -836,8 +868,8 @@ textarea::placeholder{color:var(--text3)}
               <button class="tg-btn" id="mp-0" onclick="setTg('media_present','0','mp');showMediaDetail(false)">0 — absent <span class="kh">*</span></button>
             </div>
             <input type="hidden" id="media_present">
-            <button class="btn btn-sm" onclick="applyRomanticScreenshotPreset()" title="Fill chat_screenshot / love_affection / romantic_sexual / relevant=yes / intimacy_closeness" style="margin-top:6px">💗 Romantic Screenshot <span class="kh">X</span></button>
-            <button class="btn btn-sm" onclick="applyAiAvatarPreset()" title="Fill ai_generated_avatar / persona shown / no conversation shown" style="margin-top:6px">🖼 AI Avatar Display <span class="kh">Y</span></button>
+            <button class="btn btn-sm" onclick="applyRomanticScreenshotPreset()" title="Fill chat_screenshot / love_affection / romantic_sexual / relevant=yes / intimacy_closeness" style="margin-top:6px">💗 <span class="desktop-only">Romantic Screenshot</span><span class="mobile-only-inline">Chat</span> <span class="kh">X</span></button>
+            <button class="btn btn-sm" onclick="applyAiAvatarPreset()" title="Fill ai_generated_avatar / persona shown / no conversation shown" style="margin-top:6px">🖼 <span class="desktop-only">AI Avatar Display</span><span class="mobile-only-inline">Avatar</span> <span class="kh">Y</span></button>
             <button class="btn btn-sm" onclick="applyLoveSongPreset()" title="Fill audio / ai_generated_art / love_affection / no persona or conversation shown / relevant=yes / intimacy_closeness" style="margin-top:6px">🎵 Love Song <span class="kh">L</span></button>
           </div>
           <div id="media-detail" style="display:none">
@@ -895,6 +927,15 @@ textarea::placeholder{color:var(--text3)}
       <div id="coding-warning">
         <div class="warn-title">⚠ Check before saving</div>
         <ul id="coding-warning-list"></ul>
+      </div>
+      <!-- mobile-only: single line, never grows — tap to see the full list -->
+      <button id="m-warning-bar" onclick="toggleMobileWarningDetail(true)"><span id="m-warning-text">⚠ Check before saving</span></button>
+      <div id="m-warning-overlay">
+        <div class="m-warning-overlay-header">
+          <span>⚠ Check before saving</span>
+          <button onclick="toggleMobileWarningDetail(false)" title="Close">✕</button>
+        </div>
+        <ul class="m-warning-overlay-body" id="m-warning-overlay-list"></ul>
       </div>
 
       <!-- CODE FOOTER -->
@@ -1626,17 +1667,17 @@ function renderRow(){
   updateFlagButton();
   g('code-scroll').scrollTop=0;
   closeSpeedSlider();
+  toggleMobileWarningDetail(false);
   mobileInitStepForRow();
 }
 
-// Word-count-based estimate (~200wpm) plus char count, for the compact mobile header line
+// Word-count-based estimate (~200wpm), for the compact mobile header line
 function formatReadMeta(text){
-  const chars=text.length;
-  if(!chars) return '';
+  if(!text.length) return '';
   const words=text.trim().split(/\s+/).filter(Boolean).length;
   const totalSec=Math.max(1,Math.round(words/200*60));
   const m=Math.floor(totalSec/60), s=totalSec%60;
-  return chars+' chars · '+m+':'+String(s).padStart(2,'0');
+  return m+':'+String(s).padStart(2,'0')+' est';
 }
 
 function clearForm(){
@@ -1918,12 +1959,26 @@ function updateWarningBanner(){
 
   const banner = g('coding-warning');
   const list   = g('coding-warning-list');
+  const mBar   = g('m-warning-bar');
+  const mList  = g('m-warning-overlay-list');
   if(issues.length){
     list.innerHTML = issues.map(i=>`<li>${i}</li>`).join('');
     banner.style.display = 'block';
+    if(mList) mList.innerHTML = issues.map(i=>`<li>${i}</li>`).join('');
+    if(mBar){
+      g('m-warning-text').textContent = '⚠ '+issues.length+' issue'+(issues.length>1?'s':'')+' — tap to view';
+      mBar.classList.add('show');
+    }
   } else {
     banner.style.display = 'none';
+    if(mBar) mBar.classList.remove('show');
+    toggleMobileWarningDetail(false); // auto-close the detail view once everything's resolved
   }
+}
+
+function toggleMobileWarningDetail(open){
+  const el = g('m-warning-overlay');
+  if(el) el.classList.toggle('open', open);
 }
 
 function hasConsistencyIssues(row){
