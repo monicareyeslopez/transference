@@ -637,12 +637,12 @@ textarea::placeholder{color:var(--text3)}
 <!-- UPLOAD SCREEN -->
 <div id="upload-screen">
   <div class="upload-box" id="upload-drop">
-    <div class="upload-icon">⬆</div>
-    <h2>Load your CSV</h2>
-    <p>Drop your blind_coding CSV here, or click to browse.<br>Pre-filled post data loads automatically.</p>
-    <label for="file-input" class="btn btn-primary" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin:0 auto">Choose file</label>
+    <div class="upload-icon">📊</div>
+    <h2>Load your coding sheet</h2>
+    <p>Everything's saved to Google Sheets — connect it to pick up right where you left off.</p>
+    <button class="btn btn-primary" id="gsheets-load-btn" onclick="loadFromSheets()" style="margin:0 auto">⇩ Load from Google Sheets</button>
     <div style="font-size:11px;color:var(--text3);margin:16px 0 10px">— or —</div>
-    <button class="btn btn-ghost" id="gsheets-load-btn" onclick="loadFromSheets()" style="margin:0 auto">⇩ Load from Google Sheets</button>
+    <label for="file-input" class="btn btn-ghost" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin:0 auto;font-size:12px">Upload a CSV instead</label>
   </div>
   <input type="file" id="file-input" accept=".csv" onchange="loadCSV(this)" style="display:none">
   <p style="font-size:12px;color:var(--text3)">All data stays in your browser — nothing is uploaded anywhere.</p>
@@ -1159,8 +1159,8 @@ textarea::placeholder{color:var(--text3)}
           <div class="howto-step">
             <div class="howto-num">1</div>
             <div class="howto-step-body">
-              <h3>Upload your CSV</h3>
-              <p>On the start screen, drag and drop your <code>blind_coding</code> CSV file or click "Choose file." The app loads all 1,000 posts automatically and opens at your first uncoded entry. Post text is pre-filled — you only need to fill in the coding columns.</p>
+              <h3>Connect your sheet</h3>
+              <p>On the start screen, click "Load from Google Sheets" — the app loads all your posts automatically and opens at your first uncoded entry, with progress saved back to the sheet as you go. Post text is pre-filled — you only need to fill in the coding columns. A CSV upload is also available if you'd rather work from a file.</p>
             </div>
           </div>
 
@@ -1213,8 +1213,8 @@ textarea::placeholder{color:var(--text3)}
           <div class="howto-step">
             <div class="howto-num">7</div>
             <div class="howto-step-body">
-              <h3>Export your data</h3>
-              <p>Click <code>↓ Export CSV</code> in the topbar at the end of every session. Re-upload that exported file next session — the app reads whatever is already coded and picks up where you left off. Your progress also autosaves to your browser's local storage as a backup.</p>
+              <h3>Your data is saved automatically</h3>
+              <p>Every save pushes straight to your connected Google Sheet, so there's nothing to remember at the end of a session — just close the tab and pick up where you left off next time. Your progress also autosaves to your browser's local storage as a backup, and <code>↓ Export CSV</code> is still there in the topbar if you ever want a file copy.</p>
             </div>
           </div>
 
