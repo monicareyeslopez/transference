@@ -317,12 +317,12 @@ textarea::placeholder{color:var(--text3)}
 /* OVERVIEW */
 #overview-panel{display:none;flex:1;overflow-y:auto;padding:24px 28px}
 .ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
-.ov-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .15s}
+.ov-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .15s;min-width:0}
 .ov-card:hover{border-color:var(--border3);background:var(--bg3)}
 .ov-card.coded{border-left:2px solid var(--green)}
 .ov-card-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .ov-num{font-family:var(--mono);font-size:10px;color:var(--text3)}
-.ov-title{font-size:12px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.ov-title{font-size:12px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
 .ov-sub{font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:20px;background:var(--accent-bg);color:var(--accent2);border:1px solid var(--accent-border)}
 .ov-preview{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* OVERVIEW PROGRESS BAR */
@@ -595,6 +595,16 @@ textarea::placeholder{color:var(--text3)}
   .bar-label,.bar-label-left{width:64px}
 
   #overview-view > div{padding-left:16px;padding-right:16px}
+
+  /* on a narrow screen the charts row alone can run 500px+ tall, which left the post
+     grid — previously its own separate flex:1/overflow-y:auto region below the
+     (non-shrinking) header+stats+charts — squeezed down to a sliver only a few dozen
+     px tall: technically scrollable, but not enough visible room to notice or grab.
+     Instead let the whole view (sticky header, everything else flowing normally)
+     scroll as one region, so there's always plenty of scrollable space. */
+  #overview-view{display:block!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch}
+  #overview-view > div:first-child{position:sticky;top:0;z-index:5;background:var(--bg)}
+  #overview-view > div:last-child{flex:none!important;overflow:visible!important;height:auto!important}
 }
 
 @media (max-width:480px){
@@ -1722,13 +1732,30 @@ function renderRow(){
   mobileInitStepForRow();
 }
 
-// Word-count-based estimate (~200wpm), for the compact mobile header line
+// Word-count-based estimate (~200wpm), shared by the compact mobile header line
+// and the Overview time-remaining chart below.
+function estimateReadSeconds(text){
+  if(!text) return 0;
+  const words=text.trim().split(/\s+/).filter(Boolean).length;
+  return words ? Math.max(1,Math.round(words/200*60)) : 0;
+}
+
 function formatReadMeta(text){
   if(!text.length) return '';
-  const words=text.trim().split(/\s+/).filter(Boolean).length;
-  const totalSec=Math.max(1,Math.round(words/200*60));
+  const totalSec=estimateReadSeconds(text);
   const m=Math.floor(totalSec/60), s=totalSec%60;
   return m+':'+String(s).padStart(2,'0')+' est';
+}
+
+// Formats a duration in seconds as "1h 24m" / "38m" / "45s" — used for the
+// Overview reading-time chart, where sums across hundreds of posts can run
+// well past what M:SS reads naturally.
+function formatDuration(totalSeconds){
+  const totalMin=Math.round(totalSeconds/60);
+  const h=Math.floor(totalMin/60), m=totalMin%60;
+  if(h>0) return `${h}h ${m}m`;
+  if(totalMin>0) return `${totalMin}m`;
+  return `${Math.max(1,Math.round(totalSeconds))}s`;
 }
 
 function clearForm(){
@@ -2557,6 +2584,20 @@ function renderOverview(){
 
   const onlyClass = (wTPos>0&&wTNeg===0&&wRem===0)||(wTNeg>0&&wTPos===0&&wRem===0)||(wRem>0&&wTPos===0&&wTNeg===0) ? 'only' : '';
 
+  // Reading-time estimate: sum each post's ~200wpm estimate (same formula as the
+  // mobile header's per-post "M:SS est") to get a total-time-remaining readout,
+  // shown as a bar just like the transference-coded one above.
+  let totalSec=0, codedSec=0;
+  rows.forEach(r=>{
+    const sec=estimateReadSeconds(r.post_text||r.text||'');
+    totalSec+=sec;
+    if(isCoded(r)) codedSec+=sec;
+  });
+  const remainingSec = totalSec-codedSec;
+  const wCodedSec = totalSec ? (codedSec/totalSec*100) : 0;
+  const wRemSec = totalSec ? (remainingSec/totalSec*100) : 0;
+  const timeOnlyClass = (wCodedSec>0&&wRemSec===0)||(wRemSec>0&&wCodedSec===0) ? 'only' : '';
+
   g('ov-stats').innerHTML = `
     <div class="ov-progress-bar">
       ${wTPos>0  ? `<div class="ov-seg" style="width:${wTPos}%;background:var(--accent)" title="Transference = 1: ${tPos}"></div>` : ''}
@@ -2570,6 +2611,15 @@ function renderOverview(){
       <div class="ov-legend-item"><div class="ov-legend-dot" style="background:var(--bg4);border:1px solid var(--border2)"></div>remaining <span class="ov-legend-val">${remaining}</span><span class="ov-legend-pct">${pctRem}%</span></div>
       <div class="ov-legend-item"><div class="ov-legend-dot" style="background:var(--amber)"></div>flagged <span class="ov-legend-val">${flagged}</span></div>
       <div class="ov-legend-item" style="margin-left:auto;color:var(--text3)"><span style="font-family:var(--mono);font-size:11px">${coded} / ${total} coded</span></div>
+    </div>
+    <div class="ov-progress-bar" style="margin-top:14px">
+      ${wCodedSec>0 ? `<div class="ov-seg ${timeOnlyClass}" style="width:${wCodedSec}%;background:var(--green)" title="Read so far: ~${formatDuration(codedSec)}"></div>` : ''}
+      ${wRemSec>0   ? `<div class="ov-seg ${timeOnlyClass}" style="width:${wRemSec}%;background:var(--bg4)" title="Remaining: ~${formatDuration(remainingSec)}"></div>` : ''}
+    </div>
+    <div class="ov-legend">
+      <div class="ov-legend-item"><div class="ov-legend-dot" style="background:var(--green)"></div>read so far <span class="ov-legend-val">~${formatDuration(codedSec)}</span></div>
+      <div class="ov-legend-item"><div class="ov-legend-dot" style="background:var(--bg4);border:1px solid var(--border2)"></div>remaining <span class="ov-legend-val">~${formatDuration(remainingSec)}</span></div>
+      <div class="ov-legend-item" style="margin-left:auto;color:var(--text3)"><span style="font-family:var(--mono);font-size:11px">~${formatDuration(totalSec)} total est</span></div>
     </div>`;
   buildCharts();
   const query=(g('ov-search').value||'').toLowerCase().trim();
