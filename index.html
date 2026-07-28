@@ -932,7 +932,7 @@ textarea::placeholder{color:var(--text3)}
         <div class="code-section" id="sec-s7">
           <div class="csec-head">Step 7 — coder notes  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s7')" title="Open codebook">i</span><div class="hover-tip">Required if type_other = 1. Encouraged for all ambiguous or borderline cases.</div></div></div>
           <div class="field">
-            <div class="flabel"><span class="fcode">manual_coder_notes</span></div>
+            <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">manual_coder_notes</span><button class="btn btn-sm" style="padding:2px 8px;font-size:10px" onclick="setDeletedPostNote()" title="Fill notes with 'deleted post'">Deleted post</button></div>
             <textarea id="manual_coder_notes" placeholder="Required if type_other. Encouraged for ambiguous cases..."></textarea>
           </div>
         </div>
@@ -2389,6 +2389,17 @@ function setAllToolsMentioned(){
   }
   custom.focus();
   custom.select();
+  scheduleAutosave();
+}
+
+// ── STEP 7 SHORTCUT ──
+// One-tap fill for the recurring case: the post/comment has since been deleted or
+// removed, so there's nothing left to code beyond noting why.
+function setDeletedPostNote(){
+  const el=g('manual_coder_notes');
+  el.value='deleted post';
+  updateStepStates();
+  updateWarningBanner();
   scheduleAutosave();
 }
 
