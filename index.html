@@ -593,6 +593,13 @@ textarea::placeholder{color:var(--text3)}
   #sec-s5:not(.substep-2) .mobile-substep-2{display:none!important}
   #sec-media:not(.substep-0) .mobile-substep-0{display:none!important}
   #sec-media:not(.substep-1) .mobile-substep-1{display:none!important}
+  #sec-media:not(.substep-2) .mobile-substep-2{display:none!important}
+  #sec-media:not(.substep-3) .mobile-substep-3{display:none!important}
+  #sec-media:not(.substep-4) .mobile-substep-4{display:none!important}
+  #sec-media:not(.substep-5) .mobile-substep-5{display:none!important}
+  #sec-media:not(.substep-6) .mobile-substep-6{display:none!important}
+  #sec-media:not(.substep-7) .mobile-substep-7{display:none!important}
+  #sec-media:not(.substep-8) .mobile-substep-8{display:none!important}
 
   /* no keyboard-shortcut hints on a touchscreen */
   .kh{display:none!important}
@@ -966,7 +973,7 @@ textarea::placeholder{color:var(--text3)}
           </div>
           <div id="media-detail" style="display:none">
             <div class="grid-2col" style="margin-top:4px">
-              <div class="field mobile-substep-0">
+              <div class="field mobile-substep-1">
                 <div class="flabel desktop-only"><span class="fcode">media_type</span></div>
                 <div class="flabel mobile-only-inline">Media type</div>
                 <select id="media_type" class="desktop-only"><option value="">—</option><option>image</option><option>video</option><option>both</option><option>audio</option></select>
@@ -977,11 +984,11 @@ textarea::placeholder{color:var(--text3)}
                   <button class="tg-btn" data-val="audio" onclick="setBtnField('media_type','audio','media_type-btns')">🎵 audio</button>
                 </div>
               </div>
-              <div class="field mobile-substep-0">
+              <div class="field mobile-substep-1">
                 <div class="flabel"><span class="fcode">media_count</span></div>
                 <input type="number" inputmode="numeric" pattern="[0-9]*" id="media_count" min="1" placeholder="0" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
               </div>
-              <div class="field mobile-substep-1">
+              <div class="field mobile-substep-2">
                 <div class="flabel desktop-only"><span class="fcode">media_shows_ai_persona</span></div>
                 <div class="flabel mobile-only-inline">Shows the AI's persona/avatar?</div>
                 <select id="media_shows_ai_persona" class="desktop-only"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
@@ -990,7 +997,7 @@ textarea::placeholder{color:var(--text3)}
                   <button class="tg-btn" data-val="0" onclick="setBtnField('media_shows_ai_persona','0','msap-btns')">no</button>
                 </div>
               </div>
-              <div class="field mobile-substep-1">
+              <div class="field mobile-substep-2">
                 <div class="flabel desktop-only"><span class="fcode">media_shows_conversation</span></div>
                 <div class="flabel mobile-only-inline">Shows a conversation/chat?</div>
                 <select id="media_shows_conversation" class="desktop-only" onchange="toggleConvoTopic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
@@ -999,7 +1006,7 @@ textarea::placeholder{color:var(--text3)}
                   <button class="tg-btn" data-val="0" onclick="setBtnField('media_shows_conversation','0','msc-btns');toggleConvoTopic()">no</button>
                 </div>
               </div>
-              <div class="field mobile-substep-1" style="grid-column:1/-1">
+              <div class="field mobile-substep-3" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_content_type</span></div>
                 <div class="flabel mobile-only-inline">Content type</div>
                 <select id="media_content_type" class="desktop-only"><option value="">—</option><option>chat_screenshot</option><option>ai_generated_avatar</option><option>ai_generated_art</option><option>meme_humor</option><option>settings_interface</option><option>comparison_collage</option><option>personal_photo</option><option>other</option></select>
@@ -1014,7 +1021,7 @@ textarea::placeholder{color:var(--text3)}
                   <button class="tg-btn" data-val="other" onclick="setBtnField('media_content_type','other','mct-btns')">other</button>
                 </div>
               </div>
-              <div class="field mobile-substep-1" style="grid-column:1/-1">
+              <div class="field mobile-substep-4" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_emotion_expressed</span></div>
                 <div class="flabel mobile-only-inline">Emotion expressed</div>
                 <select id="media_emotion_expressed" class="desktop-only"><option value="">—</option><option>love_affection</option><option>distress_grief</option><option>anger_frustration</option><option>humor_irony</option><option>pride_showing_off</option><option>longing_nostalgia</option><option>neutral_informational</option><option>not_applicable</option></select>
@@ -1029,7 +1036,7 @@ textarea::placeholder{color:var(--text3)}
                   <button class="tg-btn" data-val="not_applicable" onclick="setBtnField('media_emotion_expressed','not_applicable','mee-btns')">n/a</button>
                 </div>
               </div>
-              <div class="field mobile-substep-1" id="convo-topic-wrap" style="grid-column:1/-1">
+              <div class="field mobile-substep-5" id="convo-topic-wrap" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_conversation_topic</span></div>
                 <div class="flabel mobile-only-inline">Conversation topic</div>
                 <select id="media_conversation_topic" class="desktop-only"><option value="">—</option><option>romantic_sexual</option><option>emotional_support</option><option>conflict_rupture</option><option>casual_chat</option><option>roleplay</option><option>other</option></select>
@@ -1042,7 +1049,7 @@ textarea::placeholder{color:var(--text3)}
                   <button class="tg-btn" data-val="other" onclick="setBtnField('media_conversation_topic','other','mcto-btns')">other</button>
                 </div>
               </div>
-              <div class="field mobile-substep-1" style="grid-column:1/-1">
+              <div class="field mobile-substep-6" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_relevant_to_transference</span></div>
                 <div class="flabel mobile-only-inline">Is this media relevant to transference?</div>
                 <select id="media_relevant_to_transference" class="desktop-only" onchange="toggleMediaDynamic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
@@ -1051,7 +1058,7 @@ textarea::placeholder{color:var(--text3)}
                   <button class="tg-btn" data-val="0" onclick="setBtnField('media_relevant_to_transference','0','mrt-btns');toggleMediaDynamic()">no</button>
                 </div>
               </div>
-              <div class="field mobile-substep-1" id="media-dynamic-wrap" style="grid-column:1/-1">
+              <div class="field mobile-substep-7" id="media-dynamic-wrap" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_user_ai_dynamic</span></div>
                 <div class="flabel mobile-only-inline">User–AI dynamic shown</div>
                 <select id="media_user_ai_dynamic" class="desktop-only"><option value="">—</option><option>intimacy_closeness</option><option>conflict_distance</option><option>idealization</option><option>dependency_need</option><option>personhood_attribution</option><option>other</option></select>
@@ -1064,7 +1071,7 @@ textarea::placeholder{color:var(--text3)}
                   <button class="tg-btn" data-val="other" onclick="setBtnField('media_user_ai_dynamic','other','mud-btns')">other</button>
                 </div>
               </div>
-              <div class="field mobile-substep-1" style="grid-column:1/-1">
+              <div class="field mobile-substep-8" style="grid-column:1/-1">
                 <div class="flabel"><span class="fcode">media_coder_notes</span></div>
                 <textarea id="media_coder_notes" placeholder="Optional..."></textarea>
               </div>
@@ -2205,9 +2212,12 @@ const MOBILE_AUTOADVANCE_STEPS = ['sec-s1','sec-s2','sec-s3','sec-s4'];
 let mobileStepId = 'sec-s1';
 // Some steps have multiple mobile-only sub-pages so they aren't crammed onto one
 // scrolling screen: sec-s5 (metadata) has 3 — age_range/gender, relationship_status,
-// alt_tool fields. sec-media has 2 — media_type/count, then the rest of the detail
-// fields. mobileSubStep tracks the current sub-page within whichever step has them.
-const MOBILE_SUBSTEP_COUNT = { 'sec-s5': 3, 'sec-media': 2 };
+// alt_tool fields. sec-media has 8 — gate/presets, media_type/count, then each
+// attribute (or small compact pair) gets its own page so none of them need
+// scrolling to see in full. mobileSubStep tracks the current sub-page within
+// whichever step has them.
+const MOBILE_SUBSTEP_COUNT = { 'sec-s5': 3, 'sec-media': 9 };
+const MOBILE_SUBSTEP_MAX = Math.max(...Object.values(MOBILE_SUBSTEP_COUNT));
 let mobileSubStep = 0;
 
 function mobileVisibleSteps(){
@@ -2221,7 +2231,7 @@ function applyMobileSubStep(){
   Object.keys(MOBILE_SUBSTEP_COUNT).forEach(id=>{
     const el = g(id);
     if(!el) return;
-    for(let n=0;n<3;n++) el.classList.remove('substep-'+n);
+    for(let n=0;n<MOBILE_SUBSTEP_MAX;n++) el.classList.remove('substep-'+n);
   });
   const count = MOBILE_SUBSTEP_COUNT[mobileStepId];
   if(count){ const el=g(mobileStepId); if(el) el.classList.add('substep-'+mobileSubStep); }
@@ -2271,11 +2281,21 @@ function mobileGoToFirstVisible(){
   mobileRenderStep(0);
 }
 
+// A sub-page can end up with nothing on it — e.g. the conversation-topic page when
+// media_shows_conversation=0 hides its only field — which otherwise showed as a
+// blank screen the coder had to tap past. Skip straight over those.
+function mobileSubStepHasVisibleContent(){
+  const el = g(mobileStepId);
+  if(!el) return true;
+  const marked = el.querySelectorAll('.mobile-substep-'+mobileSubStep);
+  return Array.from(marked).some(m=>m.getClientRects().length>0);
+}
+
 function mobileStepNav(dir){
   const count = MOBILE_SUBSTEP_COUNT[mobileStepId];
   if(count){
-    if(dir>0 && mobileSubStep<count-1){ mobileSubStep++; mobileRenderStep(dir); return; }
-    if(dir<0 && mobileSubStep>0){ mobileSubStep--; mobileRenderStep(dir); return; }
+    if(dir>0 && mobileSubStep<count-1){ mobileSubStep++; mobileRenderStep(dir); if(!mobileSubStepHasVisibleContent()) mobileStepNav(dir); return; }
+    if(dir<0 && mobileSubStep>0){ mobileSubStep--; mobileRenderStep(dir); if(!mobileSubStepHasVisibleContent()) mobileStepNav(dir); return; }
   }
   const steps = mobileVisibleSteps();
   let idx = steps.indexOf(mobileStepId);
@@ -2322,7 +2342,7 @@ function mobileSyncActiveStep(){
 function promptMediaCount(){
   defaultMediaCount();
   mobileStepId = 'sec-media';
-  mobileSubStep = 0;
+  mobileSubStep = 1; // media_type/count sub-page (0 is the gate + preset buttons)
   mobileRenderStep(0);
   const el = g('media_count');
   if(el) setTimeout(()=>{ el.focus(); el.select(); }, 60);
