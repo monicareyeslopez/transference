@@ -568,13 +568,20 @@ textarea::placeholder{color:var(--text3)}
      gender) got too cramped to read or tap comfortably */
   .grid-2col{grid-template-columns:1fr}
 
-  /* step 5 (metadata) is split into two mobile-only sub-pages so age/gender and
-     relationship/tool fields aren't all crammed into one screen — sub-page 0
-     (age_range/gender) shows by default, sub-page 1 shows once s5-substep-1 is
-     applied. Only hide rules are needed; shown fields keep whatever display
-     value other rules already gave them (block, grid-flex via :has(.tg), etc). */
-  #sec-s5:not(.s5-substep-1) .mobile-substep-1{display:none!important}
-  #sec-s5.s5-substep-1 .mobile-substep-0{display:none!important}
+  /* Some steps are split into mobile-only sub-pages so they aren't crammed onto one
+     scrolling screen — sec-s5 (metadata) has 3: age_range/gender, relationship_status
+     alone, then alt_tool fields alone (relationship_status used to share a page with
+     alt_tool, which needed scrolling — split apart per user feedback). sec-media has
+     2: media_type/count (where a preset lands you to enter the count), then the rest
+     of the detail fields. The active sub-page N gets a .substep-N class on the
+     section itself; only hide rules are needed since a field that isn't hidden keeps
+     whatever display value other rules already gave it (block, flex via :has(.tg),
+     etc) — no separate "show" rule has to guess the right value. */
+  #sec-s5:not(.substep-0) .mobile-substep-0{display:none!important}
+  #sec-s5:not(.substep-1) .mobile-substep-1{display:none!important}
+  #sec-s5:not(.substep-2) .mobile-substep-2{display:none!important}
+  #sec-media:not(.substep-0) .mobile-substep-0{display:none!important}
+  #sec-media:not(.substep-1) .mobile-substep-1{display:none!important}
 
   /* no keyboard-shortcut hints on a touchscreen */
   .kh{display:none!important}
@@ -770,7 +777,7 @@ textarea::placeholder{color:var(--text3)}
       <div class="mobile-step-divider">
         <span id="m-step-indicator"></span>
         <div class="mobile-step-divider-right">
-          <a href="#" class="m-step-link-btn" id="m-step-link-btn" onclick="openRedditPeek(event)" title="Open on Reddit">🔗</a>
+          <a href="#" class="m-step-link-btn" id="m-step-link-btn" target="_blank" rel="noopener" onclick="openRedditPeek(event)" title="Open on Reddit">🔗</a>
           <button class="info-icon" id="m-step-info-btn" title="Open codebook">i</button>
         </div>
       </div>
@@ -877,7 +884,7 @@ textarea::placeholder{color:var(--text3)}
                 <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('relationship_status','not_disclosed','relationship_status-btns')">n/d</button>
               </div>
             </div>
-            <div class="field mobile-substep-1">
+            <div class="field mobile-substep-2">
               <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">alt_tool_name</span><button class="btn btn-sm mobile-only-inline" style="padding:2px 8px;font-size:10px" onclick="setAllToolsMentioned()" title="Multiple tools mentioned — type them all in">+ all</button></div>
               <select id="alt_tool_name">
                 <option value="">— blank —</option>
@@ -888,8 +895,8 @@ textarea::placeholder{color:var(--text3)}
                 <option value="_other_">other (type below)</option>
               </select>
             </div>
-            <div class="alt-tool-warn mobile-substep-1" id="alt-tool-warn"></div>
-            <div class="field mobile-substep-1">
+            <div class="alt-tool-warn mobile-substep-2" id="alt-tool-warn"></div>
+            <div class="field mobile-substep-2">
               <div class="flabel"><span class="fcode">alt_tool_type</span></div>
               <select id="alt_tool_type">
                 <option value="">—</option>
@@ -897,7 +904,7 @@ textarea::placeholder{color:var(--text3)}
                 <option>general_llm</option><option>roleplay_platform</option><option>other</option>
               </select>
             </div>
-            <div class="field mobile-substep-1" id="alt-tool-custom-wrap" style="display:none;grid-column:1/-1">
+            <div class="field mobile-substep-2" id="alt-tool-custom-wrap" style="display:none;grid-column:1/-1">
               <div class="flabel"><span class="fcode">alt_tool_name (custom)</span></div>
               <input type="text" id="alt_tool_name_custom" placeholder="Type tool name..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
             </div>
@@ -925,18 +932,18 @@ textarea::placeholder{color:var(--text3)}
         <div class="code-section" id="sec-s7">
           <div class="csec-head">Step 7 — coder notes  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s7')" title="Open codebook">i</span><div class="hover-tip">Required if type_other = 1. Encouraged for all ambiguous or borderline cases.</div></div></div>
           <div class="field">
-            <div class="flabel"><span class="fcode">manual_coder_notes</span></div>
+            <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">manual_coder_notes</span><button class="btn btn-sm" style="padding:2px 8px;font-size:10px" onclick="setDeletedPostNote()" title="Fill notes with 'deleted post'">Deleted post</button></div>
             <textarea id="manual_coder_notes" placeholder="Required if type_other. Encouraged for ambiguous cases..."></textarea>
           </div>
         </div>
 
         <!-- MEDIA -->
         <div class="code-section" id="sec-media">
-          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div><a href="#" class="btn btn-sm mobile-only-inline" id="m-reddit-link-media" onclick="openRedditPeek(event)" style="margin-left:auto" title="Open on Reddit to check for media">↗ Reddit</a></div>
-          <div class="field">
+          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div><a href="#" class="btn btn-sm mobile-only-inline" id="m-reddit-link-media" target="_blank" rel="noopener" onclick="openRedditPeek(event)" style="margin-left:auto" title="Open on Reddit to check for media">↗ Reddit</a></div>
+          <div class="field mobile-substep-0">
             <div class="flabel"><span class="fcode">media_present</span></div>
             <div class="tg">
-              <button class="tg-btn" id="mp-1" onclick="setTg('media_present','1','mp');showMediaDetail(true,true);defaultMediaCount()">1 — present <span class="kh">/</span></button>
+              <button class="tg-btn" id="mp-1" onclick="setTg('media_present','1','mp');showMediaDetail(true);promptMediaCount()">1 — present <span class="kh">/</span></button>
               <button class="tg-btn" id="mp-0" onclick="setTg('media_present','0','mp');showMediaDetail(false)">0 — absent <span class="kh">*</span></button>
             </div>
             <input type="hidden" id="media_present">
@@ -948,43 +955,97 @@ textarea::placeholder{color:var(--text3)}
           </div>
           <div id="media-detail" style="display:none">
             <div class="grid-2col" style="margin-top:4px">
-              <div class="field">
-                <div class="flabel"><span class="fcode">media_type</span></div>
-                <select id="media_type"><option value="">—</option><option>image</option><option>video</option><option>both</option><option>audio</option></select>
+              <div class="field mobile-substep-0">
+                <div class="flabel desktop-only"><span class="fcode">media_type</span></div>
+                <select id="media_type" class="desktop-only"><option value="">—</option><option>image</option><option>video</option><option>both</option><option>audio</option></select>
+                <div class="tg mobile-only-flex" id="media_type-btns">
+                  <button class="tg-btn" data-val="image" onclick="setBtnField('media_type','image','media_type-btns')">🖼 image</button>
+                  <button class="tg-btn" data-val="video" onclick="setBtnField('media_type','video','media_type-btns')">🎥 video</button>
+                  <button class="tg-btn" data-val="both" onclick="setBtnField('media_type','both','media_type-btns')">🎬 both</button>
+                  <button class="tg-btn" data-val="audio" onclick="setBtnField('media_type','audio','media_type-btns')">🎵 audio</button>
+                </div>
               </div>
-              <div class="field">
+              <div class="field mobile-substep-0">
                 <div class="flabel"><span class="fcode">media_count</span></div>
                 <input type="number" inputmode="numeric" pattern="[0-9]*" id="media_count" min="1" placeholder="0" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
               </div>
-              <div class="field">
-                <div class="flabel"><span class="fcode">media_shows_ai_persona</span></div>
-                <select id="media_shows_ai_persona"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+              <div class="field mobile-substep-1">
+                <div class="flabel desktop-only"><span class="fcode">media_shows_ai_persona</span></div>
+                <select id="media_shows_ai_persona" class="desktop-only"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+                <div class="tg mobile-only-flex" id="msap-btns">
+                  <button class="tg-btn" data-val="1" onclick="setBtnField('media_shows_ai_persona','1','msap-btns')">yes</button>
+                  <button class="tg-btn" data-val="0" onclick="setBtnField('media_shows_ai_persona','0','msap-btns')">no</button>
+                </div>
               </div>
-              <div class="field">
-                <div class="flabel"><span class="fcode">media_shows_conversation</span></div>
-                <select id="media_shows_conversation" onchange="toggleConvoTopic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+              <div class="field mobile-substep-1">
+                <div class="flabel desktop-only"><span class="fcode">media_shows_conversation</span></div>
+                <select id="media_shows_conversation" class="desktop-only" onchange="toggleConvoTopic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+                <div class="tg mobile-only-flex" id="msc-btns">
+                  <button class="tg-btn" data-val="1" onclick="setBtnField('media_shows_conversation','1','msc-btns');toggleConvoTopic()">yes</button>
+                  <button class="tg-btn" data-val="0" onclick="setBtnField('media_shows_conversation','0','msc-btns');toggleConvoTopic()">no</button>
+                </div>
               </div>
-              <div class="field" style="grid-column:1/-1">
-                <div class="flabel"><span class="fcode">media_content_type</span></div>
-                <select id="media_content_type"><option value="">—</option><option>chat_screenshot</option><option>ai_generated_avatar</option><option>ai_generated_art</option><option>meme_humor</option><option>settings_interface</option><option>comparison_collage</option><option>personal_photo</option><option>other</option></select>
+              <div class="field mobile-substep-1" style="grid-column:1/-1">
+                <div class="flabel desktop-only"><span class="fcode">media_content_type</span></div>
+                <select id="media_content_type" class="desktop-only"><option value="">—</option><option>chat_screenshot</option><option>ai_generated_avatar</option><option>ai_generated_art</option><option>meme_humor</option><option>settings_interface</option><option>comparison_collage</option><option>personal_photo</option><option>other</option></select>
+                <div class="tg mobile-only-flex" id="mct-btns">
+                  <button class="tg-btn" data-val="chat_screenshot" onclick="setBtnField('media_content_type','chat_screenshot','mct-btns')">💬 chat</button>
+                  <button class="tg-btn" data-val="ai_generated_avatar" onclick="setBtnField('media_content_type','ai_generated_avatar','mct-btns')">🖼 avatar</button>
+                  <button class="tg-btn" data-val="ai_generated_art" onclick="setBtnField('media_content_type','ai_generated_art','mct-btns')">🎨 ai art</button>
+                  <button class="tg-btn" data-val="meme_humor" onclick="setBtnField('media_content_type','meme_humor','mct-btns')">😂 meme</button>
+                  <button class="tg-btn" data-val="settings_interface" onclick="setBtnField('media_content_type','settings_interface','mct-btns')">⚙ settings</button>
+                  <button class="tg-btn" data-val="comparison_collage" onclick="setBtnField('media_content_type','comparison_collage','mct-btns')">🖇 comparison</button>
+                  <button class="tg-btn" data-val="personal_photo" onclick="setBtnField('media_content_type','personal_photo','mct-btns')">📷 photo</button>
+                  <button class="tg-btn" data-val="other" onclick="setBtnField('media_content_type','other','mct-btns')">other</button>
+                </div>
               </div>
-              <div class="field" style="grid-column:1/-1">
-                <div class="flabel"><span class="fcode">media_emotion_expressed</span></div>
-                <select id="media_emotion_expressed"><option value="">—</option><option>love_affection</option><option>distress_grief</option><option>anger_frustration</option><option>humor_irony</option><option>pride_showing_off</option><option>longing_nostalgia</option><option>neutral_informational</option><option>not_applicable</option></select>
+              <div class="field mobile-substep-1" style="grid-column:1/-1">
+                <div class="flabel desktop-only"><span class="fcode">media_emotion_expressed</span></div>
+                <select id="media_emotion_expressed" class="desktop-only"><option value="">—</option><option>love_affection</option><option>distress_grief</option><option>anger_frustration</option><option>humor_irony</option><option>pride_showing_off</option><option>longing_nostalgia</option><option>neutral_informational</option><option>not_applicable</option></select>
+                <div class="tg mobile-only-flex" id="mee-btns">
+                  <button class="tg-btn" data-val="love_affection" onclick="setBtnField('media_emotion_expressed','love_affection','mee-btns')">💗 love</button>
+                  <button class="tg-btn" data-val="distress_grief" onclick="setBtnField('media_emotion_expressed','distress_grief','mee-btns')">😢 distress</button>
+                  <button class="tg-btn" data-val="anger_frustration" onclick="setBtnField('media_emotion_expressed','anger_frustration','mee-btns')">😠 anger</button>
+                  <button class="tg-btn" data-val="humor_irony" onclick="setBtnField('media_emotion_expressed','humor_irony','mee-btns')">😂 humor</button>
+                  <button class="tg-btn" data-val="pride_showing_off" onclick="setBtnField('media_emotion_expressed','pride_showing_off','mee-btns')">😎 pride</button>
+                  <button class="tg-btn" data-val="longing_nostalgia" onclick="setBtnField('media_emotion_expressed','longing_nostalgia','mee-btns')">🥺 longing</button>
+                  <button class="tg-btn" data-val="neutral_informational" onclick="setBtnField('media_emotion_expressed','neutral_informational','mee-btns')">😐 neutral</button>
+                  <button class="tg-btn" data-val="not_applicable" onclick="setBtnField('media_emotion_expressed','not_applicable','mee-btns')">n/a</button>
+                </div>
               </div>
-              <div class="field" id="convo-topic-wrap" style="grid-column:1/-1">
-                <div class="flabel"><span class="fcode">media_conversation_topic</span></div>
-                <select id="media_conversation_topic"><option value="">—</option><option>romantic_sexual</option><option>emotional_support</option><option>conflict_rupture</option><option>casual_chat</option><option>roleplay</option><option>other</option></select>
+              <div class="field mobile-substep-1" id="convo-topic-wrap" style="grid-column:1/-1">
+                <div class="flabel desktop-only"><span class="fcode">media_conversation_topic</span></div>
+                <select id="media_conversation_topic" class="desktop-only"><option value="">—</option><option>romantic_sexual</option><option>emotional_support</option><option>conflict_rupture</option><option>casual_chat</option><option>roleplay</option><option>other</option></select>
+                <div class="tg mobile-only-flex" id="mcto-btns">
+                  <button class="tg-btn" data-val="romantic_sexual" onclick="setBtnField('media_conversation_topic','romantic_sexual','mcto-btns')">💗 romantic</button>
+                  <button class="tg-btn" data-val="emotional_support" onclick="setBtnField('media_conversation_topic','emotional_support','mcto-btns')">🫂 support</button>
+                  <button class="tg-btn" data-val="conflict_rupture" onclick="setBtnField('media_conversation_topic','conflict_rupture','mcto-btns')">⚡ conflict</button>
+                  <button class="tg-btn" data-val="casual_chat" onclick="setBtnField('media_conversation_topic','casual_chat','mcto-btns')">💬 casual</button>
+                  <button class="tg-btn" data-val="roleplay" onclick="setBtnField('media_conversation_topic','roleplay','mcto-btns')">🎭 roleplay</button>
+                  <button class="tg-btn" data-val="other" onclick="setBtnField('media_conversation_topic','other','mcto-btns')">other</button>
+                </div>
               </div>
-              <div class="field" style="grid-column:1/-1">
-                <div class="flabel"><span class="fcode">media_relevant_to_transference</span></div>
-                <select id="media_relevant_to_transference" onchange="toggleMediaDynamic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+              <div class="field mobile-substep-1" style="grid-column:1/-1">
+                <div class="flabel desktop-only"><span class="fcode">media_relevant_to_transference</span></div>
+                <select id="media_relevant_to_transference" class="desktop-only" onchange="toggleMediaDynamic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
+                <div class="tg mobile-only-flex" id="mrt-btns">
+                  <button class="tg-btn" data-val="1" onclick="setBtnField('media_relevant_to_transference','1','mrt-btns');toggleMediaDynamic()">yes</button>
+                  <button class="tg-btn" data-val="0" onclick="setBtnField('media_relevant_to_transference','0','mrt-btns');toggleMediaDynamic()">no</button>
+                </div>
               </div>
-              <div class="field" id="media-dynamic-wrap" style="grid-column:1/-1">
-                <div class="flabel"><span class="fcode">media_user_ai_dynamic</span></div>
-                <select id="media_user_ai_dynamic"><option value="">—</option><option>intimacy_closeness</option><option>conflict_distance</option><option>idealization</option><option>dependency_need</option><option>personhood_attribution</option><option>other</option></select>
+              <div class="field mobile-substep-1" id="media-dynamic-wrap" style="grid-column:1/-1">
+                <div class="flabel desktop-only"><span class="fcode">media_user_ai_dynamic</span></div>
+                <select id="media_user_ai_dynamic" class="desktop-only"><option value="">—</option><option>intimacy_closeness</option><option>conflict_distance</option><option>idealization</option><option>dependency_need</option><option>personhood_attribution</option><option>other</option></select>
+                <div class="tg mobile-only-flex" id="mud-btns">
+                  <button class="tg-btn" data-val="intimacy_closeness" onclick="setBtnField('media_user_ai_dynamic','intimacy_closeness','mud-btns')">🤍 intimacy</button>
+                  <button class="tg-btn" data-val="conflict_distance" onclick="setBtnField('media_user_ai_dynamic','conflict_distance','mud-btns')">↔ distance</button>
+                  <button class="tg-btn" data-val="idealization" onclick="setBtnField('media_user_ai_dynamic','idealization','mud-btns')">⭐ idealize</button>
+                  <button class="tg-btn" data-val="dependency_need" onclick="setBtnField('media_user_ai_dynamic','dependency_need','mud-btns')">🔗 dependency</button>
+                  <button class="tg-btn" data-val="personhood_attribution" onclick="setBtnField('media_user_ai_dynamic','personhood_attribution','mud-btns')">🧍 personhood</button>
+                  <button class="tg-btn" data-val="other" onclick="setBtnField('media_user_ai_dynamic','other','mud-btns')">other</button>
+                </div>
               </div>
-              <div class="field" style="grid-column:1/-1">
+              <div class="field mobile-substep-1" style="grid-column:1/-1">
                 <div class="flabel"><span class="fcode">media_coder_notes</span></div>
                 <textarea id="media_coder_notes" placeholder="Optional..."></textarea>
               </div>
@@ -1267,6 +1328,12 @@ textarea::placeholder{color:var(--text3)}
 
 <!-- CONFETTI -->
 <canvas id="confetti-canvas"></canvas>
+
+<!-- Silent looping clip played alongside TTS so iOS treats the tab as actively playing
+     audio and keeps the speech engine's audio session alive when the app is
+     backgrounded (e.g. tapping the Reddit link, which hands off to the Reddit app) —
+     speechSynthesis alone isn't enough to hold that session open. -->
+<audio id="tts-keepalive-audio" loop playsinline preload="auto" src="data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUAGAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA"></audio>
 
 <!-- MILESTONE OVERLAY -->
 <div id="milestone-overlay">
@@ -1730,6 +1797,11 @@ function renderRow(){
   loadRowIntoForm(row);
   updateBranching();
   updateFlagButton();
+  // #post-body is reused across posts (its textContent is swapped, not the node
+  // itself), so its scroll position carries over from whatever the previous post
+  // was scrolled to — opening a new post already scrolled down mid-text, cutting
+  // off its beginning. Reset it alongside the step carousel.
+  g('post-body').scrollTop=0;
   g('code-scroll').scrollTop=0;
   toggleMobileWarningDetail(false);
   mobileInitStepForRow();
@@ -1789,6 +1861,7 @@ function loadRowIntoForm(row){
   });
   refreshBtnField('gender','gender-btns');
   refreshBtnField('relationship_status','relationship_status-btns');
+  refreshMediaButtons();
   const atn=row.alt_tool_name||'';
   const atnSel=g('alt_tool_name');
   let matched=false;
@@ -1808,6 +1881,7 @@ function loadRowIntoForm(row){
     const el=g(id);if(el&&row[id]!==undefined)el.value=row[id];
   });
   toggleConvoTopic();
+  toggleMediaDynamic();
 }
 
 function selTgBtn(prefix,val){
@@ -2110,9 +2184,12 @@ const MOBILE_STEP_KEYS = {'sec-s1':'s1','sec-s2':'s2','sec-s3':'s3','sec-s4':'s4
 // arrows or a swipe.
 const MOBILE_AUTOADVANCE_STEPS = ['sec-s1','sec-s2','sec-s3','sec-s4'];
 let mobileStepId = 'sec-s1';
-// Step 5 (metadata) is split into two mobile-only sub-pages so the fields
-// aren't crammed together: 0 = age_range/gender, 1 = relationship_status/alt_tool.
-let s5SubStep = 0;
+// Some steps have multiple mobile-only sub-pages so they aren't crammed onto one
+// scrolling screen: sec-s5 (metadata) has 3 — age_range/gender, relationship_status,
+// alt_tool fields. sec-media has 2 — media_type/count, then the rest of the detail
+// fields. mobileSubStep tracks the current sub-page within whichever step has them.
+const MOBILE_SUBSTEP_COUNT = { 'sec-s5': 3, 'sec-media': 2 };
+let mobileSubStep = 0;
 
 function mobileVisibleSteps(){
   return MOBILE_STEP_IDS.filter(id=>{
@@ -2121,9 +2198,14 @@ function mobileVisibleSteps(){
   });
 }
 
-function applyS5SubStep(){
-  const el = g('sec-s5');
-  if(el) el.classList.toggle('s5-substep-1', s5SubStep===1);
+function applyMobileSubStep(){
+  Object.keys(MOBILE_SUBSTEP_COUNT).forEach(id=>{
+    const el = g(id);
+    if(!el) return;
+    for(let n=0;n<3;n++) el.classList.remove('substep-'+n);
+  });
+  const count = MOBILE_SUBSTEP_COUNT[mobileStepId];
+  if(count){ const el=g(mobileStepId); if(el) el.classList.add('substep-'+mobileSubStep); }
 }
 
 function updateStepIndicator(){
@@ -2132,7 +2214,8 @@ function updateStepIndicator(){
   const steps = mobileVisibleSteps();
   const idx = steps.indexOf(mobileStepId);
   if(idx===-1){ ind.textContent=''; return; }
-  const stepNum = mobileStepId==='sec-s5' ? `${idx+1}${s5SubStep===0?'a':'b'}` : `${idx+1}`;
+  const count = MOBILE_SUBSTEP_COUNT[mobileStepId];
+  const stepNum = count ? `${idx+1}${String.fromCharCode(97+mobileSubStep)}` : `${idx+1}`;
   ind.textContent = `Step ${stepNum} of ${steps.length}`;
 }
 
@@ -2142,7 +2225,7 @@ function mobileRenderStep(direction){
     if(!el) return;
     el.classList.toggle('mobile-step-visible', id===mobileStepId);
   });
-  applyS5SubStep();
+  applyMobileSubStep();
   const el = g(mobileStepId);
   if(el && direction){
     el.classList.remove('mobile-slide-in-l','mobile-slide-in-r');
@@ -2154,31 +2237,36 @@ function mobileRenderStep(direction){
   const steps = mobileVisibleSteps();
   const idx = steps.indexOf(mobileStepId);
   const prevBtn=g('m-step-prev'), nextBtn=g('m-step-next');
-  const onS5 = mobileStepId==='sec-s5';
-  if(prevBtn) prevBtn.disabled = idx<=0 && !(onS5 && s5SubStep===1);
-  if(nextBtn) nextBtn.disabled = (idx===-1 || idx>=steps.length-1) && !(onS5 && s5SubStep===0);
+  const count = MOBILE_SUBSTEP_COUNT[mobileStepId];
+  if(prevBtn) prevBtn.disabled = idx<=0 && !(count && mobileSubStep>0);
+  // next always stays enabled (except when idx is invalid) — from the final step it
+  // loops back to step 1 instead of dead-ending
+  if(nextBtn) nextBtn.disabled = idx===-1;
   updateStepIndicator();
 }
 
 function mobileGoToFirstVisible(){
   const steps = mobileVisibleSteps();
   if(!steps.includes(mobileStepId)) mobileStepId = steps[0]||'sec-s1';
-  s5SubStep = 0;
+  mobileSubStep = 0;
   mobileRenderStep(0);
 }
 
 function mobileStepNav(dir){
-  if(mobileStepId==='sec-s5'){
-    if(dir>0 && s5SubStep===0){ s5SubStep=1; mobileRenderStep(dir); return; }
-    if(dir<0 && s5SubStep===1){ s5SubStep=0; mobileRenderStep(dir); return; }
+  const count = MOBILE_SUBSTEP_COUNT[mobileStepId];
+  if(count){
+    if(dir>0 && mobileSubStep<count-1){ mobileSubStep++; mobileRenderStep(dir); return; }
+    if(dir<0 && mobileSubStep>0){ mobileSubStep--; mobileRenderStep(dir); return; }
   }
   const steps = mobileVisibleSteps();
   let idx = steps.indexOf(mobileStepId);
   if(idx===-1) idx=0;
-  const next = idx+dir;
-  if(next<0||next>=steps.length) return;
+  let next = idx+dir;
+  if(next<0) return; // no wrap going backward past step 1
+  if(next>=steps.length) next=0; // loop back to step 1 after the final step
   mobileStepId = steps[next];
-  if(mobileStepId==='sec-s5') s5SubStep = dir>0 ? 0 : 1;
+  const newCount = MOBILE_SUBSTEP_COUNT[mobileStepId];
+  mobileSubStep = newCount ? (dir>0 ? 0 : newCount-1) : 0;
   mobileRenderStep(dir);
 }
 
@@ -2187,7 +2275,7 @@ function mobileStepNav(dir){
 function mobileInitStepForRow(){
   const active = MOBILE_STEP_IDS.find(id=>{ const el=g(id); return el && el.classList.contains('state-active'); });
   mobileStepId = active || 'sec-s1';
-  s5SubStep = 0;
+  mobileSubStep = 0;
   mobileRenderStep(0);
 }
 
@@ -2202,10 +2290,23 @@ function mobileSyncActiveStep(){
     const idx = steps.indexOf(mobileStepId);
     if(idx>=0 && idx<steps.length-1){
       mobileStepId=steps[idx+1];
-      if(mobileStepId==='sec-s5') s5SubStep = 0;
+      mobileSubStep = 0;
       mobileRenderStep(1);
     }
   }
+}
+
+// Jumps the carousel to sec-media's count sub-page and focuses media_count, so a
+// coder who just hit a preset is immediately prompted for the one thing it can't
+// guess (how many media items), then reviews the rest of the (already-filled-in)
+// attributes on the next sub-page.
+function promptMediaCount(){
+  defaultMediaCount();
+  mobileStepId = 'sec-media';
+  mobileSubStep = 0;
+  mobileRenderStep(0);
+  const el = g('media_count');
+  if(el) setTimeout(()=>{ el.focus(); el.select(); }, 60);
 }
 
 // Swipe support on the step carousel (left = next step, right = previous step)
@@ -2278,7 +2379,27 @@ function setAllToolsMentioned(){
   sel.value='_other_';
   g('alt-tool-custom-wrap').style.display='block';
   const custom=g('alt_tool_name_custom');
+  // Pre-fill with every suggested tool name from the dropdown (comma-separated) so
+  // the coder edits/trims down to what's actually mentioned instead of typing every
+  // name from scratch — selected so typing immediately replaces it if they'd rather
+  // just type fresh.
+  if(!custom.value){
+    const suggested = Array.from(sel.options).map(o=>o.value).filter(v=>v && v!=='_other_');
+    custom.value = suggested.join(', ');
+  }
   custom.focus();
+  custom.select();
+  scheduleAutosave();
+}
+
+// ── STEP 7 SHORTCUT ──
+// One-tap fill for the recurring case: the post/comment has since been deleted or
+// removed, so there's nothing left to code beyond noting why.
+function setDeletedPostNote(){
+  const el=g('manual_coder_notes');
+  el.value='deleted post';
+  updateStepStates();
+  updateWarningBanner();
   scheduleAutosave();
 }
 
@@ -2297,13 +2418,36 @@ function toggleConvoTopic(){
   const wrap = g('convo-topic-wrap');
   wrap.style.opacity = show ? '1' : '0.4';
   wrap.style.pointerEvents = show ? 'auto' : 'none';
+  // on mobile, actually hide the field rather than just dimming it — with the step
+  // carousel showing one screen at a time, a dimmed-but-still-visible field not
+  // yet applicable was wasted space on an already-tight page
+  if(!isDesktopView()) wrap.style.display = show ? '' : 'none';
   if(!show) g('media_conversation_topic').value='';
 }
-function toggleMediaDynamic(){g('media-dynamic-wrap').style.opacity=g('media_relevant_to_transference').value==='1'?'1':'0.4';}
+function toggleMediaDynamic(){
+  const show = g('media_relevant_to_transference').value==='1';
+  const wrap = g('media-dynamic-wrap');
+  wrap.style.opacity = show ? '1' : '0.4';
+  if(!isDesktopView()) wrap.style.display = show ? '' : 'none';
+}
 
 // ── PRESET: Romantic Screenshot ──
 // One-key fill for the recurring pattern: a chat screenshot showing a
 // romantic/sexual exchange with affectionate emotion and an intimacy dynamic.
+// Keeps the mobile button groups' selected-state in sync after a preset (or
+// loadRowIntoForm) sets the underlying <select>s' .value directly via JS, which
+// doesn't fire a change event the buttons could otherwise hook into.
+function refreshMediaButtons(){
+  refreshBtnField('media_type','media_type-btns');
+  refreshBtnField('media_shows_ai_persona','msap-btns');
+  refreshBtnField('media_shows_conversation','msc-btns');
+  refreshBtnField('media_content_type','mct-btns');
+  refreshBtnField('media_emotion_expressed','mee-btns');
+  refreshBtnField('media_conversation_topic','mcto-btns');
+  refreshBtnField('media_relevant_to_transference','mrt-btns');
+  refreshBtnField('media_user_ai_dynamic','mud-btns');
+}
+
 function applyRomanticScreenshotPreset(){
   setTg('media_present','1','mp');
   showMediaDetail(true,false);
@@ -2317,8 +2461,10 @@ function applyRomanticScreenshotPreset(){
   g('media_relevant_to_transference').value='1';
   toggleMediaDynamic();
   g('media_user_ai_dynamic').value='intimacy_closeness';
+  refreshMediaButtons();
   scheduleAutosave();
   updateWarningBanner();
+  promptMediaCount();
 }
 
 // ── PRESET: AI Avatar Display ──
@@ -2333,8 +2479,10 @@ function applyAiAvatarPreset(){
   g('media_shows_conversation').value='0';
   g('media_conversation_topic').value='';
   toggleConvoTopic();
+  refreshMediaButtons();
   scheduleAutosave();
   updateWarningBanner();
+  promptMediaCount();
 }
 
 // ── PRESET: Love Song ──
@@ -2354,8 +2502,10 @@ function applyLoveSongPreset(){
   g('media_relevant_to_transference').value='1';
   toggleMediaDynamic();
   g('media_user_ai_dynamic').value='intimacy_closeness';
+  refreshMediaButtons();
   scheduleAutosave();
   updateWarningBanner();
+  promptMediaCount();
 }
 
 // ── COLLECT ROW ──
@@ -2471,9 +2621,16 @@ function jumpUncoded(dir){
 
 // ── REDDIT PEEK (Arc popup) ──
 function openRedditPeek(e){
-  if(e) e.preventDefault();
   const url = g('post-link').dataset.href;
-  if(!url||url==='#'){ toast('No permalink for this post'); return; }
+  if(!url||url==='#'){ if(e) e.preventDefault(); toast('No permalink for this post'); return; }
+  // On mobile, let the tapped <a>'s own href (target="_blank") navigate normally
+  // instead of window.open()'s popup API. window.open() with popup-style size/
+  // position features is a desktop "peek window" affordance — on mobile it's just
+  // a new tab anyway, and in a standalone PWA it's known to leave behind a blank
+  // white ghost tab when the OS hands off to the Reddit app, which then has to be
+  // manually dismissed on returning. A plain new-tab link avoids that.
+  if(!isDesktopView()) return;
+  e.preventDefault();
   window.open(url, 'reddit-peek',
     'width=900,height=700,left='+Math.round((screen.width-900)/2)+',top='+Math.round((screen.height-700)/2)
   );
@@ -2671,13 +2828,20 @@ let ttsSpeaking = false;
 let ttsKeepAlive = null;
 
 // Chrome bug workaround: speechSynthesis pauses after ~15s and never resumes
-// Fix: call pause()/resume() every 10s to keep it alive
+// Fix: call pause()/resume() every 10s to keep it alive.
+// Safari (incl. iOS) doesn't have that bug, and calling pause()+resume() back-to-back
+// like this is known to sometimes get Safari's speech engine stuck permanently
+// instead — reported as "the app bugs out when audio gets paused." Skip it there.
+const isSafariTTS = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 function startKeepAlive(){
   stopKeepAlive();
+  if(isSafariTTS) return;
   ttsKeepAlive = setInterval(()=>{
-    if(!window.speechSynthesis.speaking){ stopKeepAlive(); return; }
-    window.speechSynthesis.pause();
-    window.speechSynthesis.resume();
+    try{
+      if(!window.speechSynthesis.speaking){ stopKeepAlive(); return; }
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }catch(e){ stopKeepAlive(); }
   }, 10000);
 }
 
@@ -2686,9 +2850,42 @@ function stopKeepAlive(){
 }
 
 function toggleTTS(){
-  if(ttsSpeaking){ pauseTTS(); return; }
-  if(window.speechSynthesis.paused){ resumeTTS(); return; }
+  // Read the real engine state rather than trusting our own ttsSpeaking flag alone —
+  // on iOS a phone call, Siri, screen lock, or the pause/resume cycle itself can leave
+  // the actual synthesis engine out of sync with it, which otherwise makes the button
+  // seem to do nothing (or the wrong thing) until a full reload.
+  const synth = window.speechSynthesis;
+  if(synth.speaking && !synth.paused){ pauseTTS(); return; }
+  if(synth.paused){ resumeTTS(); return; }
   startTTS();
+}
+
+// Playing a real (silent) <audio> element alongside speechSynthesis, plus
+// registering a MediaSession, is the standard workaround for keeping speech going
+// once the tab/PWA is backgrounded — e.g. tapping the Reddit link, which hands off
+// to the Reddit app. speechSynthesis by itself isn't treated as "real" audio
+// playback by iOS, so without this it gets suspended the moment you leave.
+// Best-effort: exact behavior still varies by iOS version.
+let mediaSessionReady = false;
+function setupTTSMediaSession(){
+  if(mediaSessionReady || !('mediaSession' in navigator)) return;
+  mediaSessionReady = true;
+  try{
+    navigator.mediaSession.metadata = new MediaMetadata({ title:'Reading post aloud', artist:'Transference Coder' });
+    navigator.mediaSession.setActionHandler('play', resumeTTS);
+    navigator.mediaSession.setActionHandler('pause', pauseTTS);
+    navigator.mediaSession.setActionHandler('stop', stopTTS);
+  }catch(e){}
+}
+function ttsAudioSessionPlay(){
+  const el = g('tts-keepalive-audio');
+  if(el) el.play().catch(()=>{});
+  if('mediaSession' in navigator){ try{ navigator.mediaSession.playbackState='playing'; }catch(e){} }
+}
+function ttsAudioSessionPause(){
+  const el = g('tts-keepalive-audio');
+  if(el) el.pause();
+  if('mediaSession' in navigator){ try{ navigator.mediaSession.playbackState='paused'; }catch(e){} }
 }
 
 function startTTS(){
@@ -2698,6 +2895,7 @@ function startTTS(){
   if(!text.trim()){ toast('No text to read'); return; }
   cacheTTSWordSpans();
   clearTTSWordHighlight();
+  setupTTSMediaSession();
   ttsUtterance = new SpeechSynthesisUtterance(text);
   ttsUtterance.rate = parseFloat(g('tts-speed').value);
   ttsUtterance.pitch = 1;
@@ -2710,25 +2908,27 @@ function startTTS(){
     v.name.includes('Microsoft Aria')
   );
   if(preferred) ttsUtterance.voice = preferred;
-  ttsUtterance.onstart  = () => { ttsSpeaking=true;  startKeepAlive(); updateTTSUI(); };
-  ttsUtterance.onend    = () => { ttsSpeaking=false; stopKeepAlive();  updateTTSUI(); clearTTSWordHighlight(); };
+  ttsUtterance.onstart  = () => { ttsSpeaking=true;  startKeepAlive(); ttsAudioSessionPlay();  updateTTSUI(); };
+  ttsUtterance.onend    = () => { ttsSpeaking=false; stopKeepAlive();  ttsAudioSessionPause(); updateTTSUI(); clearTTSWordHighlight(); };
   ttsUtterance.onpause  = () => { ttsSpeaking=false; updateTTSUI(); };
   ttsUtterance.onresume = () => { ttsSpeaking=true;  updateTTSUI(); };
-  ttsUtterance.onerror  = () => { ttsSpeaking=false; stopKeepAlive();  updateTTSUI(); clearTTSWordHighlight(); };
+  ttsUtterance.onerror  = () => { ttsSpeaking=false; stopKeepAlive();  ttsAudioSessionPause(); updateTTSUI(); clearTTSWordHighlight(); };
   ttsUtterance.onboundary = (e) => { if(e.name==='word' || e.name===undefined) highlightTTSWordAt(e.charIndex); };
   window.speechSynthesis.speak(ttsUtterance);
 }
 
 function pauseTTS(){
-  window.speechSynthesis.pause();
+  try{ window.speechSynthesis.pause(); }catch(e){}
   stopKeepAlive();
+  ttsAudioSessionPause();
   ttsSpeaking=false;
   updateTTSUI();
 }
 
 function resumeTTS(){
-  window.speechSynthesis.resume();
+  try{ window.speechSynthesis.resume(); }catch(e){}
   startKeepAlive();
+  ttsAudioSessionPlay();
   ttsSpeaking=true;
   updateTTSUI();
 }
@@ -2736,6 +2936,7 @@ function resumeTTS(){
 function stopTTS(){
   try{ window.speechSynthesis.cancel(); }catch(e){}
   stopKeepAlive();
+  ttsAudioSessionPause();
   ttsSpeaking=false;
   ttsUtterance=null;
   clearTTSWordHighlight();
@@ -3276,6 +3477,12 @@ function clearEntry(){
   CODE_COLS.forEach(c => { rows[idx][c] = ''; });
   if(wasCoded) _cachedCodedCount--;
   clearForm();
+  // clearForm() only resets the fields themselves — without re-running branching,
+  // the step carousel's state-active/na/done classes (and mobileStepId) stayed stale,
+  // pointing at whatever was active before the clear instead of resetting to step 1.
+  // Reported as the app "bugging out" after Clear, needing a reload to recover.
+  updateStepStates();
+  mobileInitStepForRow();
   updateTopbar();
   saveSession();
   toast('Entry cleared');
