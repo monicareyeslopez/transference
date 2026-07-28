@@ -777,7 +777,7 @@ textarea::placeholder{color:var(--text3)}
       <div class="mobile-step-divider">
         <span id="m-step-indicator"></span>
         <div class="mobile-step-divider-right">
-          <a href="#" class="m-step-link-btn" id="m-step-link-btn" onclick="openRedditPeek(event)" title="Open on Reddit">🔗</a>
+          <a href="#" class="m-step-link-btn" id="m-step-link-btn" target="_blank" rel="noopener" onclick="openRedditPeek(event)" title="Open on Reddit">🔗</a>
           <button class="info-icon" id="m-step-info-btn" title="Open codebook">i</button>
         </div>
       </div>
@@ -939,7 +939,7 @@ textarea::placeholder{color:var(--text3)}
 
         <!-- MEDIA -->
         <div class="code-section" id="sec-media">
-          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div><a href="#" class="btn btn-sm mobile-only-inline" id="m-reddit-link-media" onclick="openRedditPeek(event)" style="margin-left:auto" title="Open on Reddit to check for media">↗ Reddit</a></div>
+          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div><a href="#" class="btn btn-sm mobile-only-inline" id="m-reddit-link-media" target="_blank" rel="noopener" onclick="openRedditPeek(event)" style="margin-left:auto" title="Open on Reddit to check for media">↗ Reddit</a></div>
           <div class="field mobile-substep-0">
             <div class="flabel"><span class="fcode">media_present</span></div>
             <div class="tg">
@@ -2621,9 +2621,16 @@ function jumpUncoded(dir){
 
 // ── REDDIT PEEK (Arc popup) ──
 function openRedditPeek(e){
-  if(e) e.preventDefault();
   const url = g('post-link').dataset.href;
-  if(!url||url==='#'){ toast('No permalink for this post'); return; }
+  if(!url||url==='#'){ if(e) e.preventDefault(); toast('No permalink for this post'); return; }
+  // On mobile, let the tapped <a>'s own href (target="_blank") navigate normally
+  // instead of window.open()'s popup API. window.open() with popup-style size/
+  // position features is a desktop "peek window" affordance — on mobile it's just
+  // a new tab anyway, and in a standalone PWA it's known to leave behind a blank
+  // white ghost tab when the OS hands off to the Reddit app, which then has to be
+  // manually dismissed on returning. A plain new-tab link avoids that.
+  if(!isDesktopView()) return;
+  e.preventDefault();
   window.open(url, 'reddit-peek',
     'width=900,height=700,left='+Math.round((screen.width-900)/2)+',top='+Math.round((screen.height-700)/2)
   );
