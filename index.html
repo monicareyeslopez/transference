@@ -968,6 +968,7 @@ textarea::placeholder{color:var(--text3)}
             <div class="grid-2col" style="margin-top:4px">
               <div class="field mobile-substep-0">
                 <div class="flabel desktop-only"><span class="fcode">media_type</span></div>
+                <div class="flabel mobile-only-inline">Media type</div>
                 <select id="media_type" class="desktop-only"><option value="">—</option><option>image</option><option>video</option><option>both</option><option>audio</option></select>
                 <div class="tg mobile-only-flex" id="media_type-btns">
                   <button class="tg-btn" data-val="image" onclick="setBtnField('media_type','image','media_type-btns')">🖼 image</button>
@@ -982,6 +983,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field mobile-substep-1">
                 <div class="flabel desktop-only"><span class="fcode">media_shows_ai_persona</span></div>
+                <div class="flabel mobile-only-inline">Shows the AI's persona/avatar?</div>
                 <select id="media_shows_ai_persona" class="desktop-only"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
                 <div class="tg mobile-only-flex" id="msap-btns">
                   <button class="tg-btn" data-val="1" onclick="setBtnField('media_shows_ai_persona','1','msap-btns')">yes</button>
@@ -990,6 +992,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field mobile-substep-1">
                 <div class="flabel desktop-only"><span class="fcode">media_shows_conversation</span></div>
+                <div class="flabel mobile-only-inline">Shows a conversation/chat?</div>
                 <select id="media_shows_conversation" class="desktop-only" onchange="toggleConvoTopic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
                 <div class="tg mobile-only-flex" id="msc-btns">
                   <button class="tg-btn" data-val="1" onclick="setBtnField('media_shows_conversation','1','msc-btns');toggleConvoTopic()">yes</button>
@@ -998,6 +1001,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field mobile-substep-1" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_content_type</span></div>
+                <div class="flabel mobile-only-inline">Content type</div>
                 <select id="media_content_type" class="desktop-only"><option value="">—</option><option>chat_screenshot</option><option>ai_generated_avatar</option><option>ai_generated_art</option><option>meme_humor</option><option>settings_interface</option><option>comparison_collage</option><option>personal_photo</option><option>other</option></select>
                 <div class="tg mobile-only-flex" id="mct-btns">
                   <button class="tg-btn" data-val="chat_screenshot" onclick="setBtnField('media_content_type','chat_screenshot','mct-btns')">💬 chat</button>
@@ -1012,6 +1016,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field mobile-substep-1" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_emotion_expressed</span></div>
+                <div class="flabel mobile-only-inline">Emotion expressed</div>
                 <select id="media_emotion_expressed" class="desktop-only"><option value="">—</option><option>love_affection</option><option>distress_grief</option><option>anger_frustration</option><option>humor_irony</option><option>pride_showing_off</option><option>longing_nostalgia</option><option>neutral_informational</option><option>not_applicable</option></select>
                 <div class="tg mobile-only-flex" id="mee-btns">
                   <button class="tg-btn" data-val="love_affection" onclick="setBtnField('media_emotion_expressed','love_affection','mee-btns')">💗 love</button>
@@ -1026,6 +1031,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field mobile-substep-1" id="convo-topic-wrap" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_conversation_topic</span></div>
+                <div class="flabel mobile-only-inline">Conversation topic</div>
                 <select id="media_conversation_topic" class="desktop-only"><option value="">—</option><option>romantic_sexual</option><option>emotional_support</option><option>conflict_rupture</option><option>casual_chat</option><option>roleplay</option><option>other</option></select>
                 <div class="tg mobile-only-flex" id="mcto-btns">
                   <button class="tg-btn" data-val="romantic_sexual" onclick="setBtnField('media_conversation_topic','romantic_sexual','mcto-btns')">💗 romantic</button>
@@ -1038,6 +1044,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field mobile-substep-1" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_relevant_to_transference</span></div>
+                <div class="flabel mobile-only-inline">Is this media relevant to transference?</div>
                 <select id="media_relevant_to_transference" class="desktop-only" onchange="toggleMediaDynamic()"><option value="">—</option><option value="1">1 — yes</option><option value="0">0 — no</option></select>
                 <div class="tg mobile-only-flex" id="mrt-btns">
                   <button class="tg-btn" data-val="1" onclick="setBtnField('media_relevant_to_transference','1','mrt-btns');toggleMediaDynamic()">yes</button>
@@ -1046,6 +1053,7 @@ textarea::placeholder{color:var(--text3)}
               </div>
               <div class="field mobile-substep-1" id="media-dynamic-wrap" style="grid-column:1/-1">
                 <div class="flabel desktop-only"><span class="fcode">media_user_ai_dynamic</span></div>
+                <div class="flabel mobile-only-inline">User–AI dynamic shown</div>
                 <select id="media_user_ai_dynamic" class="desktop-only"><option value="">—</option><option>intimacy_closeness</option><option>conflict_distance</option><option>idealization</option><option>dependency_need</option><option>personhood_attribution</option><option>other</option></select>
                 <div class="tg mobile-only-flex" id="mud-btns">
                   <button class="tg-btn" data-val="intimacy_closeness" onclick="setBtnField('media_user_ai_dynamic','intimacy_closeness','mud-btns')">🤍 intimacy</button>
