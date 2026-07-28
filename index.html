@@ -1730,6 +1730,11 @@ function renderRow(){
   loadRowIntoForm(row);
   updateBranching();
   updateFlagButton();
+  // #post-body is reused across posts (its textContent is swapped, not the node
+  // itself), so its scroll position carries over from whatever the previous post
+  // was scrolled to — opening a new post already scrolled down mid-text, cutting
+  // off its beginning. Reset it alongside the step carousel.
+  g('post-body').scrollTop=0;
   g('code-scroll').scrollTop=0;
   toggleMobileWarningDetail(false);
   mobileInitStepForRow();
@@ -2156,7 +2161,9 @@ function mobileRenderStep(direction){
   const prevBtn=g('m-step-prev'), nextBtn=g('m-step-next');
   const onS5 = mobileStepId==='sec-s5';
   if(prevBtn) prevBtn.disabled = idx<=0 && !(onS5 && s5SubStep===1);
-  if(nextBtn) nextBtn.disabled = (idx===-1 || idx>=steps.length-1) && !(onS5 && s5SubStep===0);
+  // next always stays enabled (except when idx is invalid) — from the final step it
+  // loops back to step 1 instead of dead-ending
+  if(nextBtn) nextBtn.disabled = idx===-1;
   updateStepIndicator();
 }
 
@@ -2175,8 +2182,9 @@ function mobileStepNav(dir){
   const steps = mobileVisibleSteps();
   let idx = steps.indexOf(mobileStepId);
   if(idx===-1) idx=0;
-  const next = idx+dir;
-  if(next<0||next>=steps.length) return;
+  let next = idx+dir;
+  if(next<0) return; // no wrap going backward past step 1
+  if(next>=steps.length) next=0; // loop back to step 1 after the final step
   mobileStepId = steps[next];
   if(mobileStepId==='sec-s5') s5SubStep = dir>0 ? 0 : 1;
   mobileRenderStep(dir);
@@ -2671,13 +2679,20 @@ let ttsSpeaking = false;
 let ttsKeepAlive = null;
 
 // Chrome bug workaround: speechSynthesis pauses after ~15s and never resumes
-// Fix: call pause()/resume() every 10s to keep it alive
+// Fix: call pause()/resume() every 10s to keep it alive.
+// Safari (incl. iOS) doesn't have that bug, and calling pause()+resume() back-to-back
+// like this is known to sometimes get Safari's speech engine stuck permanently
+// instead — reported as "the app bugs out when audio gets paused." Skip it there.
+const isSafariTTS = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 function startKeepAlive(){
   stopKeepAlive();
+  if(isSafariTTS) return;
   ttsKeepAlive = setInterval(()=>{
-    if(!window.speechSynthesis.speaking){ stopKeepAlive(); return; }
-    window.speechSynthesis.pause();
-    window.speechSynthesis.resume();
+    try{
+      if(!window.speechSynthesis.speaking){ stopKeepAlive(); return; }
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }catch(e){ stopKeepAlive(); }
   }, 10000);
 }
 
@@ -2686,8 +2701,13 @@ function stopKeepAlive(){
 }
 
 function toggleTTS(){
-  if(ttsSpeaking){ pauseTTS(); return; }
-  if(window.speechSynthesis.paused){ resumeTTS(); return; }
+  // Read the real engine state rather than trusting our own ttsSpeaking flag alone —
+  // on iOS a phone call, Siri, screen lock, or the pause/resume cycle itself can leave
+  // the actual synthesis engine out of sync with it, which otherwise makes the button
+  // seem to do nothing (or the wrong thing) until a full reload.
+  const synth = window.speechSynthesis;
+  if(synth.speaking && !synth.paused){ pauseTTS(); return; }
+  if(synth.paused){ resumeTTS(); return; }
   startTTS();
 }
 
@@ -2720,14 +2740,14 @@ function startTTS(){
 }
 
 function pauseTTS(){
-  window.speechSynthesis.pause();
+  try{ window.speechSynthesis.pause(); }catch(e){}
   stopKeepAlive();
   ttsSpeaking=false;
   updateTTSUI();
 }
 
 function resumeTTS(){
-  window.speechSynthesis.resume();
+  try{ window.speechSynthesis.resume(); }catch(e){}
   startKeepAlive();
   ttsSpeaking=true;
   updateTTSUI();
@@ -3276,6 +3296,12 @@ function clearEntry(){
   CODE_COLS.forEach(c => { rows[idx][c] = ''; });
   if(wasCoded) _cachedCodedCount--;
   clearForm();
+  // clearForm() only resets the fields themselves — without re-running branching,
+  // the step carousel's state-active/na/done classes (and mobileStepId) stayed stale,
+  // pointing at whatever was active before the clear instead of resetting to step 1.
+  // Reported as the app "bugging out" after Clear, needing a reload to recover.
+  updateStepStates();
+  mobileInitStepForRow();
   updateTopbar();
   saveSession();
   toast('Entry cleared');
