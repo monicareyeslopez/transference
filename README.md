@@ -1,35 +1,44 @@
 # Transference Coder
 
-A self-contained qualitative coding application for labeling transference patterns in AI companion community posts. Built for a study analyzing 1,000 Reddit posts across r/replika, r/KindroidAI, r/CharacterAI, r/therapyGPT, and r/MyBoyfriendIsAI.
+A self-contained qualitative coding application for labeling transference patterns in AI companion community posts. Built for a study analyzing Reddit posts across r/replika, r/KindroidAI, r/CharacterAI, r/therapyGPT, and r/MyBoyfriendIsAI.
 
-No installation, no server, no dependencies. Everything runs in a single HTML file in your browser.
+No installation, no server, no build step. The whole app is one HTML file (`index.html`) — everything runs in your browser, and it's hosted live via GitHub Pages at [monicareyeslopez.github.io/transference](https://monicareyeslopez.github.io/transference/).
 
 ## Usage
 
-1. Download `transference_coder.html`
-2. Open it in Chrome
-3. Upload your CSV file
-4. Code away — progress autosaves to your browser's local storage
-5. Export your CSV at the end of each session to save your work to disk
+1. Open the [live app](https://monicareyeslopez.github.io/transference/) (or download `index.html` and open it locally).
+2. Click **Load from Google Sheets** and sign in — this is the primary workflow. Everything you code saves straight back to the connected sheet, so there's nothing to remember at the end of a session; just close the tab and pick up where you left off next time.
+3. A CSV upload is also available (drag-and-drop or "Upload a CSV instead") if you'd rather work from a file. Progress on a CSV session autosaves to your browser's local storage, and can be exported back to CSV at any time.
+4. Code away. On mobile, the app installs like a native app — see below.
+
+### Installing on mobile
+
+The app is an installable PWA (Progressive Web App):
+
+- **iPhone**: open the link in **Safari**, tap the Share icon, then **Add to Home Screen**.
+- **Android**: open the link in **Chrome**, tap the **⋮** menu, then **Add to Home screen** / **Install app**.
+
+Once installed it launches full-screen with its own icon, and the app shell is cached for offline loading.
 
 ## Features
 
-- **Guided 7-step coding flow** — steps activate, dim, or mark as N/A based on prior answers
-- **Keyboard shortcuts** — numpad-mapped for high-volume coding efficiency
-- **Jump to index** — navigate directly to any row by number
+- **Guided coding flow** — steps activate, dim, or mark as N/A based on prior answers; on mobile this is a one-question-at-a-time step carousel with swipe/arrow navigation that loops back to step 1 after the last step
+- **Google Sheets sync** — primary save/load path, with autosave debouncing, retry-on-token-expiry, and an offline queue that flushes once reconnected
+- **Media coding presets** — one-tap fills for recurring patterns (romantic chat screenshot, AI avatar display, love song), each prompting for the media count and then stepping through the rest of the (pre-filled) attributes
+- **Keyboard shortcuts** — numpad-mapped for high-volume coding efficiency (desktop)
+- **Jump to index / jump to next uncoded** — navigate directly to any row, or skip straight to the next (or previous) uncoded post
 - **Text highlighting** — select and annotate passages in post text; exports to CSV
-- **Ambiguous case flagging** — flag uncertain posts; exports as a binary `ambiguous` column
-- **Overview & charts** — live transference rates, type distribution, valence and intention breakdowns
+- **Ambiguous case flagging & consistency warnings** — flag uncertain posts, and get warned before saving if required fields are missing or inconsistent
+- **Overview & charts** — live transference rates, type distribution, valence and intention breakdowns, plus a reading-time-remaining estimate across the whole dataset
 - **Coder notes search** — search across all your notes entries
 - **Research memo pad** — free-form scratch pad for cross-dataset observations
-- **Text-to-speech** — read posts aloud with adjustable speed
+- **Text-to-speech** — read posts aloud with an adjustable speed dropdown (1.0×–2.5×); keeps speaking in the background on supported browsers (e.g. when you tap out to check the Reddit link)
 - **Session timer & streak counter** — track momentum across long coding sessions
-- **Autosave** — progress saved to localStorage continuously; restored on re-upload
 - **Round-trip CSV** — exported CSV preserves highlights and flags for the next session
 
 ## Coding Schema
 
-Posts are coded across seven steps:
+Posts are coded across seven steps, plus media coding:
 
 | Step | Field | Notes |
 |------|-------|-------|
@@ -45,9 +54,9 @@ Media coding and the `ambiguous` flag apply to all posts.
 
 ## Requirements
 
-- Google Chrome (recommended for text-to-speech support)
-- A CSV file matching the expected 34-column schema
+- A modern browser (Chrome recommended for the best text-to-speech support)
+- Either a Google account with access to the connected coding sheet, or a CSV file matching the expected column schema
 
 ## Notes
 
-All data stays in your browser. Nothing is uploaded anywhere.
+All data stays in your browser and your connected Google Sheet — nothing else is uploaded anywhere.

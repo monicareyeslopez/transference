@@ -480,8 +480,14 @@ textarea::placeholder{color:var(--text3)}
   #codebook-panel,#memo-panel{width:100%;top:0;height:100vh;z-index:700}
   /* full-screen panel starts at the physical top edge (top:0) — on an iPhone with a
      notch/dynamic island, that put the close X right under/behind it and made it
-     nearly untappable. Push the header down below the safe area instead. */
+     nearly untappable. Push the header down below the safe area instead. Same fix
+     applies to the warning overlay (also position:fixed;inset:0) — missed it the
+     first time around, reported as "can't X out of it." .m-warning-overlay-header's
+     own base rule (further down the stylesheet, same specificity) would otherwise
+     win on source order and silently override this, so it needs !important here —
+     .cbp-header/.memo-header's base rules are declared earlier and don't need it. */
   .cbp-header,.memo-header{padding-top:max(14px,env(safe-area-inset-top))}
+  .m-warning-overlay-header{padding-top:max(14px,env(safe-area-inset-top))!important}
 
   /* slim divider: step position on the left, info button on the right */
   .mobile-step-divider{display:flex;align-items:center;justify-content:space-between;padding:5px 14px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);flex-shrink:0}
@@ -494,8 +500,13 @@ textarea::placeholder{color:var(--text3)}
 
   /* step carousel: one .code-section visible at a time, flanked by full-height
      arrow buttons (~10% of width combined). Now that the footer is gone, this is
-     the bottom-most element in the PWA shell — buffer the home-indicator area. */
-  .code-panel{flex:0 0 38vh;min-height:0;border-left:none;padding-bottom:env(safe-area-inset-bottom)}
+     the bottom-most element in the PWA shell — buffer the home-indicator area.
+     The inset is ADDED on top of the 38vh budget (not carved out of it) — the
+     panel's overflow:hidden meant that extra bottom padding, without growing the
+     panel to match, squeezed the fixed-height warning bar (which sits after the
+     carousel in flex order) off the bottom edge on notched phones — reported as
+     the warning being cut off with no visible text. */
+  .code-panel{flex:0 0 calc(38vh + env(safe-area-inset-bottom));min-height:0;border-left:none;padding-bottom:env(safe-area-inset-bottom)}
   .mobile-step-row{display:flex;flex:1;min-height:0}
   .mobile-step-arrow{display:flex;align-items:center;justify-content:center;width:8vw;min-width:28px;max-width:36px;flex-shrink:0;background:var(--bg2);border:none;color:var(--text2);font-size:15px;cursor:pointer;transition:all .12s}
   .mobile-step-arrow:hover{background:var(--bg3);color:var(--text)}
