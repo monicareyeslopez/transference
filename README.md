@@ -38,19 +38,20 @@ Once installed it launches full-screen with its own icon, and the app shell is c
 
 ## Coding Schema
 
-Posts are coded across seven steps, plus media coding:
+Posts are coded across four top-level steps, two of which branch into sub-steps:
 
 | Step | Field | Notes |
 |------|-------|-------|
-| 1 | `self_disclosure` | Present in all posts |
-| 2 | `manual_label_transference` | SD=1 only |
-| 3 | `transference_valence` | T=1 only |
-| 4 | `post_intention` | SD=1 only |
-| 5 | Metadata | Age, gender, relationship status, alt tool |
-| 6 | Transference types | T=1 only |
-| 7 | `manual_coder_notes` | Required if type_other=1 |
+| 1 | Media coding | Present in all posts |
+| 2 | Metadata | Age, gender, relationship status, alt tool — present in all posts |
+| 3 | `self_disclosure` | Present in all posts |
+| 3.1 | `post_intention` | SD=1 only |
+| 3.2 | `manual_label_transference` | SD=1 only |
+| 3.2.1 | `transference_valence` | T=1 only |
+| 3.2.2 | Transference types | T=1 only |
+| 4 | `manual_coder_notes` | Required if type_other=1 |
 
-Media coding and the `ambiguous` flag apply to all posts.
+The `ambiguous` flag applies to all posts.
 
 ## Requirements
 

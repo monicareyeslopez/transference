@@ -809,160 +809,8 @@ textarea::placeholder{color:var(--text3)}
         <div class="code-scroll" id="code-scroll">
 
         <!-- STEP 1 -->
-        <div class="code-section" id="sec-s1">
-          <div class="csec-head">Step 1 — self-disclosure  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s1')" title="Open codebook">i</span><div class="hover-tip">Is the author revealing something personal about their emotional or relational experience with an AI?</div></div></div>
-          <div class="field">
-            <div class="flabel"><span class="fcode">self_disclosure</span></div>
-            <div class="tg">
-              <button class="tg-btn" id="sd-1" onclick="setTg('self_disclosure','1','sd')">1 — present <span class="kh">1</span></button>
-              <button class="tg-btn" id="sd-0" onclick="setTg('self_disclosure','0','sd')">0 — absent <span class="kh">0</span></button>
-            </div>
-            <input type="hidden" id="self_disclosure">
-          </div>
-        </div>
-
-        <!-- STEP 2 -->
-        <div class="code-section" id="sec-s2">
-          <div class="csec-head">Step 2 — transference  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s2')" title="Open codebook">i</span><div class="hover-tip">Is this person unconsciously projecting relational patterns from their interpersonal history onto the AI?</div></div></div>
-          <div id="s2-lock" class="locked-notice" style="display:none">self_disclosure = 0 → auto-set to 0</div>
-          <div class="field" id="s2-field">
-            <div class="flabel"><span class="fcode">manual_label_transference</span></div>
-            <div class="tg">
-              <button class="tg-btn" id="tr-1" onclick="setTg('manual_label_transference','1','tr')">1 — present <span class="kh">2</span></button>
-              <button class="tg-btn" id="tr-0" onclick="setTg('manual_label_transference','0','tr')">0 — absent <span class="kh">3</span></button>
-            </div>
-            <input type="hidden" id="manual_label_transference">
-          </div>
-        </div>
-
-        <!-- STEP 3 -->
-        <div class="code-section" id="sec-s3">
-          <div class="csec-head">Step 3 — valence <span style="font-size:9px;color:var(--text3)">(T-positive only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s3')" title="Open codebook">i</span><div class="hover-tip">What is the emotional tone of the transference — positive, negative, or mixed?</div></div><button onclick="clearStep3()" class="step-clear-btn" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Clear step 3">clear</button></div>
-          <div id="s3-lock" class="locked-notice" style="display:none">transference = 0 → leave blank</div>
-          <div class="field" id="s3-field">
-            <div class="flabel"><span class="fcode">transference_valence</span></div>
-            <div class="tg">
-              <button class="tg-btn" id="tv-positive" onclick="setTg('transference_valence','positive','tv')">positive <span class="kh">4</span></button>
-              <button class="tg-btn" id="tv-negative" onclick="setTg('transference_valence','negative','tv')">negative <span class="kh">5</span></button>
-              <button class="tg-btn" id="tv-mixed" onclick="setTg('transference_valence','mixed','tv')">mixed <span class="kh">6</span></button>
-            </div>
-            <input type="hidden" id="transference_valence">
-          </div>
-        </div>
-
-        <!-- STEP 4 -->
-        <div class="code-section" id="sec-s4">
-          <div class="csec-head">Step 4 — post intention <span style="font-size:9px;color:var(--text3)">(SD only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s4')" title="Open codebook">i</span><div class="hover-tip">What is the primary communicative purpose of this post?</div></div><button onclick="clearStep4()" class="step-clear-btn" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Clear step 4">clear</button></div>
-          <div id="s4-lock" class="locked-notice" style="display:none">self_disclosure = 0 → leave blank</div>
-          <div class="field" id="s4-field">
-            <div class="flabel"><span class="fcode">post_intention</span></div>
-            <div class="tg">
-              <button class="tg-btn" id="pi-emotional" onclick="setTg('post_intention','emotional','pi')">emotional <span class="kh">7</span></button>
-              <button class="tg-btn" id="pi-informational" onclick="setTg('post_intention','informational','pi')">informational <span class="kh">8</span></button>
-              <button class="tg-btn" id="pi-instrumental" onclick="setTg('post_intention','instrumental','pi')">instrumental <span class="kh">9</span></button>
-            </div>
-            <input type="hidden" id="post_intention">
-          </div>
-        </div>
-
-        <!-- STEP 5 -->
-        <div class="code-section" id="sec-s5">
-          <div class="csec-head">Step 5 — metadata <span style="font-size:9px;color:var(--text3)">(all posts)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s5')" title="Open codebook">i</span><div class="hover-tip">Code for every post — age, gender, relationship status, and any alternative tool used.</div></div><button onclick="setAllNotDisclosed()" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Set age, gender and relationship status to not_disclosed">all not disclosed <span class="kh">N</span></button><button onclick="clearStep5()" class="step-clear-btn" style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Clear all step 5 fields">clear</button></div>
-          <div class="grid-2col">
-            <div class="field mobile-substep-0">
-              <div class="flabel"><span class="fcode">age_range</span></div>
-              <select id="age_range">
-                <option value="">—</option>
-                <option>under_18</option><option>18-24</option><option>25-34</option>
-                <option>35-44</option><option>45-54</option><option>55+</option>
-                <option>not_disclosed</option>
-              </select>
-            </div>
-            <div class="field mobile-substep-0">
-              <div class="flabel desktop-only"><span class="fcode">gender</span></div>
-              <select id="gender" class="desktop-only">
-                <option value="">—</option>
-                <option>male</option><option>female</option><option>other</option>
-                <option>not_disclosed</option>
-              </select>
-              <div class="tg mobile-only-flex" id="gender-btns">
-                <button class="tg-btn" data-val="male" onclick="setBtnField('gender','male','gender-btns')">male</button>
-                <button class="tg-btn" data-val="female" onclick="setBtnField('gender','female','gender-btns')">female</button>
-                <button class="tg-btn" data-val="other" onclick="setBtnField('gender','other','gender-btns')">other</button>
-                <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('gender','not_disclosed','gender-btns')">n/d</button>
-              </div>
-            </div>
-            <div class="field mobile-substep-1" style="grid-column:1/-1">
-              <div class="flabel desktop-only"><span class="fcode">relationship_status</span></div>
-              <select id="relationship_status" class="desktop-only">
-                <option value="">—</option>
-                <option>single</option><option>in_relationship</option><option>married</option>
-                <option>divorced_separated</option><option>not_disclosed</option>
-              </select>
-              <div class="tg mobile-only-flex" id="relationship_status-btns">
-                <button class="tg-btn" data-val="single" onclick="setBtnField('relationship_status','single','relationship_status-btns')">single</button>
-                <button class="tg-btn" data-val="in_relationship" onclick="setBtnField('relationship_status','in_relationship','relationship_status-btns')">dating</button>
-                <button class="tg-btn" data-val="married" onclick="setBtnField('relationship_status','married','relationship_status-btns')">married</button>
-                <button class="tg-btn" data-val="divorced_separated" onclick="setBtnField('relationship_status','divorced_separated','relationship_status-btns')">div/sep</button>
-                <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('relationship_status','not_disclosed','relationship_status-btns')">n/d</button>
-              </div>
-            </div>
-            <div class="field mobile-substep-2">
-              <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">alt_tool_name</span><button class="btn btn-sm mobile-only-inline" style="padding:2px 8px;font-size:10px" onclick="setAllToolsMentioned()" title="Multiple tools mentioned — type them all in">+ all</button></div>
-              <select id="alt_tool_name">
-                <option value="">— blank —</option>
-                <option>ChatGPT</option><option>Claude</option><option>Gemini</option>
-                <option>Grok</option><option>Copilot</option><option>Chai</option>
-                <option>Anima</option><option>Paradot</option><option>Woebot</option>
-                <option>Janitor AI</option><option>SillyTavern</option><option>Crushon.AI</option>
-                <option value="_other_">other (type below)</option>
-              </select>
-            </div>
-            <div class="alt-tool-warn mobile-substep-2" id="alt-tool-warn"></div>
-            <div class="field mobile-substep-2">
-              <div class="flabel"><span class="fcode">alt_tool_type</span></div>
-              <select id="alt_tool_type">
-                <option value="">—</option>
-                <option>companion_app</option><option>therapy_chatbot</option>
-                <option>general_llm</option><option>roleplay_platform</option><option>other</option>
-              </select>
-            </div>
-            <div class="field mobile-substep-2" id="alt-tool-custom-wrap" style="display:none;grid-column:1/-1">
-              <div class="flabel"><span class="fcode">alt_tool_name (custom)</span></div>
-              <input type="text" id="alt_tool_name_custom" placeholder="Type tool name..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP 6 -->
-        <div class="code-section" id="sec-s6">
-          <div class="csec-head">Step 6 — types <span style="font-size:9px;color:var(--text3)">(T-positive only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s6')" title="Open codebook">i</span><div class="hover-tip">Which transference types are present? Check all that apply — multiple types are common.</div></div></div>
-          <div id="s6-lock" class="locked-notice" style="display:none">transference = 0 → leave blank</div>
-          <div id="s6-field">
-            <div class="check-grid">
-              <label class="check-item" id="ci-ero" onclick="chkToggle('type_erotic_romantic','ci-ero',event)"><input type="checkbox" id="type_erotic_romantic" onclick="event.stopPropagation()"><div><div class="cil">💗 <span class="desktop-only">Erotic / romantic</span><span class="mobile-only-inline">Erotic/romantic</span> <span class="kh">E</span></div><div class="cis">type_erotic_romantic</div></div></label>
-              <label class="check-item" id="ci-dep" onclick="chkToggle('type_dependency_separation','ci-dep',event)"><input type="checkbox" id="type_dependency_separation" onclick="event.stopPropagation()"><div><div class="cil">👫 <span class="desktop-only">Dependency / separation</span><span class="mobile-only-inline">Dependency</span> <span class="kh">D</span></div><div class="cis">type_dependency_separation</div></div></label>
-              <label class="check-item" id="ci-ide" onclick="chkToggle('type_idealization_rescue','ci-ide',event)"><input type="checkbox" id="type_idealization_rescue" onclick="event.stopPropagation()"><div><div class="cil">💡 <span class="desktop-only">Idealization / rescue</span><span class="mobile-only-inline">Idealization</span> <span class="kh">I</span></div><div class="cis">type_idealization_rescue</div></div></label>
-              <label class="check-item" id="ci-sel" onclick="chkToggle('type_selfworth_validation','ci-sel',event)"><input type="checkbox" id="type_selfworth_validation" onclick="event.stopPropagation()"><div><div class="cil">👊 <span class="desktop-only">Self-worth / validation</span><span class="mobile-only-inline">Self-worth</span> <span class="kh">V</span></div><div class="cis">type_selfworth_validation</div></div></label>
-              <label class="check-item" id="ci-rup" onclick="chkToggle('type_rupture_devaluation','ci-rup',event)"><input type="checkbox" id="type_rupture_devaluation" onclick="event.stopPropagation()"><div><div class="cil">😠 <span class="desktop-only">Rupture / devaluation</span><span class="mobile-only-inline">Rupture</span> <span class="kh">R</span></div><div class="cis">type_rupture_devaluation</div></div></label>
-              <label class="check-item" id="ci-fus" onclick="chkToggle('type_identity_fusion','ci-fus',event)"><input type="checkbox" id="type_identity_fusion" onclick="event.stopPropagation()"><div><div class="cil">🫀🧠 Identity fusion <span class="kh">U</span></div><div class="cis">type_identity_fusion</div></div></label>
-              <label class="check-item full" id="ci-oth" onclick="chkToggle('type_other','ci-oth',event)"><input type="checkbox" id="type_other" onclick="event.stopPropagation()"><div><div class="cil">💬 Other <span class="kh">T</span></div><div class="cis">type_other — describe in notes</div></div></label>
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP 7 -->
-        <div class="code-section" id="sec-s7">
-          <div class="csec-head">Step 7 — coder notes  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s7')" title="Open codebook">i</span><div class="hover-tip">Required if type_other = 1. Encouraged for all ambiguous or borderline cases.</div></div></div>
-          <div class="field">
-            <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">manual_coder_notes</span><button class="btn btn-sm" style="padding:2px 8px;font-size:10px" onclick="setDeletedPostNote()" title="Fill notes with 'deleted post'">Deleted post</button></div>
-            <textarea id="manual_coder_notes" placeholder="Required if type_other. Encouraged for ambiguous cases..."></textarea>
-          </div>
-        </div>
-
-        <!-- MEDIA -->
         <div class="code-section" id="sec-media">
-          <div class="csec-head">Media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div><a href="#" class="btn btn-sm mobile-only-inline" id="m-reddit-link-media" target="_blank" rel="noopener" onclick="openRedditPeek(event)" style="margin-left:auto" title="Open on Reddit to check for media">↗ Reddit</a></div>
+          <div class="csec-head">Step 1 — media coding  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('media')" title="Open codebook">i</span><div class="hover-tip">Does this post contain images or video? View the original Reddit post via permalink to check.</div></div><a href="#" class="btn btn-sm mobile-only-inline" id="m-reddit-link-media" target="_blank" rel="noopener" onclick="openRedditPeek(event)" style="margin-left:auto" title="Open on Reddit to check for media">↗ Reddit</a></div>
           <div class="field mobile-substep-0">
             <div class="flabel"><span class="fcode">media_present</span></div>
             <div class="tg">
@@ -1084,6 +932,158 @@ textarea::placeholder{color:var(--text3)}
           </div>
         </div>
 
+        <!-- STEP 2 -->
+        <div class="code-section" id="sec-s5">
+          <div class="csec-head">Step 2 — metadata <span style="font-size:9px;color:var(--text3)">(all posts)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s5')" title="Open codebook">i</span><div class="hover-tip">Code for every post — age, gender, relationship status, and any alternative tool used.</div></div><button onclick="setAllNotDisclosed()" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Set age, gender and relationship status to not_disclosed">all not disclosed <span class="kh">N</span></button><button onclick="clearStep5()" class="step-clear-btn" style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Clear all step 2 fields">clear</button></div>
+          <div class="grid-2col">
+            <div class="field mobile-substep-0">
+              <div class="flabel"><span class="fcode">age_range</span></div>
+              <select id="age_range">
+                <option value="">—</option>
+                <option>under_18</option><option>18-24</option><option>25-34</option>
+                <option>35-44</option><option>45-54</option><option>55+</option>
+                <option>not_disclosed</option>
+              </select>
+            </div>
+            <div class="field mobile-substep-0">
+              <div class="flabel desktop-only"><span class="fcode">gender</span></div>
+              <select id="gender" class="desktop-only">
+                <option value="">—</option>
+                <option>male</option><option>female</option><option>other</option>
+                <option>not_disclosed</option>
+              </select>
+              <div class="tg mobile-only-flex" id="gender-btns">
+                <button class="tg-btn" data-val="male" onclick="setBtnField('gender','male','gender-btns')">male</button>
+                <button class="tg-btn" data-val="female" onclick="setBtnField('gender','female','gender-btns')">female</button>
+                <button class="tg-btn" data-val="other" onclick="setBtnField('gender','other','gender-btns')">other</button>
+                <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('gender','not_disclosed','gender-btns')">n/d</button>
+              </div>
+            </div>
+            <div class="field mobile-substep-1" style="grid-column:1/-1">
+              <div class="flabel desktop-only"><span class="fcode">relationship_status</span></div>
+              <select id="relationship_status" class="desktop-only">
+                <option value="">—</option>
+                <option>single</option><option>in_relationship</option><option>married</option>
+                <option>divorced_separated</option><option>not_disclosed</option>
+              </select>
+              <div class="tg mobile-only-flex" id="relationship_status-btns">
+                <button class="tg-btn" data-val="single" onclick="setBtnField('relationship_status','single','relationship_status-btns')">single</button>
+                <button class="tg-btn" data-val="in_relationship" onclick="setBtnField('relationship_status','in_relationship','relationship_status-btns')">dating</button>
+                <button class="tg-btn" data-val="married" onclick="setBtnField('relationship_status','married','relationship_status-btns')">married</button>
+                <button class="tg-btn" data-val="divorced_separated" onclick="setBtnField('relationship_status','divorced_separated','relationship_status-btns')">div/sep</button>
+                <button class="tg-btn" data-val="not_disclosed" onclick="setBtnField('relationship_status','not_disclosed','relationship_status-btns')">n/d</button>
+              </div>
+            </div>
+            <div class="field mobile-substep-2">
+              <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">alt_tool_name</span><button class="btn btn-sm mobile-only-inline" style="padding:2px 8px;font-size:10px" onclick="setAllToolsMentioned()" title="Multiple tools mentioned — type them all in">+ all</button></div>
+              <select id="alt_tool_name">
+                <option value="">— blank —</option>
+                <option>ChatGPT</option><option>Claude</option><option>Gemini</option>
+                <option>Grok</option><option>Copilot</option><option>Chai</option>
+                <option>Anima</option><option>Paradot</option><option>Woebot</option>
+                <option>Janitor AI</option><option>SillyTavern</option><option>Crushon.AI</option>
+                <option value="_other_">other (type below)</option>
+              </select>
+            </div>
+            <div class="alt-tool-warn mobile-substep-2" id="alt-tool-warn"></div>
+            <div class="field mobile-substep-2">
+              <div class="flabel"><span class="fcode">alt_tool_type</span></div>
+              <select id="alt_tool_type">
+                <option value="">—</option>
+                <option>companion_app</option><option>therapy_chatbot</option>
+                <option>general_llm</option><option>roleplay_platform</option><option>other</option>
+              </select>
+            </div>
+            <div class="field mobile-substep-2" id="alt-tool-custom-wrap" style="display:none;grid-column:1/-1">
+              <div class="flabel"><span class="fcode">alt_tool_name (custom)</span></div>
+              <input type="text" id="alt_tool_name_custom" placeholder="Type tool name..." style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-size:12px;padding:7px 10px;outline:none">
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="code-section" id="sec-s1">
+          <div class="csec-head">Step 3 — self-disclosure  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s1')" title="Open codebook">i</span><div class="hover-tip">Is the author revealing something personal about their emotional or relational experience with an AI?</div></div></div>
+          <div class="field">
+            <div class="flabel"><span class="fcode">self_disclosure</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="sd-1" onclick="setTg('self_disclosure','1','sd')">1 — present <span class="kh">1</span></button>
+              <button class="tg-btn" id="sd-0" onclick="setTg('self_disclosure','0','sd')">0 — absent <span class="kh">0</span></button>
+            </div>
+            <input type="hidden" id="self_disclosure">
+          </div>
+        </div>
+
+        <!-- STEP 3.1 -->
+        <div class="code-section" id="sec-s4">
+          <div class="csec-head">Step 3.1 — post intention <span style="font-size:9px;color:var(--text3)">(SD only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s4')" title="Open codebook">i</span><div class="hover-tip">What is the primary communicative purpose of this post?</div></div><button onclick="clearStep4()" class="step-clear-btn" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Clear step 3.1">clear</button></div>
+          <div id="s4-lock" class="locked-notice" style="display:none">self_disclosure = 0 → leave blank</div>
+          <div class="field" id="s4-field">
+            <div class="flabel"><span class="fcode">post_intention</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="pi-emotional" onclick="setTg('post_intention','emotional','pi')">emotional <span class="kh">7</span></button>
+              <button class="tg-btn" id="pi-informational" onclick="setTg('post_intention','informational','pi')">informational <span class="kh">8</span></button>
+              <button class="tg-btn" id="pi-instrumental" onclick="setTg('post_intention','instrumental','pi')">instrumental <span class="kh">9</span></button>
+            </div>
+            <input type="hidden" id="post_intention">
+          </div>
+        </div>
+
+        <!-- STEP 3.2 -->
+        <div class="code-section" id="sec-s2">
+          <div class="csec-head">Step 3.2 — transference  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s2')" title="Open codebook">i</span><div class="hover-tip">Is this person unconsciously projecting relational patterns from their interpersonal history onto the AI?</div></div></div>
+          <div id="s2-lock" class="locked-notice" style="display:none">self_disclosure = 0 → auto-set to 0</div>
+          <div class="field" id="s2-field">
+            <div class="flabel"><span class="fcode">manual_label_transference</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="tr-1" onclick="setTg('manual_label_transference','1','tr')">1 — present <span class="kh">2</span></button>
+              <button class="tg-btn" id="tr-0" onclick="setTg('manual_label_transference','0','tr')">0 — absent <span class="kh">3</span></button>
+            </div>
+            <input type="hidden" id="manual_label_transference">
+          </div>
+        </div>
+
+        <!-- STEP 3.2.1 -->
+        <div class="code-section" id="sec-s3">
+          <div class="csec-head">Step 3.2.1 — valence <span style="font-size:9px;color:var(--text3)">(T-positive only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s3')" title="Open codebook">i</span><div class="hover-tip">What is the emotional tone of the transference — positive, negative, or mixed?</div></div><button onclick="clearStep3()" class="step-clear-btn" style="margin-left:auto;font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:20px;border:1px solid var(--border2);background:var(--bg4);color:var(--text3);cursor:pointer;transition:all .12s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent-border)';this.style.color='var(--accent2)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'" title="Clear step 3.2.1">clear</button></div>
+          <div id="s3-lock" class="locked-notice" style="display:none">transference = 0 → leave blank</div>
+          <div class="field" id="s3-field">
+            <div class="flabel"><span class="fcode">transference_valence</span></div>
+            <div class="tg">
+              <button class="tg-btn" id="tv-positive" onclick="setTg('transference_valence','positive','tv')">positive <span class="kh">4</span></button>
+              <button class="tg-btn" id="tv-negative" onclick="setTg('transference_valence','negative','tv')">negative <span class="kh">5</span></button>
+              <button class="tg-btn" id="tv-mixed" onclick="setTg('transference_valence','mixed','tv')">mixed <span class="kh">6</span></button>
+            </div>
+            <input type="hidden" id="transference_valence">
+          </div>
+        </div>
+
+        <!-- STEP 3.2.2 -->
+        <div class="code-section" id="sec-s6">
+          <div class="csec-head">Step 3.2.2 — types <span style="font-size:9px;color:var(--text3)">(T-positive only)</span>  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s6')" title="Open codebook">i</span><div class="hover-tip">Which transference types are present? Check all that apply — multiple types are common.</div></div></div>
+          <div id="s6-lock" class="locked-notice" style="display:none">transference = 0 → leave blank</div>
+          <div id="s6-field">
+            <div class="check-grid">
+              <label class="check-item" id="ci-ero" onclick="chkToggle('type_erotic_romantic','ci-ero',event)"><input type="checkbox" id="type_erotic_romantic" onclick="event.stopPropagation()"><div><div class="cil">💗 <span class="desktop-only">Erotic / romantic</span><span class="mobile-only-inline">Erotic/romantic</span> <span class="kh">E</span></div><div class="cis">type_erotic_romantic</div></div></label>
+              <label class="check-item" id="ci-dep" onclick="chkToggle('type_dependency_separation','ci-dep',event)"><input type="checkbox" id="type_dependency_separation" onclick="event.stopPropagation()"><div><div class="cil">👫 <span class="desktop-only">Dependency / separation</span><span class="mobile-only-inline">Dependency</span> <span class="kh">D</span></div><div class="cis">type_dependency_separation</div></div></label>
+              <label class="check-item" id="ci-ide" onclick="chkToggle('type_idealization_rescue','ci-ide',event)"><input type="checkbox" id="type_idealization_rescue" onclick="event.stopPropagation()"><div><div class="cil">💡 <span class="desktop-only">Idealization / rescue</span><span class="mobile-only-inline">Idealization</span> <span class="kh">I</span></div><div class="cis">type_idealization_rescue</div></div></label>
+              <label class="check-item" id="ci-sel" onclick="chkToggle('type_selfworth_validation','ci-sel',event)"><input type="checkbox" id="type_selfworth_validation" onclick="event.stopPropagation()"><div><div class="cil">👊 <span class="desktop-only">Self-worth / validation</span><span class="mobile-only-inline">Self-worth</span> <span class="kh">V</span></div><div class="cis">type_selfworth_validation</div></div></label>
+              <label class="check-item" id="ci-rup" onclick="chkToggle('type_rupture_devaluation','ci-rup',event)"><input type="checkbox" id="type_rupture_devaluation" onclick="event.stopPropagation()"><div><div class="cil">😠 <span class="desktop-only">Rupture / devaluation</span><span class="mobile-only-inline">Rupture</span> <span class="kh">R</span></div><div class="cis">type_rupture_devaluation</div></div></label>
+              <label class="check-item" id="ci-fus" onclick="chkToggle('type_identity_fusion','ci-fus',event)"><input type="checkbox" id="type_identity_fusion" onclick="event.stopPropagation()"><div><div class="cil">🫀🧠 Identity fusion <span class="kh">U</span></div><div class="cis">type_identity_fusion</div></div></label>
+              <label class="check-item full" id="ci-oth" onclick="chkToggle('type_other','ci-oth',event)"><input type="checkbox" id="type_other" onclick="event.stopPropagation()"><div><div class="cil">💬 Other <span class="kh">T</span></div><div class="cis">type_other — describe in notes</div></div></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="code-section" id="sec-s7">
+          <div class="csec-head">Step 4 — coder notes  <div class="info-wrap"><span class="info-icon" onclick="openCodebook('s7')" title="Open codebook">i</span><div class="hover-tip">Required if type_other = 1. Encouraged for all ambiguous or borderline cases.</div></div></div>
+          <div class="field">
+            <div class="flabel" style="display:flex;align-items:center;justify-content:space-between"><span class="fcode">manual_coder_notes</span><button class="btn btn-sm" style="padding:2px 8px;font-size:10px" onclick="setDeletedPostNote()" title="Fill notes with 'deleted post'">Deleted post</button></div>
+            <textarea id="manual_coder_notes" placeholder="Required if type_other. Encouraged for ambiguous cases..."></textarea>
+          </div>
+        </div>
+
         <div style="height:12px"></div>
         </div><!-- end code-scroll -->
         <button class="mobile-step-arrow" id="m-step-next" onclick="mobileStepNav(1)" title="Next step">▶</button>
@@ -1201,10 +1201,11 @@ textarea::placeholder{color:var(--text3)}
               <h3>Read the post, then code</h3>
               <p>The post text appears on the left. Code on the right. Follow the steps from top to bottom — the panel guides you by highlighting the active step and dimming steps that aren't applicable yet.</p>
               <ul>
-                <li><strong>Step 1</strong> — is self-disclosure present? This unlocks the rest of the form.</li>
-                <li><strong>Steps 2–4</strong> — only apply if SD = 1. Steps 3 and 6 only apply if transference = 1.</li>
-                <li><strong>Step 5</strong> — always fill in metadata (age, gender, relationship status).</li>
-                <li><strong>Media</strong> — check the original Reddit post via the permalink before coding.</li>
+                <li><strong>Step 1</strong> — check the original Reddit post via the permalink for media before coding.</li>
+                <li><strong>Step 2</strong> — always fill in metadata (age, gender, relationship status).</li>
+                <li><strong>Step 3</strong> — is self-disclosure present? This unlocks steps 3.1 and 3.2.</li>
+                <li><strong>Steps 3.1–3.2</strong> — only apply if SD = 1. Steps 3.2.1 and 3.2.2 only apply if transference = 1.</li>
+                <li><strong>Step 4</strong> — coder notes, required if type_other = 1.</li>
               </ul>
             </div>
           </div>
@@ -1277,23 +1278,23 @@ textarea::placeholder{color:var(--text3)}
           <div class="kbd-row"><span>Skip (no save)</span><code>Space</code></div>
           <div class="kbd-row"><span>Toggle overview</span><code>Tab</code></div>
           <div class="kbd-row"><span>Go to post #</span><code>G</code></div>
-          <div class="kbd-section" style="grid-column:auto">Self-disclosure</div>
+          <div class="kbd-section" style="grid-column:auto">Self-disclosure (Step 3)</div>
           <div class="kbd-row"><span>1 — present</span><code>1</code></div>
           <div class="kbd-row"><span>0 — absent</span><code>0</code></div>
-          <div class="kbd-section" style="grid-column:auto">Transference</div>
+          <div class="kbd-section" style="grid-column:auto">Transference (Step 3.2)</div>
           <div class="kbd-row"><span>1 — present</span><code>2</code></div>
           <div class="kbd-row"><span>0 — absent</span><code>3</code></div>
-          <div class="kbd-section" style="grid-column:auto">Valence</div>
+          <div class="kbd-section" style="grid-column:auto">Valence (Step 3.2.1)</div>
           <div class="kbd-row"><span>positive</span><code>4</code></div>
           <div class="kbd-row"><span>negative</span><code>5</code></div>
           <div class="kbd-row"><span>mixed</span><code>6</code></div>
-          <div class="kbd-section" style="grid-column:auto">Post intention</div>
+          <div class="kbd-section" style="grid-column:auto">Post intention (Step 3.1)</div>
           <div class="kbd-row"><span>emotional</span><code>7</code></div>
           <div class="kbd-row"><span>informational</span><code>8</code></div>
           <div class="kbd-row"><span>instrumental</span><code>9</code></div>
         </div>
         <div class="kbd-col">
-          <div class="kbd-section" style="grid-column:auto">Types (Step 6)</div>
+          <div class="kbd-section" style="grid-column:auto">Types (Step 3.2.2)</div>
           <div class="kbd-row"><span>erotic / romantic</span><code>E</code></div>
           <div class="kbd-row"><span>dependency / separation</span><code>D</code></div>
           <div class="kbd-row"><span>idealization / rescue</span><code>I</code></div>
@@ -1301,16 +1302,16 @@ textarea::placeholder{color:var(--text3)}
           <div class="kbd-row"><span>rupture / devaluation</span><code>R</code></div>
           <div class="kbd-row"><span>identity fusion</span><code>U</code></div>
           <div class="kbd-row"><span>other</span><code>T</code></div>
-          <div class="kbd-section" style="grid-column:auto">Media</div>
+          <div class="kbd-section" style="grid-column:auto">Media (Step 1)</div>
           <div class="kbd-row"><span>present</span><code>/</code></div>
           <div class="kbd-row"><span>absent</span><code>*</code></div>
           <div class="kbd-row"><span>Romantic Screenshot preset</span><code>X</code></div>
           <div class="kbd-row"><span>AI Avatar Display preset</span><code>Y</code></div>
           <div class="kbd-row"><span>Love Song preset</span><code>L</code></div>
-          <div class="kbd-section" style="grid-column:auto">Gender</div>
+          <div class="kbd-section" style="grid-column:auto">Gender (Step 2)</div>
           <div class="kbd-row"><span>female</span><code>F</code></div>
           <div class="kbd-row"><span>male</span><code>M</code></div>
-          <div class="kbd-section" style="grid-column:auto">Step 5</div>
+          <div class="kbd-section" style="grid-column:auto">Metadata (Step 2)</div>
           <div class="kbd-row"><span>All not disclosed</span><code>N</code></div>
           <div class="kbd-row"><span>Accept tool suggestion</span><code>A</code></div>
           <div class="kbd-section" style="grid-column:auto">Other</div>
@@ -1995,17 +1996,35 @@ function updateStepStates(){
     return age!==''&&gen!==''&&rel!=='';
   })();
 
-  // Step 1 — always active first; done once set
+  // Step 1 (media, sec-media) — always active; done once media_present is set. Coded
+  // for every post, so it has no dependency on anything else.
+  setState('sec-media', mpSet ? 'done' : 'active');
+
+  // Step 2 (metadata, sec-s5) — always active; done once age/gender/relationship are
+  // all filled in. Also coded for every post — sequencing after media is visual order
+  // only, not a real data dependency, so it isn't gated on mpSet.
+  setState('sec-s5', metaDone ? 'done' : 'active');
+
+  // Step 3 (self-disclosure, sec-s1) — always active; done once set. Like media and
+  // metadata, it doesn't depend on either of them — the ordering is visual only.
   setState('sec-s1', sdSet ? 'done' : 'active');
 
-  // Step 2 — waiting until SD set; na if SD=0; active if SD=1 and not set; done if set
+  // Step 3.1 (post intention, sec-s4) — waiting until SD set; na if SD=0; active if SD=1
+  // and not set; done if set. No longer gated on transference — it precedes it now.
+  if(!sdSet)      setState('sec-s4', 'waiting');
+  else if(!sdYes) setState('sec-s4', 'na');
+  else if(!piSet) setState('sec-s4', 'active');
+  else            setState('sec-s4', 'done');
+
+  // Step 3.2 (transference, sec-s2) — waiting until SD set; na if SD=0; active if SD=1
+  // and not set; done if set
   if(!sdSet)         setState('sec-s2', 'waiting');
   else if(!sdYes)    setState('sec-s2', 'na');
   else if(!trSet)    setState('sec-s2', 'active');
   else               setState('sec-s2', 'done');
 
-  // Step 3 — na as soon as SD=0 (transference is auto-0, valence never applies); otherwise
-  // waiting until TR set, na if TR=0, active/done once TR=1
+  // Step 3.2.1 (valence, sec-s3) — na as soon as SD=0 (transference is auto-0, valence
+  // never applies); otherwise waiting until TR set, na if TR=0, active/done once TR=1
   if(!sdSet)         setState('sec-s3', 'waiting');
   else if(!sdYes)    setState('sec-s3', 'na');
   else if(!trSet)    setState('sec-s3', 'waiting');
@@ -2013,21 +2032,8 @@ function updateStepStates(){
   else if(!tvSet)    setState('sec-s3', 'active');
   else               setState('sec-s3', 'done');
 
-  // Step 4 — waiting until SD set; na if SD=0; active if SD=1 and TR coded and pi not set; done if set
-  if(!sdSet)                        setState('sec-s4', 'waiting');
-  else if(!sdYes)                   setState('sec-s4', 'na');
-  else if(sdYes && !trSet)          setState('sec-s4', 'waiting');
-  else if(sdYes && trSet && !piSet) setState('sec-s4', 'active');
-  else                              setState('sec-s4', 'done');
-
-  // Step 5 — reachable once SD set; done once age/gender/relationship are all filled in
-  // (previously stayed 'active' forever, which stalled auto-scroll before it ever reached
-  // step 6/7/media — the scanner stops at the first 'active' section in document order)
-  if(!sdSet)        setState('sec-s5', 'waiting');
-  else if(metaDone) setState('sec-s5', 'done');
-  else              setState('sec-s5', 'active');
-
-  // Step 6 — na as soon as SD=0; otherwise waiting until TR set, na if TR=0, active/done once TR=1
+  // Step 3.2.2 (types, sec-s6) — na as soon as SD=0; otherwise waiting until TR set, na if
+  // TR=0, active/done once TR=1
   const anyType = ['type_erotic_romantic','type_dependency_separation','type_idealization_rescue',
     'type_selfworth_validation','type_rupture_devaluation','type_identity_fusion','type_other']
     .some(f => { const el=g(f); return el && el.checked; });
@@ -2038,16 +2044,12 @@ function updateStepStates(){
   else if(!anyType)   setState('sec-s6', 'active');
   else                setState('sec-s6', 'done');
 
-  // Step 7 — always reachable once SD set (notes optional except if type_other)
+  // Step 4 (coder notes, sec-s7) — always reachable once SD set (notes optional except
+  // if type_other)
   const notesVal = (g('manual_coder_notes').value||'').trim();
   if(!sdSet)          setState('sec-s7', 'waiting');
   else if(notesVal)   setState('sec-s7', 'done');
   else                setState('sec-s7', 'active');
-
-  // Media — always reachable once SD set
-  if(!sdSet)    setState('sec-media', 'waiting');
-  else if(mpSet) setState('sec-media', 'done');
-  else           setState('sec-media', 'active');
 
   // Glow when all required steps for this branch are complete
   let complete = false;
@@ -2089,7 +2091,7 @@ function getConsistencyIssues(row){
   if(sd==='1' && tr==='0' && anyType)      issues.push('Type checked but transference = 0');
   if(typeOther && !notes)                  issues.push('type_other checked but coder notes are empty');
   if(sd==='1' && !pi)                      issues.push('Self-disclosure = 1 but post intention not set');
-  // Step 5 blank fields
+  // Step 2 (metadata) blank fields
   if(isCoded({self_disclosure:sd}) && !row.age_range)           issues.push('age_range not set');
   if(isCoded({self_disclosure:sd}) && !row.gender)              issues.push('gender not set');
   if(isCoded({self_disclosure:sd}) && !row.relationship_status) issues.push('relationship_status not set');
@@ -2128,7 +2130,7 @@ function updateWarningBanner(){
   if(sd==='1' && tr==='0' && anyType)    issues.push('Type checked but transference = 0');
   if(typeOther && !notes)                issues.push('type_other checked but coder notes are empty');
   if(sd==='1' && !pi)                    issues.push('Self-disclosure = 1 but post intention not set');
-  // Step 5 blank fields
+  // Step 2 (metadata) blank fields
   if(sd && !g('age_range').value)           issues.push('age_range not set');
   if(sd && !g('gender').value)              issues.push('gender not set');
   if(sd && !g('relationship_status').value) issues.push('relationship_status not set');
@@ -2175,7 +2177,7 @@ function hasConsistencyIssues(row){
 let lastActiveSection = null;
 function scrollToActiveSection(){
   if(!isDesktopView()) return;
-  const sections = ['sec-s1','sec-s2','sec-s3','sec-s4','sec-s5','sec-s6','sec-s7','sec-media'];
+  const sections = ['sec-media','sec-s5','sec-s1','sec-s4','sec-s2','sec-s3','sec-s6','sec-s7'];
   // find first active section
   const active = sections.find(id => {
     const el = g(id);
@@ -2206,15 +2208,15 @@ function scrollToActiveSection(){
 // CSS), flanked by arrow buttons and swipeable. This reuses the same 'state-*'
 // classes updateStepStates() already computes — it doesn't introduce a second
 // source of truth for which step is applicable.
-const MOBILE_STEP_IDS = ['sec-s1','sec-s2','sec-s3','sec-s4','sec-s5','sec-s6','sec-s7','sec-media'];
+const MOBILE_STEP_IDS = ['sec-media','sec-s5','sec-s1','sec-s4','sec-s2','sec-s3','sec-s6','sec-s7'];
 const MOBILE_STEP_KEYS = {'sec-s1':'s1','sec-s2':'s2','sec-s3':'s3','sec-s4':'s4','sec-s5':'s5','sec-s6':'s6','sec-s7':'s7','sec-media':'media'};
 // Only these steps auto-advance the carousel forward when they become "done" — each
-// is a single yes/no-style choice. Steps 5/6/7/media hold multiple independent
-// fields (metadata, multi-select types, free text, media details), so reaching
-// "done" there doesn't mean the user is finished — those only advance via the
-// arrows or a swipe.
-const MOBILE_AUTOADVANCE_STEPS = ['sec-s1','sec-s2','sec-s3','sec-s4'];
-let mobileStepId = 'sec-s1';
+// is a single yes/no-style choice. Metadata, media, types, and notes hold multiple
+// independent fields (metadata, multi-select types, free text, media details), so
+// reaching "done" there doesn't mean the user is finished — those only advance via
+// the arrows or a swipe.
+const MOBILE_AUTOADVANCE_STEPS = ['sec-s1','sec-s4','sec-s2','sec-s3'];
+let mobileStepId = 'sec-media';
 // Some steps have multiple mobile-only sub-pages so they aren't crammed onto one
 // scrolling screen: sec-s5 (metadata) has 3 — age_range/gender, relationship_status,
 // alt_tool fields. sec-media has 8 — gate/presets, media_type/count, then each
@@ -2267,7 +2269,7 @@ function mobileRenderStep(direction){
     el.classList.add(direction>0?'mobile-slide-in-r':'mobile-slide-in-l');
   }
   const infoBtn = g('m-step-info-btn');
-  if(infoBtn) infoBtn.onclick = ()=>openCodebook(MOBILE_STEP_KEYS[mobileStepId]||'s1');
+  if(infoBtn) infoBtn.onclick = ()=>openCodebook(MOBILE_STEP_KEYS[mobileStepId]||'media');
   const steps = mobileVisibleSteps();
   const idx = steps.indexOf(mobileStepId);
   const prevBtn=g('m-step-prev'), nextBtn=g('m-step-next');
@@ -2281,7 +2283,7 @@ function mobileRenderStep(direction){
 
 function mobileGoToFirstVisible(){
   const steps = mobileVisibleSteps();
-  if(!steps.includes(mobileStepId)) mobileStepId = steps[0]||'sec-s1';
+  if(!steps.includes(mobileStepId)) mobileStepId = steps[0]||'sec-media';
   mobileSubStep = 0;
   mobileRenderStep(0);
 }
@@ -2318,7 +2320,7 @@ function mobileStepNav(dir){
 // actually needs attention (mirrors desktop's scrollToActiveSection target).
 function mobileInitStepForRow(){
   const active = MOBILE_STEP_IDS.find(id=>{ const el=g(id); return el && el.classList.contains('state-active'); });
-  mobileStepId = active || 'sec-s1';
+  mobileStepId = active || 'sec-media';
   mobileSubStep = 0;
   mobileRenderStep(0);
 }
@@ -2436,12 +2438,15 @@ function setAllToolsMentioned(){
   scheduleAutosave();
 }
 
-// ── STEP 7 SHORTCUT ──
+// ── STEP 4 SHORTCUT ──
 // One-tap fill for the recurring case: the post/comment has since been deleted or
-// removed, so there's nothing left to code beyond noting why.
+// removed, so there's nothing left to code beyond noting why. Media can't be
+// evaluated on a deleted post either, so mark it absent along with the note.
 function setDeletedPostNote(){
   const el=g('manual_coder_notes');
   el.value='deleted post';
+  setTg('media_present','0','mp');
+  showMediaDetail(false);
   updateStepStates();
   updateWarningBanner();
   scheduleAutosave();
@@ -2706,7 +2711,7 @@ function cancelAutoAdvance(){
   }
 }
 
-// ── STEP 5 SHORTCUT ──
+// ── STEP 2 SHORTCUT ──
 function setAllNotDisclosed(){
   g('age_range').value = 'not_disclosed';
   g('gender').value = 'not_disclosed';
@@ -2718,7 +2723,7 @@ function setAllNotDisclosed(){
   refreshBtnField('relationship_status','relationship_status-btns');
   updateStepStates();
   scheduleAutosave();
-  toast('Step 5 set to not disclosed');
+  toast('Step 2 set to not disclosed');
 }
 
 function clearStep3(){
@@ -2727,7 +2732,7 @@ function clearStep3(){
   updateStepStates();
   updateWarningBanner();
   scheduleAutosave();
-  toast('Step 3 cleared');
+  toast('Step 3.2.1 cleared');
 }
 
 function clearStep4(){
@@ -2736,7 +2741,7 @@ function clearStep4(){
   updateStepStates();
   updateWarningBanner();
   scheduleAutosave();
-  toast('Step 4 cleared');
+  toast('Step 3.1 cleared');
 }
 
 function clearStep5(){
@@ -2751,7 +2756,7 @@ function clearStep5(){
   refreshBtnField('relationship_status','relationship_status-btns');
   updateStepStates();
   scheduleAutosave();
-  toast('Step 5 cleared');
+  toast('Step 2 cleared');
 }
 
 // ── OVERVIEW ──
@@ -3535,7 +3540,7 @@ function clearEntry(){
 // ── CODEBOOK PANEL ──
 const CODEBOOK = {
   s1: {
-    badge: 'Step 1',
+    badge: 'Step 3',
     title: 'Self-Disclosure',
     html: `
       <div class="cbp-section">
@@ -3563,7 +3568,7 @@ const CODEBOOK = {
       </div>`
   },
   s2: {
-    badge: 'Step 2',
+    badge: 'Step 3.2',
     title: 'Transference Judgment',
     html: `
       <div class="cbp-section">
@@ -3591,7 +3596,7 @@ const CODEBOOK = {
       </div>`
   },
   s3: {
-    badge: 'Step 3',
+    badge: 'Step 3.2.1',
     title: 'Transference Valence',
     html: `
       <div class="cbp-section">
@@ -3611,7 +3616,7 @@ const CODEBOOK = {
       </div>`
   },
   s4: {
-    badge: 'Step 4',
+    badge: 'Step 3.1',
     title: 'Post Intention',
     html: `
       <div class="cbp-section">
@@ -3631,7 +3636,7 @@ const CODEBOOK = {
       </div>`
   },
   s5: {
-    badge: 'Step 5',
+    badge: 'Step 2',
     title: 'Contextual Metadata',
     html: `
       <div class="cbp-section">
@@ -3661,7 +3666,7 @@ const CODEBOOK = {
       </div>`
   },
   s6: {
-    badge: 'Step 6',
+    badge: 'Step 3.2.2',
     title: 'Type Classification',
     html: `
       <div class="cbp-section">
@@ -3685,7 +3690,7 @@ const CODEBOOK = {
       </div>`
   },
   s7: {
-    badge: 'Step 7',
+    badge: 'Step 4',
     title: 'Coder Notes',
     html: `
       <div class="cbp-section">
@@ -3705,11 +3710,11 @@ const CODEBOOK = {
       </div>
       <div class="cbp-section">
         <div class="cbp-sec-label">Community norms reminder</div>
-        <div class="cbp-not"><strong>r/MyBoyfriendIsAI</strong> — romantic AI relationships are the explicit premise; transference still only coded when Step 2 indicators are present.<br><br><strong>r/therapyGPT</strong> — therapeutic use is the premise; idealization/rescue must be distinguishable from normal positive therapy experiences.<br><br><strong>r/CharacterAI</strong> — roleplay is common; distinguish between in-character performance and genuine personal disclosure.</div>
+        <div class="cbp-not"><strong>r/MyBoyfriendIsAI</strong> — romantic AI relationships are the explicit premise; transference still only coded when Step 3.2 indicators are present.<br><br><strong>r/therapyGPT</strong> — therapeutic use is the premise; idealization/rescue must be distinguishable from normal positive therapy experiences.<br><br><strong>r/CharacterAI</strong> — roleplay is common; distinguish between in-character performance and genuine personal disclosure.</div>
       </div>`
   },
   media: {
-    badge: 'Media',
+    badge: 'Step 1',
     title: 'Media Coding',
     html: `
       <div class="cbp-section">
