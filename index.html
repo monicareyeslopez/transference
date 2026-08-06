@@ -2679,7 +2679,7 @@ function openRedditPeek(e){
   // white ghost tab when the OS hands off to the Reddit app, which then has to be
   // manually dismissed on returning. A plain new-tab link avoids that.
   if(!isDesktopView()) return;
-  e.preventDefault();
+  if(e) e.preventDefault();
   window.open(url, 'reddit-peek',
     'width=900,height=700,left='+Math.round((screen.width-900)/2)+',top='+Math.round((screen.height-700)/2)
   );
