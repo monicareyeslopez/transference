@@ -42,8 +42,8 @@ Posts are coded across four top-level steps, two of which branch into sub-steps:
 
 | Step | Field | Notes |
 |------|-------|-------|
-| 1 | Metadata | Age, gender, relationship status, alt tool — present in all posts |
-| 2 | Media coding | Present in all posts |
+| 1 | Media coding | Present in all posts |
+| 2 | Metadata | Age, gender, relationship status, alt tool — present in all posts |
 | 3 | `self_disclosure` | Present in all posts |
 | 3.1 | `post_intention` | SD=1 only |
 | 3.2 | `manual_label_transference` | SD=1 only |
