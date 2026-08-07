@@ -61,3 +61,4 @@ The `ambiguous` flag applies to all posts.
 ## Notes
 
 All data stays in your browser and your connected Google Sheet — nothing else is uploaded anywhere.
+
